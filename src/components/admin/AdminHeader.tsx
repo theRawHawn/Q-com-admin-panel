@@ -241,7 +241,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
           )}
         </div>
 
-        {/* User Persona Switcher */}
+        {/* Logged in User & Role Profile */}
         <div className="relative">
           <button
             onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
@@ -255,8 +255,8 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
             <div className="hidden sm:block">
               <div className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
                 {currentUser.name}
-                <span className="text-[10px] text-slate-500 font-mono">
-                  {currentUser.role.replace('_', ' ')}
+                <span className="text-[10px] text-emerald-700 font-medium bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded">
+                  {currentUser.role.replace(/_/g, ' ')}
                 </span>
               </div>
             </div>
@@ -264,36 +264,37 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
           </button>
 
           {isUserDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-1.5">
-              <div className="px-2.5 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                Switch Role / Persona
+            <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-3">
+              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                Logged In Account
               </div>
 
-              <div className="py-1 max-h-64 overflow-y-auto space-y-0.5">
-                {availableUsers.map((user) => {
-                  const isCurrent = user.id === currentUser.id;
-                  return (
-                    <button
-                      key={user.id}
-                      onClick={() => {
-                        onSwitchUser(user);
-                        setIsUserDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 transition-colors ${
-                        isCurrent ? 'bg-emerald-50 text-emerald-900' : 'hover:bg-slate-50 text-slate-800'
-                      }`}
-                    >
-                      <img src={user.avatar} alt={user.name} className="h-7 w-7 rounded-full object-cover shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-semibold truncate flex items-center justify-between">
-                          <span>{user.name}</span>
-                          <span className="text-[9px] text-slate-500 font-mono">{user.role.replace('_', ' ')}</span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 truncate">{user.department}</p>
-                      </div>
-                    </button>
-                  );
-                })}
+              <div className="flex items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                <img src={currentUser.avatar} alt={currentUser.name} className="h-10 w-10 rounded-full object-cover border border-slate-200 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold text-slate-900 truncate">{currentUser.name}</div>
+                  <p className="text-[11px] text-slate-500 truncate">{currentUser.email}</p>
+                </div>
+              </div>
+
+              <div className="mt-3 space-y-2 text-xs">
+                <div className="flex items-center justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-500">Active Role</span>
+                  <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px]">
+                    {currentUser.roleTitle || currentUser.role.replace(/_/g, ' ')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-1 border-b border-slate-100">
+                  <span className="text-slate-500">Department</span>
+                  <span className="font-medium text-slate-800 text-[11px]">{currentUser.department}</span>
+                </div>
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-slate-500">Session Status</span>
+                  <span className="font-medium text-slate-700 text-[11px] flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Active
+                  </span>
+                </div>
               </div>
             </div>
           )}
