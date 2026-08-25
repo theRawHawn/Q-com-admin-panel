@@ -100,6 +100,86 @@ class AdminApiClient {
     }
     return data;
   }
+
+  public async put<T>(endpoint: string, body: any): Promise<T> {
+    const res = await fetch(endpoint, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify(body),
+    });
+
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      if (!res.ok) {
+        throw new Error(`HTTP Error ${res.status}: Server returned non-JSON response`);
+      }
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error(`Endpoint ${endpoint} returned invalid JSON format`);
+      }
+    }
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || data.error || `HTTP Error ${res.status}`);
+    }
+    return data;
+  }
+
+  public async patch<T>(endpoint: string, body?: any): Promise<T> {
+    const res = await fetch(endpoint, {
+      method: 'PATCH',
+      headers: this.getHeaders(),
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      if (!res.ok) {
+        throw new Error(`HTTP Error ${res.status}: Server returned non-JSON response`);
+      }
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error(`Endpoint ${endpoint} returned invalid JSON format`);
+      }
+    }
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || data.error || `HTTP Error ${res.status}`);
+    }
+    return data;
+  }
+
+  public async delete<T>(endpoint: string): Promise<T> {
+    const res = await fetch(endpoint, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    });
+
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      if (!res.ok) {
+        throw new Error(`HTTP Error ${res.status}: Server returned non-JSON response`);
+      }
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error(`Endpoint ${endpoint} returned invalid JSON format`);
+      }
+    }
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || data.error || `HTTP Error ${res.status}`);
+    }
+    return data;
+  }
 }
 
 export const adminApi = new AdminApiClient();

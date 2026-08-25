@@ -6,10 +6,12 @@ import {
   Filter,
   User,
   Clock,
-  Key
+  Key,
+  Download
 } from 'lucide-react';
 import { AdminAuditLog, AdminPermission } from '../../types/admin';
 import { adminApi } from '../../utils/adminApiClient';
+import { exportToCsv } from '../../utils/exportToSheet';
 
 interface AuditLogsViewerProps {
   userPermissions: AdminPermission[];
@@ -44,6 +46,20 @@ export const AuditLogsViewer: React.FC<AuditLogsViewerProps> = ({ userPermission
       l.targetEntity.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleExportAuditLogs = () => {
+    exportToCsv<AdminAuditLog>('qcom_security_audit_trail_sheet', [
+      { header: 'Log ID', accessor: (l) => l.id },
+      { header: 'Timestamp', accessor: (l) => l.timestamp },
+      { header: 'Admin ID', accessor: (l) => l.adminId },
+      { header: 'Admin Role', accessor: (l) => l.adminRole },
+      { header: 'Action Taken', accessor: (l) => l.action },
+      { header: 'Target Entity', accessor: (l) => l.targetEntity },
+      { header: 'Entity ID', accessor: (l) => l.targetId || 'N/A' },
+      { header: 'Details / Reason', accessor: (l) => typeof l.details === 'string' ? l.details : JSON.stringify(l.details || {}) },
+      { header: 'IP Address', accessor: (l) => l.ipAddress || '127.0.0.1' },
+    ], logs);
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
@@ -60,13 +76,22 @@ export const AuditLogsViewer: React.FC<AuditLogsViewerProps> = ({ userPermission
           </p>
         </div>
 
-        <button
-          onClick={fetchLogs}
-          className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 transition-colors shadow-2xs"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : ''}`} />
-          <span>Refresh Ledger</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportAuditLogs}
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span>Export Audit Sheet</span>
+          </button>
+          <button
+            onClick={fetchLogs}
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 transition-colors shadow-2xs"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : ''}`} />
+            <span>Refresh Ledger</span>
+          </button>
+        </div>
       </div>
 
       {/* Search */}

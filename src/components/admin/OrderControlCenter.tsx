@@ -4,10 +4,12 @@ import {
   Eye,
   AlertTriangle,
   Bike,
-  RefreshCw
+  RefreshCw,
+  Download
 } from 'lucide-react';
 import { AdminOrder, AdminRider, AdminPermission } from '../../types/admin';
 import { adminApi } from '../../utils/adminApiClient';
+import { exportToCsv } from '../../utils/exportToSheet';
 import { OrderDetailModal } from './OrderDetailModal';
 
 interface OrderControlCenterProps {
@@ -81,6 +83,23 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({ userPerm
     }
   };
 
+  const handleExportOrders = () => {
+    exportToCsv<AdminOrder>('qcom_orders_dataset', [
+      { header: 'Order ID', accessor: (o) => o.id },
+      { header: 'Customer Name', accessor: (o) => o.customer?.name || 'Guest' },
+      { header: 'Customer Phone', accessor: (o) => o.customer?.phone || '' },
+      { header: 'Seller Store Name', accessor: (o) => o.seller?.name || '' },
+      { header: 'City', accessor: (o) => o.jobSite?.city || 'Bengaluru' },
+      { header: 'Total Amount (INR)', accessor: (o) => o.pricing?.total || 0 },
+      { header: 'Payment Status', accessor: (o) => o.payment?.status },
+      { header: 'Payment Method', accessor: (o) => o.payment?.method },
+      { header: 'Order Status', accessor: (o) => o.status },
+      { header: 'Assigned Rider', accessor: (o) => o.rider?.name || 'Unassigned' },
+      { header: 'Rider Phone', accessor: (o) => o.rider?.phone || 'N/A' },
+      { header: 'Placed At', accessor: (o) => o.placedAt },
+    ], orders);
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5">
       {/* Header */}
@@ -94,13 +113,22 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({ userPerm
           </h1>
         </div>
 
-        <button
-          onClick={fetchOrders}
-          className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 transition-colors shadow-2xs self-start sm:self-auto"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
-          <span>Refresh</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={handleExportOrders}
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shadow-xs"
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span>Export Orders Sheet</span>
+          </button>
+          <button
+            onClick={fetchOrders}
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 transition-colors shadow-2xs"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter & Search Bar */}

@@ -16,7 +16,12 @@ import {
   FileText,
   Settings,
   Lock,
-  X
+  X,
+  Megaphone,
+  Layout,
+  BarChart3,
+  Shield,
+  Percent
 } from 'lucide-react';
 import { AdminPermission, AdminRole } from '../../types/admin';
 
@@ -27,7 +32,7 @@ interface SidebarItem {
   requiredPermission: AdminPermission;
   badge?: number | string;
   badgeColor?: string;
-  group: 'Operations' | 'Supply & Fleet' | 'Finance' | 'Settings';
+  group: 'Operations' | 'Marketing & Ads' | 'Supply & Fleet' | 'Finance' | 'Settings';
 }
 
 const SIDEBAR_ITEMS: SidebarItem[] = [
@@ -36,20 +41,27 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: 'orders', label: 'Orders', icon: ShoppingBag, requiredPermission: 'orders.view', badge: 5, badgeColor: 'bg-emerald-600', group: 'Operations' },
   { id: 'dispatch', label: 'Live Dispatch', icon: Send, requiredPermission: 'orders.assign_rider', badge: 7, badgeColor: 'bg-rose-500', group: 'Operations' },
   { id: 'support', label: 'Support Desk', icon: LifeBuoy, requiredPermission: 'support.view', badge: 2, badgeColor: 'bg-amber-500', group: 'Operations' },
+  { id: 'reports', label: 'Executive Reports', icon: BarChart3, requiredPermission: 'reports.view', group: 'Operations' },
 
-  // 2. Supply & Fleet
+  // 2. Marketing & Retail Media
+  { id: 'promotions', label: 'Promotions & Coupons', icon: Percent, requiredPermission: 'promotions.view', group: 'Marketing & Ads' },
+  { id: 'ads', label: 'Sponsored Ads Engine', icon: Megaphone, requiredPermission: 'ads.view', badge: 'LIVE', badgeColor: 'bg-purple-600', group: 'Marketing & Ads' },
+  { id: 'cms', label: 'Content & CMS', icon: Layout, requiredPermission: 'cms.view', group: 'Marketing & Ads' },
+
+  // 3. Supply & Fleet
   { id: 'sellers', label: 'Partner Stores', icon: Store, requiredPermission: 'sellers.view', group: 'Supply & Fleet' },
   { id: 'riders', label: 'Riders & Fleet', icon: Bike, requiredPermission: 'riders.view', group: 'Supply & Fleet' },
   { id: 'customers', label: 'Customers', icon: Users, requiredPermission: 'customers.view', group: 'Supply & Fleet' },
   { id: 'inventory', label: 'Inventory & SKUs', icon: Package, requiredPermission: 'inventory.view', group: 'Supply & Fleet' },
 
-  // 3. Finance & Growth
+  // 4. Finance & Growth
   { id: 'payments', label: 'Payments & Ledger', icon: CreditCard, requiredPermission: 'payments.view', group: 'Finance' },
   { id: 'refunds', label: 'Refunds Desk', icon: RotateCcw, requiredPermission: 'refunds.view', group: 'Finance' },
   { id: 'settlements', label: 'Store Settlements', icon: Receipt, requiredPermission: 'settlements.view', group: 'Finance' },
   { id: 'pricing', label: 'Pricing & Margins', icon: Tag, requiredPermission: 'pricing.view', group: 'Finance' },
 
-  // 4. Governance & Settings
+  // 5. Governance & Settings
+  { id: 'employees', label: 'Employees & Roles', icon: Shield, requiredPermission: 'users.view', group: 'Settings' },
   { id: 'service_areas', label: 'Service Zones', icon: MapPin, requiredPermission: 'service_areas.view', group: 'Settings' },
   { id: 'audit', label: 'Audit Logs', icon: FileText, requiredPermission: 'audit.view', group: 'Settings' },
   { id: 'settings', label: 'Settings', icon: Settings, requiredPermission: 'settings.manage', group: 'Settings' },
@@ -72,21 +84,28 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   isMobileOpen = false,
   onCloseMobile,
 }) => {
-  const groups: SidebarItem['group'][] = ['Operations', 'Supply & Fleet', 'Finance', 'Settings'];
+  const groups: SidebarItem['group'][] = ['Operations', 'Marketing & Ads', 'Supply & Fleet', 'Finance', 'Settings'];
 
   const renderSidebarContent = () => (
     <>
       {/* Navigation Groups */}
       <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-4">
         {groups.map((grp) => {
-          const itemsInGroup = SIDEBAR_ITEMS.filter((item) => item.group === grp);
+          const isSuperAdmin = userRole === 'SUPER_ADMIN' || userPermissions.includes('*' as any);
+          const itemsInGroup = SIDEBAR_ITEMS.filter((item) => {
+            if (item.group !== grp) return false;
+            if (isSuperAdmin) return true;
+            return userPermissions.includes(item.requiredPermission);
+          });
+
+          if (itemsInGroup.length === 0) return null;
+
           return (
             <div key={grp} className="space-y-0.5">
               <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                 {grp}
               </div>
               {itemsInGroup.map((item) => {
-                const isPermitted = userPermissions.includes(item.requiredPermission);
                 const isActive = activeTab === item.id;
                 const Icon = item.icon;
 
@@ -100,9 +119,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       isActive
                         ? 'bg-emerald-50 text-emerald-700 font-semibold'
-                        : isPermitted
-                        ? 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                        : 'text-slate-400 opacity-50 cursor-not-allowed'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
@@ -115,9 +132,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
-                      {!isPermitted ? (
-                        <Lock className="h-3 w-3 text-slate-400" />
-                      ) : item.badge ? (
+                      {item.badge ? (
                         <span
                           className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-full text-white font-mono ${
                             item.badgeColor || 'bg-slate-500'

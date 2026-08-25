@@ -10,10 +10,12 @@ import {
   Search,
   Zap,
   Phone,
-  FileCheck
+  FileCheck,
+  Download
 } from 'lucide-react';
 import { AdminRider, AdminPermission } from '../../types/admin';
 import { adminApi } from '../../utils/adminApiClient';
+import { exportToCsv } from '../../utils/exportToSheet';
 
 interface RiderFleetManagementProps {
   userPermissions: AdminPermission[];
@@ -68,6 +70,24 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({ user
     return matchesFilter && matchesQuery;
   });
 
+  const handleExportRiders = () => {
+    exportToCsv<AdminRider>('qcom_rider_fleet_sheet', [
+      { header: 'Rider ID', accessor: (r) => r.id },
+      { header: 'Rider Name', accessor: (r) => r.name },
+      { header: 'Phone', accessor: (r) => r.phone },
+      { header: 'Vehicle Type', accessor: (r) => r.vehicleType },
+      { header: 'Vehicle Number', accessor: (r) => r.vehicleNumber },
+      { header: 'Assigned Hub', accessor: (r) => r.assignedZoneName || r.cityId || 'Central Hub' },
+      { header: 'Status', accessor: (r) => r.status },
+      { header: 'Duty Status', accessor: (r) => r.status === 'ONLINE' || r.status === 'ON_DELIVERY' ? 'ONLINE' : 'OFFLINE' },
+      { header: 'Current Order ID', accessor: (r) => r.currentOrderId || 'None' },
+      { header: 'Total Deliveries', accessor: (r) => r.totalDeliveries || 0 },
+      { header: 'Today Deliveries', accessor: (r) => r.todayDeliveries || 0 },
+      { header: 'Rating', accessor: (r) => r.rating || 4.9 },
+      { header: 'Daily Earnings (INR)', accessor: (r) => r.todayEarnings || 0 },
+    ], riders);
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Top Header */}
@@ -84,13 +104,22 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({ user
           </p>
         </div>
 
-        <button
-          onClick={fetchRiders}
-          className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 transition-colors shadow-2xs"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : ''}`} />
-          <span>Refresh Fleet</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportRiders}
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span>Export Fleet Sheet</span>
+          </button>
+          <button
+            onClick={fetchRiders}
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 transition-colors shadow-2xs"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : ''}`} />
+            <span>Refresh Fleet</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search */}

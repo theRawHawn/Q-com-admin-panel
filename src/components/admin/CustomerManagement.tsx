@@ -9,10 +9,12 @@ import {
   FileSpreadsheet,
   ShieldCheck,
   RefreshCw,
-  ShoppingBag
+  ShoppingBag,
+  Download
 } from 'lucide-react';
 import { AdminCustomer, AdminPermission } from '../../types/admin';
 import { adminApi } from '../../utils/adminApiClient';
+import { exportToCsv } from '../../utils/exportToSheet';
 
 interface CustomerManagementProps {
   userPermissions: AdminPermission[];
@@ -49,6 +51,23 @@ export const CustomerManagement: React.FC<CustomerManagementProps> = ({ userPerm
       (c.companyName && c.companyName.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  const handleExportCustomers = () => {
+    exportToCsv<AdminCustomer>('qcom_customers_directory_sheet', [
+      { header: 'Customer ID', accessor: (c) => c.id },
+      { header: 'Name', accessor: (c) => c.name },
+      { header: 'Phone', accessor: (c) => c.phone },
+      { header: 'Email', accessor: (c) => c.email || 'N/A' },
+      { header: 'Trade Role', accessor: (c) => c.accountType },
+      { header: 'Company Name', accessor: (c) => c.companyName || 'Individual' },
+      { header: 'GSTIN', accessor: (c) => c.savedGstins?.[0]?.gstin || 'Unregistered' },
+      { header: 'Primary City', accessor: (c) => c.addresses?.[0]?.areaName || 'Bengaluru' },
+      { header: 'Status', accessor: (c) => c.status },
+      { header: 'Total Orders', accessor: (c) => c.totalOrders },
+      { header: 'Total LTV Spend (INR)', accessor: (c) => c.totalSpend },
+      { header: 'Joined At', accessor: (c) => c.createdAt },
+    ], customers);
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
@@ -65,13 +84,22 @@ export const CustomerManagement: React.FC<CustomerManagementProps> = ({ userPerm
           </p>
         </div>
 
-        <button
-          onClick={fetchCustomers}
-          className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 transition-colors shadow-2xs"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : ''}`} />
-          <span>Refresh Directory</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCustomers}
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span>Export Customers Sheet</span>
+          </button>
+          <button
+            onClick={fetchCustomers}
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 transition-colors shadow-2xs"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : ''}`} />
+            <span>Refresh Directory</span>
+          </button>
+        </div>
       </div>
 
       {/* Search Bar */}

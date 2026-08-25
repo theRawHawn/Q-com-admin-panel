@@ -16,6 +16,11 @@ import { PricingEconomicsConfig } from './components/admin/PricingEconomicsConfi
 import { SupportDesk } from './components/admin/SupportDesk';
 import { AuditLogsViewer } from './components/admin/AuditLogsViewer';
 import { MarketplaceSettings } from './components/admin/MarketplaceSettings';
+import { PromotionsManager } from './components/admin/PromotionsManager';
+import { SponsoredAdsManager } from './components/admin/SponsoredAdsManager';
+import { CmsContentManager } from './components/admin/CmsContentManager';
+import { EmployeeRoleManager } from './components/admin/EmployeeRoleManager';
+import { ReportsAnalytics } from './components/admin/ReportsAnalytics';
 
 import { AdminUser, AdminRole, AdminPermission, IndianCityConfig } from './types/admin';
 import { adminApi } from './utils/adminApiClient';
@@ -23,74 +28,74 @@ import { adminApi } from './utils/adminApiClient';
 // 7 Pre-configured RBAC Admin Personas for live testing & inspection
 const AVAILABLE_ADMIN_PERSONAS: AdminUser[] = [
   {
-    id: 'ADM-SUPER-01',
-    name: 'Vikram Malhotra',
-    email: 'vikram.m@qcom.build',
+    id: 'emp-001',
+    name: 'Vikramaditya Rao',
+    email: 'vikram.rao@qcom.trade',
     role: 'SUPER_ADMIN',
-    roleTitle: 'Chief Operating Officer & Super Admin',
+    roleTitle: 'Main Admin / Super Admin',
     department: 'Executive Leadership',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
     lastLogin: 'Just now',
   },
   {
-    id: 'ADM-OPS-02',
-    name: 'Priya Sharma',
-    email: 'priya.s@qcom.build',
+    id: 'emp-002',
+    name: 'Pooja Narang',
+    email: 'pooja.n@qcom.trade',
     role: 'OPERATIONS_ADMIN',
     roleTitle: 'Head of National Hub Operations',
     department: 'Fulfillment & Dispatch',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&auto=format&fit=crop&q=80',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80',
     lastLogin: '5 mins ago',
   },
   {
-    id: 'ADM-SELLER-03',
-    name: 'Anand Kulkarni',
-    email: 'anand.k@qcom.build',
+    id: 'emp-003',
+    name: 'Anand Sundaram',
+    email: 'anand.s@qcom.trade',
     role: 'SELLER_MANAGER',
-    roleTitle: 'Authorised Merchant & Local GST Store Onboarding Lead',
+    roleTitle: 'Authorised Merchant Onboarding Lead',
     department: 'Supply Partnerships',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80',
     lastLogin: '18 mins ago',
   },
   {
-    id: 'ADM-FLEET-04',
-    name: 'Rohit Verma',
-    email: 'rohit.v@qcom.build',
+    id: 'emp-004',
+    name: 'Kavita Hegde',
+    email: 'kavita.h@qcom.trade',
     role: 'DELIVERY_MANAGER',
     roleTitle: 'Pan-India Fleet Telemetry Controller',
     department: 'Logistics',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80',
+    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&auto=format&fit=crop&q=80',
     lastLogin: '1 hour ago',
   },
   {
-    id: 'ADM-FIN-05',
-    name: 'Sunita Mehra',
-    email: 'sunita.m@qcom.build',
+    id: 'emp-005',
+    name: 'Deepak Mehrotra',
+    email: 'deepak.m@qcom.trade',
     role: 'FINANCE_ADMIN',
     roleTitle: 'Reconciliation & Multi-State GST Comptroller',
     department: 'Finance & Accounts',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80',
     lastLogin: '2 hours ago',
   },
   {
-    id: 'ADM-SUPP-06',
-    name: 'Karthik Raja',
-    email: 'karthik.r@qcom.build',
+    id: 'emp-008',
+    name: 'Siddharth Varma',
+    email: 'siddharth.v@qcom.trade',
+    role: 'MARKETING_ADMIN',
+    roleTitle: 'Retail Media & Brand Promotions Lead',
+    department: 'Marketing & Brand Monetization',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop&q=80',
+    lastLogin: '10 mins ago',
+  },
+  {
+    id: 'emp-006',
+    name: 'Nisha Pillai',
+    email: 'nisha.p@qcom.trade',
     role: 'CUSTOMER_SUPPORT',
     roleTitle: 'Senior Contractor Support Specialist',
     department: 'Customer Care',
-    avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=120&auto=format&fit=crop&q=80',
-    lastLogin: '32 mins ago',
-  },
-  {
-    id: 'ADM-ANALYST-07',
-    name: 'Deepa Hegde',
-    email: 'deepa.h@qcom.build',
-    role: 'ANALYST',
-    roleTitle: 'Pan-India Expansion & Unit Economics Analyst',
-    department: 'Business Intelligence',
     avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&auto=format&fit=crop&q=80',
-    lastLogin: 'Yesterday',
+    lastLogin: '32 mins ago',
   },
 ];
 
@@ -108,6 +113,11 @@ const TAB_PERMISSION_MAP: Record<string, AdminPermission> = {
   refunds: 'refunds.view',
   settlements: 'settlements.view',
   pricing: 'pricing.view',
+  promotions: 'promotions.view',
+  ads: 'ads.view',
+  cms: 'cms.view',
+  employees: 'users.view',
+  reports: 'reports.view',
   service_areas: 'service_areas.view',
   audit: 'audit.view',
   settings: 'settings.manage',
@@ -123,13 +133,17 @@ const DEFAULT_ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
     'inventory.view', 'inventory.edit_stock', 'inventory.edit_price',
     'payments.view', 'payments.reconcile', 'refunds.view', 'refunds.create', 'refunds.approve',
     'settlements.view', 'settlements.process', 'pricing.view', 'pricing.manage',
+    'promotions.view', 'promotions.create', 'promotions.approve',
+    'ads.view', 'ads.create', 'ads.publish', 'ads.approve',
+    'cms.view', 'cms.manage', 'reports.view',
+    'users.view', 'users.create', 'users.edit',
     'service_areas.view', 'service_areas.manage', 'audit.view', 'support.view', 'support.manage', 'settings.manage'
   ],
   OPERATIONS_ADMIN: [
     'dashboard.view', 'orders.view', 'orders.edit_status', 'orders.cancel', 'orders.assign_rider',
     'sellers.view', 'sellers.suspend', 'riders.view', 'riders.approve', 'riders.suspend', 'riders.broadcast',
     'customers.view', 'inventory.view', 'inventory.edit_stock', 'service_areas.view', 'service_areas.manage',
-    'support.view', 'support.manage', 'audit.view'
+    'support.view', 'support.manage', 'audit.view', 'reports.view'
   ],
   SELLER_MANAGER: [
     'dashboard.view', 'sellers.view', 'sellers.approve', 'sellers.suspend', 'sellers.edit_commission',
@@ -142,7 +156,12 @@ const DEFAULT_ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   FINANCE_ADMIN: [
     'dashboard.view', 'orders.view', 'sellers.view', 'payments.view', 'payments.reconcile',
     'refunds.view', 'refunds.create', 'refunds.approve', 'settlements.view', 'settlements.process',
-    'pricing.view', 'pricing.manage', 'audit.view'
+    'pricing.view', 'pricing.manage', 'audit.view', 'reports.view', 'promotions.view'
+  ],
+  MARKETING_ADMIN: [
+    'dashboard.view', 'promotions.view', 'promotions.create', 'promotions.approve',
+    'ads.view', 'ads.create', 'ads.publish', 'ads.approve',
+    'cms.view', 'cms.manage', 'reports.view', 'sellers.view', 'inventory.view'
   ],
   CUSTOMER_SUPPORT: [
     'dashboard.view', 'customers.view', 'customers.edit_status', 'orders.view', 'orders.cancel',
@@ -151,7 +170,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<AdminRole, AdminPermission[]> = {
   ANALYST: [
     'dashboard.view', 'orders.view', 'sellers.view', 'riders.view', 'customers.view',
     'inventory.view', 'payments.view', 'refunds.view', 'settlements.view',
-    'service_areas.view', 'pricing.view', 'audit.view'
+    'service_areas.view', 'pricing.view', 'audit.view', 'reports.view', 'promotions.view', 'ads.view', 'cms.view'
   ],
 };
 
@@ -214,7 +233,13 @@ export default function App() {
   };
 
   const currentTabRequiredPermission = TAB_PERMISSION_MAP[activeTab];
-  const isPermitted = !currentTabRequiredPermission || userPermissions.includes(currentTabRequiredPermission);
+  const isSuperAdmin = currentUser.role === 'SUPER_ADMIN' || userPermissions.includes('*' as any) || userPermissions.length > 25;
+  const isPermitted =
+    isSuperAdmin ||
+    !currentTabRequiredPermission ||
+    userPermissions.includes(currentTabRequiredPermission) ||
+    (currentTabRequiredPermission === 'users.view' && (userPermissions.includes('employees.view') || userPermissions.includes('roles.view'))) ||
+    (currentTabRequiredPermission === 'settings.manage' && userPermissions.includes('settings.view'));
 
   const renderActiveView = () => {
     if (!isPermitted) {
@@ -251,6 +276,16 @@ export default function App() {
         return <SellerSettlements userPermissions={userPermissions} />;
       case 'pricing':
         return <PricingEconomicsConfig userPermissions={userPermissions} />;
+      case 'promotions':
+        return <PromotionsManager />;
+      case 'ads':
+        return <SponsoredAdsManager />;
+      case 'cms':
+        return <CmsContentManager />;
+      case 'employees':
+        return <EmployeeRoleManager />;
+      case 'reports':
+        return <ReportsAnalytics />;
       case 'service_areas':
         return (
           <ServiceAreasConfig 

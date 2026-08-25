@@ -30,43 +30,159 @@ export type AdminRole =
   | 'DELIVERY_MANAGER'
   | 'FINANCE_ADMIN'
   | 'CUSTOMER_SUPPORT'
-  | 'ANALYST';
+  | 'MARKETING_ADMIN'
+  | 'ANALYST'
+  | string; // Support dynamic role codes
 
 export type AdminPermission =
+  // Dashboard & System Settings
   | 'dashboard.view'
+  | 'settings.view'
+  | 'settings.edit'
+  | 'settings.manage'
+  // Orders
   | 'orders.view'
-  | 'orders.edit_status'
+  | 'orders.create'
+  | 'orders.edit'
   | 'orders.cancel'
+  | 'orders.refund'
+  | 'orders.export'
   | 'orders.assign_rider'
-  | 'sellers.view'
-  | 'sellers.approve'
-  | 'sellers.suspend'
-  | 'sellers.edit_commission'
-  | 'riders.view'
-  | 'riders.approve'
-  | 'riders.suspend'
-  | 'riders.broadcast'
+  | 'orders.update_status'
+  | 'orders.edit_status'
+  // Customers
   | 'customers.view'
+  | 'customers.edit'
+  | 'customers.suspend'
+  | 'customers.reactivate'
+  | 'customers.export'
   | 'customers.edit_status'
   | 'customers.view_sensitive'
+  // Sellers
+  | 'sellers.view'
+  | 'sellers.create'
+  | 'sellers.edit'
+  | 'sellers.approve'
+  | 'sellers.reject'
+  | 'sellers.suspend'
+  | 'sellers.reactivate'
+  | 'sellers.export'
+  | 'sellers.edit_commission'
+  // Products & Catalogue
+  | 'products.view'
+  | 'products.create'
+  | 'products.edit'
+  | 'products.delete'
+  | 'products.approve'
+  | 'products.disable'
+  | 'products.export'
+  | 'categories.view'
+  | 'categories.create'
+  | 'categories.edit'
+  | 'categories.delete'
+  | 'brands.view'
+  | 'brands.create'
+  | 'brands.edit'
+  | 'brands.delete'
   | 'inventory.view'
   | 'inventory.edit_stock'
   | 'inventory.edit_price'
+  // Riders & Fleet
+  | 'riders.view'
+  | 'riders.create'
+  | 'riders.edit'
+  | 'riders.approve'
+  | 'riders.suspend'
+  | 'riders.reactivate'
+  | 'riders.assign'
+  | 'riders.view_location'
+  | 'riders.broadcast'
+  | 'riders.export'
+  // Delivery Operations
+  | 'delivery.view'
+  | 'delivery.assign_rider'
+  | 'delivery.reassign_rider'
+  | 'delivery.view_live_map'
+  | 'delivery.view_eta'
+  | 'delivery.manage_exception'
+  | 'service_areas.view'
+  | 'service_areas.manage'
+  // Payments & Financial Settlements
   | 'payments.view'
+  | 'payments.export'
+  | 'payments.refund'
+  | 'payments.approve_refund'
   | 'payments.reconcile'
   | 'refunds.view'
   | 'refunds.create'
   | 'refunds.approve'
   | 'settlements.view'
+  | 'settlements.create'
   | 'settlements.process'
+  | 'settlements.approve'
+  | 'settlements.export'
   | 'pricing.view'
   | 'pricing.manage'
-  | 'service_areas.view'
-  | 'service_areas.manage'
-  | 'audit.view'
+  // Promotions & Marketing
+  | 'promotions.view'
+  | 'promotions.create'
+  | 'promotions.edit'
+  | 'promotions.approve'
+  | 'promotions.publish'
+  | 'promotions.pause'
+  | 'promotions.delete'
+  // Sponsored Ads Engine
+  | 'ads.view'
+  | 'ads.create'
+  | 'ads.edit'
+  | 'ads.approve'
+  | 'ads.publish'
+  | 'ads.pause'
+  | 'ads.delete'
+  | 'ads.export'
+  | 'ads.view_analytics'
+  // CMS Content
+  | 'cms.view'
+  | 'cms.manage'
+  // Support Desk
   | 'support.view'
+  | 'support.create_ticket'
+  | 'support.update_ticket'
+  | 'support.resolve_ticket'
+  | 'support.issue_refund'
   | 'support.manage'
-  | 'settings.manage';
+  // Reports & Business Analytics
+  | 'reports.view'
+  | 'reports.export'
+  | 'reports.financial'
+  | 'reports.operations'
+  | 'reports.seller'
+  | 'reports.rider'
+  | 'reports.customer'
+  | 'reports.marketing'
+  // Employee Management
+  | 'employees.view'
+  | 'employees.create'
+  | 'employees.edit'
+  | 'employees.activate'
+  | 'employees.deactivate'
+  | 'employees.suspend'
+  | 'users.view'
+  | 'users.create'
+  | 'users.edit'
+  // Dynamic Roles & Permissions Management
+  | 'roles.view'
+  | 'roles.create'
+  | 'roles.edit'
+  | 'roles.deactivate'
+  | 'roles.assign'
+  | 'roles.manage'
+  | 'permissions.view'
+  | 'permissions.assign'
+  // Security Audit Logs
+  | 'audit.view'
+  | 'audit_logs.view'
+  | 'audit_logs.export';
 
 export interface AdminUser {
   id: string;
@@ -77,6 +193,7 @@ export interface AdminUser {
   avatar: string;
   department: string;
   lastLogin: string;
+  status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 }
 
 export type OrderStatus =
@@ -365,14 +482,20 @@ export type AdminPricingConfig = PricingConfig;
 
 export interface AuditLogEntry {
   id: string;
-  adminId: string;
+  adminId?: string;
   adminName?: string;
-  adminRole: string;
-  action: string;
-  targetEntity: string;
+  adminRole?: string;
+  actorName?: string;
+  actorRole?: string;
+  actionType?: string;
+  targetModule?: string;
+  summary?: string;
+  severity?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  action?: string;
+  targetEntity?: string;
   targetId?: string;
-  details: any;
-  ipAddress: string;
+  details?: any;
+  ipAddress?: string;
   timestamp: string;
   status?: 'SUCCESS' | 'DENIED' | 'FAILED';
 }
@@ -398,3 +521,160 @@ export interface SupportTicket {
   resolutionNotes?: string;
 }
 export type AdminSupportTicket = SupportTicket;
+
+// ==================== PROMOTIONS & FUNDING MATRIX ====================
+export type PromotionFundingSource = 'PLATFORM' | 'SELLER' | 'BRAND' | 'SHARED';
+export type PromotionType = 'COUPON' | 'PERCENTAGE_DISCOUNT' | 'FLAT_DISCOUNT' | 'FREE_DELIVERY' | 'FIRST_ORDER' | 'SELLER_OFFER' | 'BRAND_OFFER';
+
+export interface AdminPromotion {
+  id: string;
+  code: string;
+  name: string;
+  type: PromotionType;
+  discountValue: number; // e.g., 50 (flat) or 15 (%)
+  isPercentage: boolean;
+  minOrderValue: number;
+  maxDiscountCap: number;
+  fundingSource: PromotionFundingSource;
+  fundingSharePercent?: {
+    platform: number;
+    seller: number;
+    brand: number;
+  };
+  applicableCategory?: string;
+  applicableBrand?: string;
+  validFrom: string;
+  validUntil: string;
+  usageCount: number;
+  maxUsageLimit: number;
+  status: 'ACTIVE' | 'SCHEDULED' | 'EXPIRED' | 'PAUSED';
+  createdBy: string;
+}
+
+// ==================== SPONSORED ADS & RETAIL MEDIA ENGINE ====================
+export type AdPlacement = 
+  | 'HOME_TOP_BANNER'
+  | 'HOME_SECOND_BANNER'
+  | 'HOME_CATEGORY_BANNER'
+  | 'CATEGORY_TOP_BANNER'
+  | 'SEARCH_TOP_SPONSORED'
+  | 'SEARCH_PRODUCT_SPONSORED'
+  | 'PRODUCT_PAGE_SPONSORED'
+  | 'PRODUCT_LIST_SPONSORED'
+  | 'CHECKOUT_PROMOTION';
+
+export type AdCampaignStatus =
+  | 'DRAFT'
+  | 'PENDING_APPROVAL'
+  | 'APPROVED'
+  | 'SCHEDULED'
+  | 'LIVE'
+  | 'PAUSED'
+  | 'COMPLETED'
+  | 'REJECTED';
+
+export interface SponsoredAdCampaign {
+  id: string;
+  campaignName: string;
+  advertiserBrand: string;
+  brandContactEmail?: string;
+  placement: AdPlacement;
+  startDate: string;
+  endDate: string;
+  totalBudget: number;
+  spentBudget: number;
+  billingMethod: 'CPM' | 'CPC' | 'FIXED';
+  cpmRate?: number; // Cost per 1k impressions
+  cpcRate?: number; // Cost per click
+  targetGeography: string; // e.g. 'Bengaluru', 'All Hubs'
+  targetCategory?: string;
+  creativeUrl: string;
+  headline: string;
+  ctaText: string;
+  targetProductId?: string;
+  priorityScore: number; // Higher priority gets served first
+  status: AdCampaignStatus;
+  rejectionReason?: string;
+  approvalWorkflow: {
+    createdBy: string;
+    createdAt: string;
+    managerReviewedBy?: string;
+    financeApprovedBy?: string;
+    superAdminApprovedBy?: string;
+    currentStage: 'MARKETING_SUBMITTED' | 'MANAGER_REVIEW' | 'FINANCE_REVIEW' | 'FINAL_APPROVED' | 'LIVE';
+  };
+  analytics: {
+    impressions: number;
+    clicks: number;
+    ctrPercent: number;
+    productViews: number;
+    addToCarts: number;
+    attributableOrders: number;
+    attributableRevenue: number;
+    roasMultiplier: number; // Return On Ad Spend (e.g., 6.4x)
+  };
+}
+
+// ==================== CONTENT & CMS MANAGEMENT ====================
+export interface CmsHeroBanner {
+  id: string;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  targetScreen: string;
+  cityScope: string;
+  priority: number;
+  isActive: boolean;
+  validUntil: string;
+}
+
+export interface CmsCuratedCollection {
+  id: string;
+  title: string;
+  slug: string;
+  bannerBgColor: string;
+  productIds: string[];
+  cityScope: string;
+  isActive: boolean;
+}
+
+// ==================== EMPLOYEES & ROLE MANAGEMENT ====================
+export interface AdminRoleDefinition {
+  id: string; // e.g., 'role-super-admin', 'role-ops-mgr', 'role-city-ops-101'
+  code: string; // e.g., 'SUPER_ADMIN', 'OPERATIONS_MANAGER', 'CITY_OPS_MGR'
+  name: string; // e.g., 'Main Admin / Super Admin', 'City Operations Manager'
+  department: string; // e.g., 'Executive Leadership', 'Operations', 'Finance'
+  description: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  isSystemRole?: boolean;
+  permissions: AdminPermission[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminEmployeeUser {
+  id: string; // Employee ID e.g. EMP-1001
+  employeeCode?: string;
+  name: string;
+  email: string;
+  phone: string;
+  designation?: string;
+  role: AdminRole; // Primary role code for backwards compatibility
+  roleTitle: string;
+  department: string;
+  avatar: string;
+  assignedRoleIds: string[]; // Dynamic multiple assigned role IDs
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  joiningDate?: string;
+  lastLogin: string;
+  customPermissionsOverride?: AdminPermission[];
+  createdAt: string;
+  mfaEnabled?: boolean;
+}
+
+export interface ProtectedRoleChangePayload {
+  targetUserId: string;
+  newRole?: AdminRole;
+  roleIds?: string[];
+  reason: string;
+}

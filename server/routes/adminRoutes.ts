@@ -1,32 +1,56 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { authoritativeAdminStore } from '../store/adminStore';
-import { hasPermission, PRESET_ADMIN_USERS, ROLE_PERMISSIONS } from '../rbac';
-import { AdminPermission, AdminRole, AdminUser } from '../../src/types/admin';
+import { calculateEmployeePermissions, MODULE_PERMISSION_GROUPS, ALL_SYSTEM_PERMISSIONS } from '../rbac';
+import { AdminPermission, AdminRole, AdminUser, AdminEmployeeUser, AdminRoleDefinition } from '../../src/types/admin';
 
 export const adminRouter = Router();
 
 // Middleware to extract authenticated admin persona from headers
 interface AuthenticatedRequest extends Request {
   admin?: AdminUser;
+  employee?: AdminEmployeeUser;
+  effectivePermissions?: AdminPermission[];
 }
 
 function authenticateAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  // Support active role switching via header for testing all 7 roles in the control room
   const roleHeader = (req.headers['x-admin-role'] as AdminRole) || 'SUPER_ADMIN';
   const adminIdHeader = req.headers['x-admin-id'] as string;
 
-  const foundUser = PRESET_ADMIN_USERS.find(
-    (u) => (adminIdHeader && u.id === adminIdHeader) || u.role === roleHeader
-  ) || PRESET_ADMIN_USERS[0];
+  // Look up employee from store first
+  let emp = authoritativeAdminStore.getEmployees().find(
+    (e) => (adminIdHeader && (e.id === adminIdHeader || e.employeeCode === adminIdHeader)) || e.role === roleHeader || e.assignedRoleIds?.includes(roleHeader)
+  );
 
-  req.admin = foundUser;
+  if (!emp && (roleHeader === 'SUPER_ADMIN' || !roleHeader)) {
+    emp = authoritativeAdminStore.getEmployees().find((e) => e.role === 'SUPER_ADMIN') || authoritativeAdminStore.getEmployees()[0];
+  } else if (!emp) {
+    emp = authoritativeAdminStore.getEmployees()[0];
+  }
+
+  req.employee = emp;
+  req.admin = {
+    id: emp.id,
+    name: emp.name,
+    email: emp.email,
+    role: emp.role,
+    roleTitle: emp.roleTitle,
+    avatar: emp.avatar,
+    department: emp.department,
+    lastLogin: emp.lastLogin,
+    status: emp.status,
+  };
+
+  const allRoles = authoritativeAdminStore.getRoles();
+  req.effectivePermissions = calculateEmployeePermissions(emp, allRoles);
   next();
 }
 
 function requirePermission(permission: AdminPermission) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const admin = req.admin;
-    if (!admin) {
+    const emp = req.employee;
+    const permissions = req.effectivePermissions || [];
+
+    if (!emp) {
       return res.status(401).json({
         success: false,
         error: 'UNAUTHENTICATED',
@@ -34,26 +58,52 @@ function requirePermission(permission: AdminPermission) {
       });
     }
 
-    if (!hasPermission(admin.role, permission)) {
-      // Log denied attempt to audit store
+    // Check if employee is inactive or suspended
+    if (emp.status !== 'ACTIVE') {
       authoritativeAdminStore.logAudit({
-        adminId: admin.id,
-        adminName: admin.name,
-        adminRole: admin.role,
-        action: `PERMISSION_DENIED_${permission.toUpperCase().replace(/\./g, '_')}`,
-        targetEntity: 'API_ENDPOINT',
-        targetId: req.originalUrl,
-        details: `Role ${admin.role} attempted forbidden action requiring ${permission}`,
-        ipAddress: req.ip || '127.0.0.1',
-        status: 'DENIED',
+        actorName: emp.name,
+        actorRole: emp.role,
+        actionType: 'BLOCKED_INACTIVE_USER_ACCESS',
+        targetModule: 'RBAC Security',
+        summary: `Blocked access attempt by ${emp.status} user "${emp.name}" (${emp.email}).`,
+        severity: 'CRITICAL',
+      });
+
+      return res.status(403).json({
+        success: false,
+        error: 'ACCOUNT_INACTIVE',
+        status: emp.status,
+        message: `Access Denied: Your account status is '${emp.status}'. Please contact Super Admin.`,
+      });
+    }
+
+    // Super Admin bypass & alias permissions mapping
+    const isSuperAdmin = emp.role === 'SUPER_ADMIN' || emp.assignedRoleIds?.includes('role-super-admin') || emp.assignedRoleIds?.includes('SUPER_ADMIN');
+
+    const hasPerm =
+      isSuperAdmin ||
+      permissions.includes(permission) ||
+      permissions.includes('*' as any) ||
+      (permission === 'users.view' && (permissions.includes('employees.view') || permissions.includes('roles.view'))) ||
+      (permission === 'roles.view' && permissions.includes('users.view')) ||
+      (permission === 'employees.view' && permissions.includes('users.view'));
+
+    if (!hasPerm) {
+      authoritativeAdminStore.logAudit({
+        actorName: emp.name,
+        actorRole: emp.role,
+        actionType: `PERMISSION_DENIED_${permission.toUpperCase().replace(/\./g, '_')}`,
+        targetModule: 'RBAC Security',
+        summary: `User "${emp.name}" (${emp.roleTitle}) attempted forbidden action requiring '${permission}'.`,
+        severity: 'HIGH',
       });
 
       return res.status(403).json({
         success: false,
         error: 'PERMISSION_DENIED',
         requiredPermission: permission,
-        userRole: admin.role,
-        message: `Forbidden: Your role '${admin.roleTitle}' does not possess the required permission '${permission}'`,
+        userRole: emp.roleTitle,
+        message: `Forbidden: Your role '${emp.roleTitle}' does not possess the required permission '${permission}'`,
       });
     }
 
@@ -63,18 +113,269 @@ function requirePermission(permission: AdminPermission) {
 
 adminRouter.use(authenticateAdmin);
 
+// ==================== DYNAMIC RBAC: ROLES & PERMISSIONS API ====================
+
+// 1. Get all dynamic roles & permission breakdown
+adminRouter.get('/roles', requirePermission('roles.view'), (req: AuthenticatedRequest, res: Response) => {
+  const roles = authoritativeAdminStore.getRoles();
+  const employees = authoritativeAdminStore.getEmployees();
+
+  // Enrich roles with assigned employee counts
+  const enrichedRoles = roles.map((role) => {
+    const assignedCount = employees.filter(
+      (e) => e.status === 'ACTIVE' && (e.assignedRoleIds?.includes(role.id) || e.assignedRoleIds?.includes(role.code) || e.role === role.code)
+    ).length;
+
+    return {
+      ...role,
+      assignedEmployeeCount: assignedCount,
+    };
+  });
+
+  res.json({
+    success: true,
+    roles: enrichedRoles,
+  });
+});
+
+// 2. Get full permission matrix structure & list
+adminRouter.get('/permissions', requirePermission('permissions.view'), (req: AuthenticatedRequest, res: Response) => {
+  res.json({
+    success: true,
+    moduleGroups: MODULE_PERMISSION_GROUPS,
+    allPermissions: ALL_SYSTEM_PERMISSIONS,
+  });
+});
+
+// 3. Create a new custom role dynamically
+adminRouter.post('/roles/create', requirePermission('roles.create'), (req: AuthenticatedRequest, res: Response) => {
+  const { name, department, description, permissions, code } = req.body;
+
+  if (!name || typeof name !== 'string' || name.trim().length < 3) {
+    return res.status(400).json({ success: false, error: 'INVALID_ROLE_NAME', message: 'Role name must be at least 3 characters long.' });
+  }
+
+  if (!Array.isArray(permissions)) {
+    return res.status(400).json({ success: false, error: 'INVALID_PERMISSIONS', message: 'Permissions must be provided as an array of permission keys.' });
+  }
+
+  const createdRole = authoritativeAdminStore.createRole({
+    name: name.trim(),
+    code: code || name.trim().toUpperCase().replace(/\s+/g, '_'),
+    department: department || 'General Operations',
+    description: description || 'Custom dynamic role created by Main Admin.',
+    permissions,
+    status: 'ACTIVE',
+  });
+
+  res.status(201).json({
+    success: true,
+    role: createdRole,
+    message: `Dynamic role "${createdRole.name}" created successfully with ${createdRole.permissions.length} action permissions.`,
+  });
+});
+
+// 4. Update an existing role definition & permission matrix
+adminRouter.put('/roles/:id', requirePermission('roles.edit'), (req: AuthenticatedRequest, res: Response) => {
+  const roleId = req.params.id;
+  const { name, department, description, permissions, status } = req.body;
+
+  const existing = authoritativeAdminStore.getRoleById(roleId);
+  if (!existing) {
+    return res.status(404).json({ success: false, error: 'ROLE_NOT_FOUND', message: 'Role not found.' });
+  }
+
+  if (existing.isSystemRole && existing.code === 'SUPER_ADMIN' && permissions && permissions.length < ALL_SYSTEM_PERMISSIONS.length) {
+    return res.status(400).json({ success: false, error: 'PROTECTED_SYSTEM_ROLE', message: 'Super Admin system role permissions cannot be restricted.' });
+  }
+
+  const updated = authoritativeAdminStore.updateRole(roleId, {
+    ...(name && { name: name.trim() }),
+    ...(department && { department }),
+    ...(description !== undefined && { description }),
+    ...(permissions && { permissions }),
+    ...(status && { status }),
+  });
+
+  res.json({
+    success: true,
+    role: updated,
+    message: `Role "${updated?.name}" updated successfully.`,
+  });
+});
+
+// 5. Deactivate a role (with employee impact warning and audit log)
+adminRouter.patch('/roles/:id/deactivate', requirePermission('roles.deactivate'), (req: AuthenticatedRequest, res: Response) => {
+  const roleId = req.params.id;
+  const result = authoritativeAdminStore.deactivateRole(roleId);
+
+  if (!result.success) {
+    return res.status(400).json({
+      success: false,
+      error: 'ROLE_DEACTIVATION_FAILED',
+      message: result.message,
+    });
+  }
+
+  res.json({
+    success: true,
+    role: result.role,
+    affectedEmployeesCount: result.affectedEmployeesCount,
+    message: result.message,
+  });
+});
+
+// 5b. Delete dynamic role
+adminRouter.delete('/roles/:id', requirePermission('roles.deactivate'), (req: AuthenticatedRequest, res: Response) => {
+  const result = authoritativeAdminStore.deleteRole(req.params.id);
+  if (!result.success) {
+    return res.status(400).json({ success: false, error: 'ROLE_DELETE_FAILED', message: result.message });
+  }
+  res.json({ success: true, message: result.message });
+});
+
+// 6. Get employee directory with dynamic permissions summary
+adminRouter.get('/employees/list', requirePermission('employees.view'), (req: AuthenticatedRequest, res: Response) => {
+  const employees = authoritativeAdminStore.getEmployees();
+  const allRoles = authoritativeAdminStore.getRoles();
+
+  const enrichedEmployees = employees.map((emp) => {
+    const effectivePerms = calculateEmployeePermissions(emp, allRoles);
+    const assignedRoles = allRoles.filter(
+      (r) => emp.assignedRoleIds?.includes(r.id) || emp.assignedRoleIds?.includes(r.code) || emp.role === r.code
+    );
+
+    return {
+      ...emp,
+      effectivePermissionsCount: effectivePerms.length,
+      assignedRolesDetails: assignedRoles,
+    };
+  });
+
+  res.json({
+    success: true,
+    employees: enrichedEmployees,
+  });
+});
+
+// 7. Create new employee with multi-role assignment
+adminRouter.post('/employees/create', requirePermission('employees.create'), (req: AuthenticatedRequest, res: Response) => {
+  const { name, email, phone, designation, department, assignedRoleIds, joiningDate } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({ success: false, error: 'MISSING_FIELDS', message: 'Name and email are required.' });
+  }
+
+  const newEmp = authoritativeAdminStore.createEmployee({
+    name,
+    email,
+    phone,
+    designation,
+    department,
+    assignedRoleIds: assignedRoleIds || ['role-order-ops-exec'],
+    joiningDate,
+    status: 'ACTIVE',
+  });
+
+  res.status(201).json({
+    success: true,
+    employee: newEmp,
+    message: `Employee "${newEmp.name}" (${newEmp.employeeCode}) created successfully.`,
+  });
+});
+
+// 8. Update employee details & role assignments
+adminRouter.put('/employees/:id/update', requirePermission('employees.edit'), (req: AuthenticatedRequest, res: Response) => {
+  const empId = req.params.id;
+  const { name, email, phone, designation, department, assignedRoleIds, customPermissionsOverride, reason } = req.body;
+
+  if (assignedRoleIds && (!reason || reason.trim().length < 5)) {
+    return res.status(400).json({
+      success: false,
+      error: 'REASON_REQUIRED',
+      message: 'Role reassignments require an administrative justification reason (min 5 characters).',
+    });
+  }
+
+  const updated = authoritativeAdminStore.updateEmployee(empId, {
+    ...(name && { name }),
+    ...(email && { email }),
+    ...(phone && { phone }),
+    ...(designation && { designation }),
+    ...(department && { department }),
+    ...(assignedRoleIds && { assignedRoleIds }),
+    ...(customPermissionsOverride !== undefined && { customPermissionsOverride }),
+  });
+
+  if (!updated) {
+    return res.status(404).json({ success: false, error: 'EMPLOYEE_NOT_FOUND', message: 'Employee not found.' });
+  }
+
+  res.json({
+    success: true,
+    employee: updated,
+    message: `Employee "${updated.name}" updated successfully.`,
+  });
+});
+
+// 9. Update employee status (Activate / Deactivate / Suspend)
+adminRouter.patch('/employees/:id/status', requirePermission('employees.suspend'), (req: AuthenticatedRequest, res: Response) => {
+  const empId = req.params.id;
+  const { status, reason } = req.body;
+
+  if (!['ACTIVE', 'INACTIVE', 'SUSPENDED'].includes(status)) {
+    return res.status(400).json({ success: false, error: 'INVALID_STATUS', message: 'Status must be ACTIVE, INACTIVE, or SUSPENDED.' });
+  }
+
+  if ((status === 'SUSPENDED' || status === 'INACTIVE') && (!reason || reason.trim().length < 5)) {
+    return res.status(400).json({
+      success: false,
+      error: 'JUSTIFICATION_REQUIRED',
+      message: 'Deactivating or suspending an employee requires an administrative justification reason.',
+    });
+  }
+
+  const updated = authoritativeAdminStore.setEmployeeStatus(empId, status, reason);
+  if (!updated) {
+    return res.status(404).json({ success: false, error: 'EMPLOYEE_NOT_FOUND', message: 'Employee not found.' });
+  }
+
+  res.json({
+    success: true,
+    employee: updated,
+    message: `Employee status changed to ${status}.`,
+  });
+});
+
+// 10. Delete employee record
+adminRouter.delete('/employees/:id', requirePermission('employees.suspend'), (req: AuthenticatedRequest, res: Response) => {
+  const result = authoritativeAdminStore.deleteEmployee(req.params.id);
+  if (!result.success) {
+    return res.status(400).json({ success: false, error: 'EMPLOYEE_DELETE_FAILED', message: result.message });
+  }
+  res.json({ success: true, message: result.message });
+});
+
+
 // 1. Current Admin Profile & Permissions
 const handleAdminMe = (req: AuthenticatedRequest, res: Response) => {
   const admin = req.admin!;
-  const permissions = ROLE_PERMISSIONS[admin.role] || [];
+  const emp = req.employee!;
+  const permissions = req.effectivePermissions || [];
+  const allRoles = authoritativeAdminStore.getRoles();
+  const allEmployees = authoritativeAdminStore.getEmployees();
+
   res.json({
     success: true,
     user: {
       ...admin,
+      status: emp.status,
+      assignedRoleIds: emp.assignedRoleIds,
       permissions,
     },
     permissions,
-    allAvailableRoles: PRESET_ADMIN_USERS,
+    allAvailableRoles: allRoles,
+    allEmployees: allEmployees,
   });
 };
 
@@ -939,4 +1240,266 @@ adminRouter.post('/support/tickets/:id/resolve', requirePermission('support.mana
   });
 
   res.json({ success: true, ticket });
+});
+
+// ==================== 24. PROMOTIONS & COUPONS MATRIX ====================
+adminRouter.get('/promotions', requirePermission('promotions.view'), (req: AuthenticatedRequest, res: Response) => {
+  res.json({
+    success: true,
+    promotions: authoritativeAdminStore.promotions,
+  });
+});
+
+adminRouter.post('/promotions/create', requirePermission('promotions.create'), (req: AuthenticatedRequest, res: Response) => {
+  const { code, name, type, discountValue, isPercentage, minOrderValue, maxDiscountCap, fundingSource, fundingSharePercent, applicableBrand, applicableCategory, validUntil } = req.body;
+
+  if (!code || !name || !discountValue) {
+    return res.status(400).json({ success: false, error: 'MISSING_PROMOTION_FIELDS' });
+  }
+
+  const newPromo = {
+    id: `prm-${Date.now().toString(36)}`,
+    code: code.toUpperCase().trim(),
+    name,
+    type: type || 'COUPON',
+    discountValue: Number(discountValue),
+    isPercentage: Boolean(isPercentage),
+    minOrderValue: Number(minOrderValue) || 0,
+    maxDiscountCap: Number(maxDiscountCap) || 500,
+    fundingSource: fundingSource || 'PLATFORM',
+    fundingSharePercent: fundingSharePercent || { platform: 100, seller: 0, brand: 0 },
+    applicableBrand,
+    applicableCategory,
+    validFrom: new Date().toISOString().split('T')[0],
+    validUntil: validUntil || '2026-12-31',
+    usageCount: 0,
+    maxUsageLimit: 1000,
+    status: 'ACTIVE' as const,
+    createdBy: `${req.admin!.name} (${req.admin!.roleTitle})`,
+  };
+
+  authoritativeAdminStore.promotions.unshift(newPromo);
+
+  authoritativeAdminStore.logAudit({
+    adminId: req.admin!.id,
+    adminName: req.admin!.name,
+    adminRole: req.admin!.role,
+    action: 'PROMOTION_COUPON_CREATED',
+    targetEntity: 'AdminPromotion',
+    targetId: newPromo.id,
+    details: `Created promo coupon '${newPromo.code}' funded by ${newPromo.fundingSource}`,
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  res.json({ success: true, promotion: newPromo });
+});
+
+adminRouter.post('/promotions/:id/toggle', requirePermission('promotions.create'), (req: AuthenticatedRequest, res: Response) => {
+  const promo = authoritativeAdminStore.promotions.find((p) => p.id === req.params.id);
+  if (!promo) return res.status(404).json({ success: false, error: 'PROMOTION_NOT_FOUND' });
+
+  promo.status = promo.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
+
+  authoritativeAdminStore.logAudit({
+    adminId: req.admin!.id,
+    adminName: req.admin!.name,
+    adminRole: req.admin!.role,
+    action: 'PROMOTION_STATUS_TOGGLED',
+    targetEntity: 'AdminPromotion',
+    targetId: promo.id,
+    details: `Toggled status of coupon '${promo.code}' to ${promo.status}`,
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  res.json({ success: true, promotion: promo });
+});
+
+// ==================== 25. SPONSORED ADS & RETAIL MEDIA ENGINE ====================
+adminRouter.get('/ads/campaigns', requirePermission('ads.view'), (req: AuthenticatedRequest, res: Response) => {
+  res.json({
+    success: true,
+    campaigns: authoritativeAdminStore.sponsoredAds,
+  });
+});
+
+adminRouter.post('/ads/campaigns/create', requirePermission('ads.create'), (req: AuthenticatedRequest, res: Response) => {
+  const { campaignName, advertiserBrand, brandContactEmail, placement, startDate, endDate, totalBudget, billingMethod, cpmRate, cpcRate, targetGeography, targetCategory, creativeUrl, headline, ctaText } = req.body;
+
+  if (!campaignName || !advertiserBrand || !placement) {
+    return res.status(400).json({ success: false, error: 'MISSING_AD_FIELDS' });
+  }
+
+  const newCampaign = {
+    id: `ad-${Date.now().toString(36)}`,
+    campaignName,
+    advertiserBrand,
+    brandContactEmail: brandContactEmail || `${advertiserBrand.toLowerCase().replace(/\s+/g, '')}@brand.in`,
+    placement,
+    startDate: startDate || new Date().toISOString().split('T')[0],
+    endDate: endDate || '2026-10-31',
+    totalBudget: Number(totalBudget) || 100000,
+    spentBudget: 0,
+    billingMethod: billingMethod || 'CPM',
+    cpmRate: Number(cpmRate) || 100,
+    cpcRate: Number(cpcRate) || 10,
+    targetGeography: targetGeography || 'Pan-India',
+    targetCategory,
+    creativeUrl: creativeUrl || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&auto=format&fit=crop&q=80',
+    headline: headline || `${advertiserBrand} Authorized Range`,
+    ctaText: ctaText || 'Shop Now',
+    priorityScore: 80,
+    status: 'PENDING_APPROVAL' as const,
+    approvalWorkflow: {
+      createdBy: `${req.admin!.name} (${req.admin!.roleTitle})`,
+      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      currentStage: 'MANAGER_REVIEW' as const,
+    },
+    analytics: {
+      impressions: 0,
+      clicks: 0,
+      ctrPercent: 0,
+      productViews: 0,
+      addToCarts: 0,
+      attributableOrders: 0,
+      attributableRevenue: 0,
+      roasMultiplier: 0,
+    },
+  };
+
+  authoritativeAdminStore.sponsoredAds.unshift(newCampaign);
+
+  authoritativeAdminStore.logAudit({
+    adminId: req.admin!.id,
+    adminName: req.admin!.name,
+    adminRole: req.admin!.role,
+    action: 'SPONSORED_AD_CAMPAIGN_SUBMITTED',
+    targetEntity: 'SponsoredAdCampaign',
+    targetId: newCampaign.id,
+    details: `Created Retail Media ad campaign '${newCampaign.campaignName}' for brand ${newCampaign.advertiserBrand}`,
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  res.json({ success: true, campaign: newCampaign });
+});
+
+adminRouter.post('/ads/campaigns/:id/approve', requirePermission('ads.approve'), (req: AuthenticatedRequest, res: Response) => {
+  const campaign = authoritativeAdminStore.sponsoredAds.find((c) => c.id === req.params.id);
+  if (!campaign) return res.status(404).json({ success: false, error: 'CAMPAIGN_NOT_FOUND' });
+
+  campaign.status = 'LIVE';
+  campaign.approvalWorkflow.superAdminApprovedBy = `${req.admin!.name} (${req.admin!.roleTitle})`;
+  campaign.approvalWorkflow.currentStage = 'LIVE';
+
+  authoritativeAdminStore.logAudit({
+    adminId: req.admin!.id,
+    adminName: req.admin!.name,
+    adminRole: req.admin!.role,
+    action: 'SPONSORED_AD_APPROVED_LIVE',
+    targetEntity: 'SponsoredAdCampaign',
+    targetId: campaign.id,
+    details: `Approved & published Retail Media ad campaign '${campaign.campaignName}' for ${campaign.advertiserBrand}`,
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  res.json({ success: true, campaign });
+});
+
+adminRouter.post('/ads/campaigns/:id/toggle', requirePermission('ads.publish'), (req: AuthenticatedRequest, res: Response) => {
+  const campaign = authoritativeAdminStore.sponsoredAds.find((c) => c.id === req.params.id);
+  if (!campaign) return res.status(404).json({ success: false, error: 'CAMPAIGN_NOT_FOUND' });
+
+  campaign.status = campaign.status === 'LIVE' ? 'PAUSED' : 'LIVE';
+
+  authoritativeAdminStore.logAudit({
+    adminId: req.admin!.id,
+    adminName: req.admin!.name,
+    adminRole: req.admin!.role,
+    action: 'SPONSORED_AD_STATUS_TOGGLED',
+    targetEntity: 'SponsoredAdCampaign',
+    targetId: campaign.id,
+    details: `Toggled status of campaign '${campaign.campaignName}' to ${campaign.status}`,
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  res.json({ success: true, campaign });
+});
+
+// ==================== 26. CMS CONTENT & BANNER MANAGEMENT ====================
+adminRouter.get('/cms/banners', requirePermission('cms.view'), (req: AuthenticatedRequest, res: Response) => {
+  res.json({
+    success: true,
+    banners: authoritativeAdminStore.cmsBanners,
+    collections: authoritativeAdminStore.cmsCollections,
+  });
+});
+
+adminRouter.post('/cms/banners/create', requirePermission('cms.manage'), (req: AuthenticatedRequest, res: Response) => {
+  const { title, subtitle, imageUrl, targetScreen, cityScope } = req.body;
+  if (!title || !imageUrl) {
+    return res.status(400).json({ success: false, error: 'TITLE_AND_IMAGE_REQUIRED' });
+  }
+
+  const newBanner = {
+    id: `cms-ban-${Date.now().toString(36)}`,
+    title,
+    subtitle: subtitle || 'Limited time offer for verified trade contractors',
+    imageUrl,
+    targetScreen: targetScreen || 'HOME_EXPLORE',
+    cityScope: cityScope || 'all',
+    priority: 1,
+    isActive: true,
+    validUntil: '2026-12-31',
+  };
+
+  authoritativeAdminStore.cmsBanners.unshift(newBanner);
+
+  authoritativeAdminStore.logAudit({
+    adminId: req.admin!.id,
+    adminName: req.admin!.name,
+    adminRole: req.admin!.role,
+    action: 'CMS_BANNER_CREATED',
+    targetEntity: 'CmsHeroBanner',
+    targetId: newBanner.id,
+    details: `Created CMS hero banner '${newBanner.title}'`,
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  res.json({ success: true, banner: newBanner });
+});
+
+// ==================== 28. REPORTS & ANALYTICS SUMMARY ====================
+adminRouter.get('/reports/summary', requirePermission('reports.view'), (req: AuthenticatedRequest, res: Response) => {
+  const city = (req.query.city as string || 'all').toLowerCase();
+  
+  res.json({
+    success: true,
+    summary: {
+      financials: {
+        totalGmv: 48290000,
+        platformCommissionRevenue: 4346100,
+        deliveryFeeRevenue: 1240000,
+        retailMediaAdRevenue: 898000,
+        totalRefundsProcessed: 482000,
+        netPlatformProfit: 6002100,
+      },
+      operationalSla: {
+        avgDispatchTimeMins: 3.2,
+        avgRiderPickupMins: 4.1,
+        avgDoorstepDeliveryMins: 14.8,
+        slaCompliancePercent: 97.4,
+      },
+      retailMediaMetrics: {
+        totalActiveCampaigns: authoritativeAdminStore.sponsoredAds.filter((a) => a.status === 'LIVE').length,
+        totalImpressions: 1913333,
+        totalClicks: 65233,
+        avgRoas: 7.55,
+      },
+    },
+  });
 });

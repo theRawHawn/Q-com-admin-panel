@@ -13,10 +13,12 @@ import {
   Power,
   Sliders,
   FileCheck,
-  AlertTriangle
+  AlertTriangle,
+  Download
 } from 'lucide-react';
 import { AdminSeller, AdminPermission } from '../../types/admin';
 import { adminApi } from '../../utils/adminApiClient';
+import { exportToCsv } from '../../utils/exportToSheet';
 import { SellerApprovalModal } from './SellerApprovalModal';
 
 interface SellerManagementProps {
@@ -95,6 +97,25 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({ userPermissi
   const activeSellers = sellers.filter((s) => s.status === 'ACTIVE' || s.status === 'SUSPENDED');
   const pendingApplications = sellers.filter((s) => s.status === 'PENDING_APPROVAL');
 
+  const handleExportSellers = () => {
+    exportToCsv<AdminSeller>('qcom_sellers_merchant_sheet', [
+      { header: 'Seller ID', accessor: (s) => s.id },
+      { header: 'Store Name', accessor: (s) => s.name },
+      { header: 'GSTIN', accessor: (s) => s.gstin },
+      { header: 'Owner Name', accessor: (s) => s.ownerName },
+      { header: 'Phone', accessor: (s) => s.phone },
+      { header: 'Email', accessor: (s) => s.email },
+      { header: 'Area Name', accessor: (s) => s.areaName },
+      { header: 'Hub Category', accessor: (s) => s.hubType },
+      { header: 'Status', accessor: (s) => s.status },
+      { header: 'Online', accessor: (s) => s.isStoreOnline ? 'YES' : 'NO' },
+      { header: 'Commission Rate %', accessor: (s) => s.commissionRatePercent },
+      { header: 'GST Verified', accessor: (s) => s.documents?.gstVerified ? 'VERIFIED' : 'PENDING' },
+      { header: 'Total Orders', accessor: (s) => s.totalOrders || 0 },
+      { header: 'Rating', accessor: (s) => s.rating || 4.8 },
+    ], sellers);
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
@@ -112,6 +133,13 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({ userPermissi
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportSellers}
+            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Export Merchants Sheet</span>
+          </button>
           <div className="bg-slate-100 p-1 rounded-xl flex items-center border border-slate-200 text-xs">
             <button
               onClick={() => setActiveTab('ACTIVE')}

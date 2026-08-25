@@ -11,7 +11,14 @@ import {
   AuditLogEntry,
   SupportTicket,
   IndianCityConfig,
+  AdminPromotion,
+  SponsoredAdCampaign,
+  CmsHeroBanner,
+  CmsCuratedCollection,
+  AdminEmployeeUser,
+  AdminRoleDefinition,
 } from '../../src/types/admin';
+import { DEFAULT_DYNAMIC_ROLES } from '../rbac';
 
 class AdminStore {
   public cities: IndianCityConfig[] = [];
@@ -26,6 +33,12 @@ class AdminStore {
   public pricingConfig: PricingConfig;
   public auditLogs: AuditLogEntry[] = [];
   public supportTickets: SupportTicket[] = [];
+  public promotions: AdminPromotion[] = [];
+  public sponsoredAds: SponsoredAdCampaign[] = [];
+  public cmsBanners: CmsHeroBanner[] = [];
+  public cmsCollections: CmsCuratedCollection[] = [];
+  public employees: AdminEmployeeUser[] = [];
+  public dynamicRoles: AdminRoleDefinition[] = [];
 
   constructor() {
     this.pricingConfig = {
@@ -40,6 +53,7 @@ class AdminStore {
       surgeMultiplier: 1.0,
     };
 
+    this.dynamicRoles = [...DEFAULT_DYNAMIC_ROLES];
     this.seedInitialData();
   }
 
@@ -2202,6 +2216,358 @@ class AdminStore {
         status: 'SUCCESS',
       },
     ];
+
+    // 4. Promotions & Coupons Engine Initial Data
+    this.promotions = [
+      {
+        id: 'prm-01',
+        code: 'BUILDER50',
+        name: 'Monsoon Contractor Kickstart',
+        type: 'COUPON',
+        discountValue: 50,
+        isPercentage: false,
+        minOrderValue: 499,
+        maxDiscountCap: 50,
+        fundingSource: 'PLATFORM',
+        fundingSharePercent: { platform: 100, seller: 0, brand: 0 },
+        validFrom: '2026-08-01',
+        validUntil: '2026-09-30',
+        usageCount: 1420,
+        maxUsageLimit: 5000,
+        status: 'ACTIVE',
+        createdBy: 'Siddharth Varma (Marketing)',
+      },
+      {
+        id: 'prm-02',
+        code: 'HAVELLS15',
+        name: 'Havells Switchgear & Wire Blitz',
+        type: 'PERCENTAGE_DISCOUNT',
+        discountValue: 15,
+        isPercentage: true,
+        minOrderValue: 1499,
+        maxDiscountCap: 450,
+        fundingSource: 'BRAND',
+        fundingSharePercent: { platform: 0, seller: 0, brand: 100 },
+        applicableBrand: 'Havells',
+        applicableCategory: 'Electrical Switchgears',
+        validFrom: '2026-08-15',
+        validUntil: '2026-08-31',
+        usageCount: 680,
+        maxUsageLimit: 2000,
+        status: 'ACTIVE',
+        createdBy: 'Siddharth Varma (Marketing)',
+      },
+      {
+        id: 'prm-03',
+        code: 'FREEDEL299',
+        name: 'Express 15-Min Free Delivery Offer',
+        type: 'FREE_DELIVERY',
+        discountValue: 35,
+        isPercentage: false,
+        minOrderValue: 299,
+        maxDiscountCap: 35,
+        fundingSource: 'SHARED',
+        fundingSharePercent: { platform: 60, seller: 40, brand: 0 },
+        validFrom: '2026-08-01',
+        validUntil: '2026-10-31',
+        usageCount: 3120,
+        maxUsageLimit: 10000,
+        status: 'ACTIVE',
+        createdBy: 'Siddharth Varma (Marketing)',
+      },
+    ];
+
+    // 5. Retail Media Sponsored Ads Engine Initial Data
+    this.sponsoredAds = [
+      {
+        id: 'ad-coca-cola-01',
+        campaignName: 'Coca-Cola Summer Refreshment for On-site Crews',
+        advertiserBrand: 'Coca-Cola India',
+        brandContactEmail: 'brand.campaigns@coca-cola.in',
+        placement: 'HOME_TOP_BANNER',
+        startDate: '2026-08-01',
+        endDate: '2026-08-31',
+        totalBudget: 250000,
+        spentBudget: 148000,
+        billingMethod: 'CPM',
+        cpmRate: 120,
+        targetGeography: 'Bengaluru, Mumbai, Delhi NCR',
+        targetCategory: 'Beverages & Site Refreshments',
+        creativeUrl: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=1200&auto=format&fit=crop&q=80',
+        headline: 'Chilled Refreshments for Worksite Crew Delivered in 15 Minutes!',
+        ctaText: 'Order Chilled Pack',
+        priorityScore: 95,
+        status: 'LIVE',
+        approvalWorkflow: {
+          createdBy: 'Siddharth Varma (Marketing Admin)',
+          createdAt: '2026-07-28 10:00 AM',
+          managerReviewedBy: 'Vikramaditya Rao (Super Admin)',
+          financeApprovedBy: 'Deepak Mehrotra (Finance Admin)',
+          superAdminApprovedBy: 'Vikramaditya Rao (Super Admin)',
+          currentStage: 'LIVE',
+        },
+        analytics: {
+          impressions: 1233333,
+          clicks: 49333,
+          ctrPercent: 4.0,
+          productViews: 38200,
+          addToCarts: 18400,
+          attributableOrders: 14200,
+          attributableRevenue: 947200,
+          roasMultiplier: 6.4,
+        },
+      },
+      {
+        id: 'ad-bosch-02',
+        campaignName: 'Bosch Heavy Duty Rotary Hammers & Impact Drills',
+        advertiserBrand: 'Bosch Power Tools India',
+        brandContactEmail: 'retailmedia@bosch-pt.co.in',
+        placement: 'SEARCH_TOP_SPONSORED',
+        startDate: '2026-08-10',
+        endDate: '2026-09-15',
+        totalBudget: 500000,
+        spentBudget: 210000,
+        billingMethod: 'CPC',
+        cpcRate: 14,
+        targetGeography: 'Pan-India All Hubs',
+        targetCategory: 'Power Tools & Machinery',
+        creativeUrl: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&auto=format&fit=crop&q=80',
+        headline: 'Bosch Professional Cordless Impact Drills with 3-Year Warranty',
+        ctaText: 'Explore Pro Range',
+        priorityScore: 90,
+        status: 'LIVE',
+        approvalWorkflow: {
+          createdBy: 'Siddharth Varma (Marketing Admin)',
+          createdAt: '2026-08-05 02:30 PM',
+          managerReviewedBy: 'Pooja Narang (Operations Admin)',
+          financeApprovedBy: 'Deepak Mehrotra (Finance Admin)',
+          superAdminApprovedBy: 'Vikramaditya Rao (Super Admin)',
+          currentStage: 'LIVE',
+        },
+        analytics: {
+          impressions: 650000,
+          clicks: 15000,
+          ctrPercent: 2.3,
+          productViews: 14200,
+          addToCarts: 6800,
+          attributableOrders: 5100,
+          attributableRevenue: 1836000,
+          roasMultiplier: 8.7,
+        },
+      },
+      {
+        id: 'ad-schneider-03',
+        campaignName: 'Schneider Electric Acti9 Industrial MCB Launch',
+        advertiserBrand: 'Schneider Electric',
+        brandContactEmail: 'promotions@schneider-electric.co.in',
+        placement: 'PRODUCT_LIST_SPONSORED',
+        startDate: '2026-08-20',
+        endDate: '2026-09-30',
+        totalBudget: 350000,
+        spentBudget: 4500,
+        billingMethod: 'CPM',
+        cpmRate: 150,
+        targetGeography: 'Mumbai & MMR, Pune, Ahmedabad',
+        targetCategory: 'Electrical Switchgears',
+        creativeUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&auto=format&fit=crop&q=80',
+        headline: 'Schneider Electric Acti9 Dual-Safety Circuit Breakers',
+        ctaText: 'Buy Authorized Stock',
+        priorityScore: 88,
+        status: 'PENDING_APPROVAL',
+        approvalWorkflow: {
+          createdBy: 'Siddharth Varma (Marketing Admin)',
+          createdAt: '2026-08-24 11:15 AM',
+          currentStage: 'FINANCE_REVIEW',
+        },
+        analytics: {
+          impressions: 30000,
+          clicks: 900,
+          ctrPercent: 3.0,
+          productViews: 750,
+          addToCarts: 310,
+          attributableOrders: 210,
+          attributableRevenue: 145000,
+          roasMultiplier: 32.2,
+        },
+      },
+    ];
+
+    // 6. CMS Banners & Collections
+    this.cmsBanners = [
+      {
+        id: 'cms-ban-01',
+        title: 'Emergency Job-Site Supplies Delivered in 15 Minutes',
+        subtitle: '100% Genuine GST ITC Invoices Guaranteed across 10 Metropolitan Hubs',
+        imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1200&auto=format&fit=crop&q=80',
+        targetScreen: 'HOME_EXPLORE',
+        cityScope: 'all',
+        priority: 1,
+        isActive: true,
+        validUntil: '2026-12-31',
+      },
+      {
+        id: 'cms-ban-02',
+        title: 'Monsoon Heavy Plumbing & Dewatering Pumps Sale',
+        subtitle: 'Up to 25% Off on Crompton Kirloskar Submersible Pumps',
+        imageUrl: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=1200&auto=format&fit=crop&q=80',
+        targetScreen: 'CATEGORY_PLUMBING',
+        cityScope: 'bengaluru',
+        priority: 2,
+        isActive: true,
+        validUntil: '2026-09-15',
+      },
+    ];
+
+    this.cmsCollections = [
+      {
+        id: 'col-trending',
+        title: 'Trending Heavy Switchgears & Cables',
+        slug: 'trending-switchgears',
+        bannerBgColor: 'bg-emerald-900',
+        productIds: ['prod-01', 'prod-03'],
+        cityScope: 'all',
+        isActive: true,
+      },
+      {
+        id: 'col-best-sellers',
+        title: 'Contractor Daily Best Sellers',
+        slug: 'contractor-bestsellers',
+        bannerBgColor: 'bg-blue-900',
+        productIds: ['prod-02', 'prod-04'],
+        cityScope: 'all',
+        isActive: true,
+      },
+    ];
+
+    // 7. Employee User Directory & Dynamic Roles
+    this.employees = [
+      {
+        id: 'emp-001',
+        employeeCode: 'EMP-1001',
+        name: 'Vikramaditya Rao',
+        email: 'vikram.rao@qcom.trade',
+        phone: '+91 98450 99881',
+        designation: 'Chief Technology & Operations Officer',
+        role: 'SUPER_ADMIN',
+        roleTitle: 'Main Admin / Super Admin',
+        department: 'Executive Leadership',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+        assignedRoleIds: ['role-super-admin'],
+        status: 'ACTIVE',
+        joiningDate: '2025-01-01',
+        lastLogin: 'Just now',
+        createdAt: '2025-01-01',
+        mfaEnabled: true,
+      },
+      {
+        id: 'emp-002',
+        employeeCode: 'EMP-1002',
+        name: 'Pooja Narang',
+        email: 'pooja.n@qcom.trade',
+        phone: '+91 98110 44552',
+        designation: 'Senior Operations Lead (Bengaluru)',
+        role: 'OPERATIONS_MANAGER',
+        roleTitle: 'Operations Manager',
+        department: 'Live Dispatch Operations',
+        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop&q=80',
+        assignedRoleIds: ['role-ops-mgr'],
+        status: 'ACTIVE',
+        joiningDate: '2025-02-15',
+        lastLogin: '10 mins ago',
+        createdAt: '2025-02-15',
+        mfaEnabled: false,
+      },
+      {
+        id: 'emp-003',
+        employeeCode: 'EMP-1003',
+        name: 'Anand Sundaram',
+        email: 'anand.s@qcom.trade',
+        phone: '+91 98200 33441',
+        designation: 'Head of Hardware Partner Acquisition',
+        role: 'SELLER_MANAGER',
+        roleTitle: 'Seller Manager',
+        department: 'Merchant Network',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80',
+        assignedRoleIds: ['role-seller-mgr'],
+        status: 'ACTIVE',
+        joiningDate: '2025-03-10',
+        lastLogin: '45 mins ago',
+        createdAt: '2025-03-10',
+        mfaEnabled: false,
+      },
+      {
+        id: 'emp-004',
+        employeeCode: 'EMP-1004',
+        name: 'Kavita Hegde',
+        email: 'kavita.h@qcom.trade',
+        phone: '+91 98490 88771',
+        designation: 'Fleet Logistics Director',
+        role: 'DELIVERY_MANAGER',
+        roleTitle: 'Rider / Delivery Manager',
+        department: 'Fleet & Dispatch Logistics',
+        avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&auto=format&fit=crop&q=80',
+        assignedRoleIds: ['role-rider-mgr'],
+        status: 'ACTIVE',
+        joiningDate: '2025-03-20',
+        lastLogin: '1 hour ago',
+        createdAt: '2025-03-20',
+        mfaEnabled: false,
+      },
+      {
+        id: 'emp-005',
+        employeeCode: 'EMP-1005',
+        name: 'Deepak Mehrotra',
+        email: 'deepak.m@qcom.trade',
+        phone: '+91 98210 55662',
+        designation: 'Head of Marketplace Treasury & GST',
+        role: 'FINANCE_ADMIN',
+        roleTitle: 'Finance Manager',
+        department: 'Finance & Compliance',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80',
+        assignedRoleIds: ['role-finance-mgr'],
+        status: 'ACTIVE',
+        joiningDate: '2025-02-01',
+        lastLogin: 'Yesterday',
+        createdAt: '2025-02-01',
+        mfaEnabled: true,
+      },
+      {
+        id: 'emp-006',
+        employeeCode: 'EMP-1006',
+        name: 'Nisha Pillai',
+        email: 'nisha.p@qcom.trade',
+        phone: '+91 98400 11223',
+        designation: 'Senior Contractor Support Specialist',
+        role: 'CUSTOMER_SUPPORT',
+        roleTitle: 'Customer Support Executive',
+        department: 'Contractor Care',
+        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&auto=format&fit=crop&q=80',
+        assignedRoleIds: ['role-support-exec'],
+        status: 'ACTIVE',
+        joiningDate: '2025-04-12',
+        lastLogin: 'Today 09:30 AM',
+        createdAt: '2025-04-12',
+        mfaEnabled: false,
+      },
+      {
+        id: 'emp-008',
+        employeeCode: 'EMP-1008',
+        name: 'Siddharth Varma',
+        email: 'siddharth.v@qcom.trade',
+        phone: '+91 98190 77661',
+        designation: 'Head of Growth & Retail Media Monetization',
+        role: 'MARKETING_ADMIN',
+        roleTitle: 'Marketing Manager',
+        department: 'Brand Marketing & Growth',
+        avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop&q=80',
+        assignedRoleIds: ['role-marketing-mgr'],
+        status: 'ACTIVE',
+        joiningDate: '2025-05-01',
+        lastLogin: 'Just now',
+        createdAt: '2025-05-01',
+        mfaEnabled: false,
+      },
+    ];
   }
 
   // Audit logger helper
@@ -2213,6 +2579,234 @@ class AdminStore {
     };
     this.auditLogs.unshift(newEntry);
   }
+
+  // Dynamic Role Management Store Methods
+  public getRoles(): AdminRoleDefinition[] {
+    return this.dynamicRoles;
+  }
+
+  public getRoleById(roleId: string): AdminRoleDefinition | undefined {
+    return this.dynamicRoles.find((r) => r.id === roleId || r.code === roleId);
+  }
+
+  public createRole(roleData: Omit<AdminRoleDefinition, 'id' | 'createdAt' | 'updatedAt'>): AdminRoleDefinition {
+    const id = `role-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 5)}`;
+    const newRole: AdminRoleDefinition = {
+      ...roleData,
+      id,
+      code: roleData.code ? roleData.code.toUpperCase().replace(/\s+/g, '_') : id.toUpperCase(),
+      status: roleData.status || 'ACTIVE',
+      isSystemRole: false,
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
+    };
+
+    this.dynamicRoles.push(newRole);
+    this.logAudit({
+      actorName: 'Main Admin',
+      actorRole: 'SUPER_ADMIN',
+      actionType: 'ROLE_CREATED',
+      targetModule: 'RBAC Security',
+      summary: `Created dynamic role "${newRole.name}" (${newRole.code}) with ${newRole.permissions.length} action permissions.`,
+      severity: 'HIGH',
+    });
+    return newRole;
+  }
+
+  public updateRole(roleId: string, roleData: Partial<AdminRoleDefinition>): AdminRoleDefinition | null {
+    const roleIndex = this.dynamicRoles.findIndex((r) => r.id === roleId || r.code === roleId);
+    if (roleIndex === -1) return null;
+
+    const existingRole = this.dynamicRoles[roleIndex];
+    const updatedRole: AdminRoleDefinition = {
+      ...existingRole,
+      ...roleData,
+      updatedAt: new Date().toISOString().split('T')[0],
+    };
+
+    this.dynamicRoles[roleIndex] = updatedRole;
+    this.logAudit({
+      actorName: 'Main Admin',
+      actorRole: 'SUPER_ADMIN',
+      actionType: 'ROLE_UPDATED',
+      targetModule: 'RBAC Security',
+      summary: `Updated role permissions for "${updatedRole.name}" (${updatedRole.code}). Assigned permissions: ${updatedRole.permissions.length}.`,
+      severity: 'HIGH',
+    });
+    return updatedRole;
+  }
+
+  public deactivateRole(roleId: string): { success: boolean; affectedEmployeesCount: number; role?: AdminRoleDefinition; message?: string } {
+    const role = this.getRoleById(roleId);
+    if (!role) return { success: false, affectedEmployeesCount: 0, message: 'Role not found' };
+
+    if (role.isSystemRole && role.code === 'SUPER_ADMIN') {
+      return { success: false, affectedEmployeesCount: 0, message: 'System Super Admin role cannot be deactivated.' };
+    }
+
+    const affectedEmployees = this.employees.filter(
+      (e) => e.status === 'ACTIVE' && (e.assignedRoleIds?.includes(role.id) || e.assignedRoleIds?.includes(role.code) || e.role === role.code)
+    );
+
+    role.status = 'INACTIVE';
+    role.updatedAt = new Date().toISOString().split('T')[0];
+
+    this.logAudit({
+      actorName: 'Main Admin',
+      actorRole: 'SUPER_ADMIN',
+      actionType: 'ROLE_DEACTIVATED',
+      targetModule: 'RBAC Security',
+      summary: `Deactivated role "${role.name}". Warning: ${affectedEmployees.length} active employee(s) lost access derived from this role.`,
+      severity: 'CRITICAL',
+    });
+
+    return {
+      success: true,
+      affectedEmployeesCount: affectedEmployees.length,
+      role,
+      message: `Role ${role.name} deactivated. ${affectedEmployees.length} employee(s) affected.`,
+    };
+  }
+
+  // Employee Directory & Dynamic Multi-Role Management Methods
+  public getEmployees(): AdminEmployeeUser[] {
+    return this.employees;
+  }
+
+  public getEmployeeById(id: string): AdminEmployeeUser | undefined {
+    return this.employees.find((e) => e.id === id || e.employeeCode === id);
+  }
+
+  public createEmployee(empData: Partial<AdminEmployeeUser>): AdminEmployeeUser {
+    const id = `emp-${Date.now().toString(36)}`;
+    const employeeCode = `EMP-${1000 + this.employees.length + 1}`;
+    const assignedRoleIds = empData.assignedRoleIds && empData.assignedRoleIds.length > 0 ? empData.assignedRoleIds : ['role-order-ops-exec'];
+    const primaryRoleDef = this.dynamicRoles.find((r) => assignedRoleIds.includes(r.id) || assignedRoleIds.includes(r.code)) || this.dynamicRoles[0];
+
+    const newEmp: AdminEmployeeUser = {
+      id,
+      employeeCode,
+      name: empData.name || 'New Staff Member',
+      email: empData.email || `${employeeCode.toLowerCase()}@qcom.trade`,
+      phone: empData.phone || '+91 99000 00000',
+      designation: empData.designation || primaryRoleDef.name,
+      role: primaryRoleDef.code,
+      roleTitle: empData.roleTitle || primaryRoleDef.name,
+      department: empData.department || primaryRoleDef.department,
+      avatar: empData.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+      assignedRoleIds,
+      status: empData.status || 'ACTIVE',
+      joiningDate: empData.joiningDate || new Date().toISOString().split('T')[0],
+      lastLogin: 'Never',
+      createdAt: new Date().toISOString().split('T')[0],
+      mfaEnabled: false,
+    };
+
+    this.employees.push(newEmp);
+    this.logAudit({
+      actorName: 'Main Admin',
+      actorRole: 'SUPER_ADMIN',
+      actionType: 'EMPLOYEE_CREATED',
+      targetModule: 'Employee Directory',
+      summary: `Created new employee "${newEmp.name}" (${newEmp.employeeCode}). Roles assigned: ${assignedRoleIds.length}.`,
+      severity: 'HIGH',
+    });
+    return newEmp;
+  }
+
+  public updateEmployee(id: string, empData: Partial<AdminEmployeeUser>): AdminEmployeeUser | null {
+    const idx = this.employees.findIndex((e) => e.id === id);
+    if (idx === -1) return null;
+
+    const existing = this.employees[idx];
+    const updated = { ...existing, ...empData };
+
+    if (empData.assignedRoleIds && empData.assignedRoleIds.length > 0) {
+      const primaryRoleDef = this.dynamicRoles.find((r) => empData.assignedRoleIds!.includes(r.id) || empData.assignedRoleIds!.includes(r.code));
+      if (primaryRoleDef) {
+        updated.role = primaryRoleDef.code;
+        updated.roleTitle = primaryRoleDef.name;
+      }
+    }
+
+    this.employees[idx] = updated;
+    this.logAudit({
+      actorName: 'Main Admin',
+      actorRole: 'SUPER_ADMIN',
+      actionType: 'EMPLOYEE_UPDATED',
+      targetModule: 'Employee Directory',
+      summary: `Updated details & roles for employee "${updated.name}" (${updated.employeeCode}).`,
+      severity: 'MEDIUM',
+    });
+    return updated;
+  }
+
+  public setEmployeeStatus(id: string, status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED', reason?: string): AdminEmployeeUser | null {
+    const emp = this.getEmployeeById(id);
+    if (!emp) return null;
+
+    const prevStatus = emp.status;
+    emp.status = status;
+
+    this.logAudit({
+      actorName: 'Main Admin',
+      actorRole: 'SUPER_ADMIN',
+      actionType: status === 'SUSPENDED' ? 'EMPLOYEE_SUSPENDED' : status === 'INACTIVE' ? 'EMPLOYEE_DEACTIVATED' : 'EMPLOYEE_ACTIVATED',
+      targetModule: 'Employee Directory',
+      summary: `Changed employee "${emp.name}" status from ${prevStatus} to ${status}. Justification: ${reason || 'Administrative action'}.`,
+      severity: status === 'SUSPENDED' ? 'CRITICAL' : 'HIGH',
+    });
+    return emp;
+  }
+
+  public deleteEmployee(id: string): { success: boolean; message: string } {
+    const idx = this.employees.findIndex((e) => e.id === id || e.employeeCode === id);
+    if (idx === -1) {
+      return { success: false, message: 'Employee not found.' };
+    }
+
+    const emp = this.employees[idx];
+    if (emp.role === 'SUPER_ADMIN' || emp.id === 'emp-001') {
+      return { success: false, message: 'Primary Super Admin account cannot be deleted.' };
+    }
+
+    this.employees.splice(idx, 1);
+    this.logAudit({
+      actorName: 'Main Admin',
+      actorRole: 'SUPER_ADMIN',
+      actionType: 'EMPLOYEE_DELETED',
+      targetModule: 'Employee Directory',
+      summary: `Permanently deleted employee record for "${emp.name}" (${emp.employeeCode}).`,
+      severity: 'CRITICAL',
+    });
+
+    return { success: true, message: `Employee "${emp.name}" (${emp.employeeCode}) deleted successfully.` };
+  }
+
+  public deleteRole(roleId: string): { success: boolean; message: string } {
+    const idx = this.dynamicRoles.findIndex((r) => r.id === roleId || r.code === roleId);
+    if (idx === -1) {
+      return { success: false, message: 'Role not found.' };
+    }
+
+    const role = this.dynamicRoles[idx];
+    if (role.isSystemRole || role.code === 'SUPER_ADMIN') {
+      return { success: false, message: 'System Super Admin role cannot be deleted.' };
+    }
+
+    this.dynamicRoles.splice(idx, 1);
+    this.logAudit({
+      actorName: 'Main Admin',
+      actorRole: 'SUPER_ADMIN',
+      actionType: 'ROLE_DELETED',
+      targetModule: 'RBAC Security',
+      summary: `Permanently deleted dynamic role "${role.name}" (${role.code}).`,
+      severity: 'CRITICAL',
+    });
+
+    return { success: true, message: `Dynamic role "${role.name}" deleted successfully.` };
+  }
+
 }
 
 export const authoritativeAdminStore = new AdminStore();
