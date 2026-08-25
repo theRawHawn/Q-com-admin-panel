@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {
-  TrendingUp,
   Package,
   Bike,
   AlertTriangle,
   ArrowUpRight,
   Store,
-  Clock,
   RotateCcw,
   CheckCircle2,
   RefreshCw,
   Zap
 } from 'lucide-react';
 import { adminApi } from '../../utils/adminApiClient';
+import { QuickStats } from './QuickStats';
 
 interface DashboardOverviewProps {
   onNavigateTab: (tabId: string) => void;
@@ -86,41 +85,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
         </div>
       </div>
 
-      {/* KPI Top Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
-          <span className="text-xs font-medium text-slate-500">Gross GMV</span>
-          <div className="text-xl font-bold text-slate-900 mt-1">₹{kpis.todayGmv.toLocaleString('en-IN')}</div>
-          <div className="flex items-center gap-1 text-[11px] text-emerald-600 font-medium mt-1">
-            <TrendingUp className="h-3 w-3" />
-            <span>+18.4% today</span>
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
-          <span className="text-xs font-medium text-slate-500">Total Orders</span>
-          <div className="text-xl font-bold text-slate-900 mt-1">{kpis.todayOrders.toLocaleString()}</div>
-          <div className="text-[11px] text-slate-500 mt-1">
-            96.7% completed
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
-          <span className="text-xs font-medium text-slate-500">Active Fleet</span>
-          <div className="text-xl font-bold text-slate-900 mt-1">{activeNow.ridersOnline + activeNow.ridersDelivering}</div>
-          <div className="text-[11px] text-emerald-600 font-medium mt-1">
-            {activeNow.ridersDelivering} en route
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
-          <span className="text-xs font-medium text-slate-500">Avg Delivery SLA</span>
-          <div className="text-xl font-bold text-slate-900 mt-1">{kpis?.avgDeliverySlaMins || 14.8} min</div>
-          <div className="text-[11px] text-slate-500 mt-1">
-            Standard target: &lt;15m
-          </div>
-        </div>
-      </div>
+      {/* Quick Stats Component */}
+      <QuickStats metrics={metrics} onNavigateTab={onNavigateTab} />
 
       {/* Actionable Alerts Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
