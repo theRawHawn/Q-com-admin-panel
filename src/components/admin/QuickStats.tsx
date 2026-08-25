@@ -89,7 +89,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ metrics, onNavigateTab }
   ];
 
   return (
-    <div id="quick-stats-container" className="space-y-2.5">
+    <div id="quick-stats-container" className="space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
           Real-Time Quick Stats
@@ -100,7 +100,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ metrics, onNavigateTab }
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {stats.map((item) => {
           const Icon = item.icon;
           return (
@@ -108,32 +108,32 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ metrics, onNavigateTab }
               key={item.id}
               id={`quick-stat-${item.id}`}
               onClick={() => item.tab && onNavigateTab && onNavigateTab(item.tab)}
-              className={`bg-white border border-slate-200 rounded-xl p-4 shadow-2xs transition-all hover:border-slate-300 hover:shadow-xs group ${
+              className={`bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-2xs transition-all hover:border-slate-300 hover:shadow-xs group ${
                 item.tab && onNavigateTab ? 'cursor-pointer' : ''
               }`}
             >
-              <div className="flex items-start justify-between">
-                <div className={`p-2 rounded-lg ${item.iconColor}`}>
-                  <Icon className="h-4 w-4" />
+              <div className="flex items-start justify-between gap-1">
+                <div className={`p-1.5 sm:p-2 rounded-lg ${item.iconColor} shrink-0`}>
+                  <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${item.badgeColor}`}>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className={`text-[9px] sm:text-[10px] font-medium px-1.5 sm:px-2 py-0.5 rounded-full truncate max-w-[80px] sm:max-w-none ${item.badgeColor}`}>
                     {item.badge}
                   </span>
                   {item.tab && onNavigateTab && (
-                    <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-600 transition-colors" />
+                    <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-600 transition-colors hidden sm:block" />
                   )}
                 </div>
               </div>
 
-              <div className="mt-3">
-                <span className="text-xs font-medium text-slate-500 block">
+              <div className="mt-2.5 sm:mt-3">
+                <span className="text-[11px] sm:text-xs font-medium text-slate-500 block truncate">
                   {item.title}
                 </span>
-                <div className="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
+                <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mt-0.5">
                   {item.value}
                 </div>
-                <div className="text-[11px] text-slate-500 mt-1 font-normal truncate">
+                <div className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 sm:mt-1 font-normal truncate">
                   {item.subtext}
                 </div>
               </div>

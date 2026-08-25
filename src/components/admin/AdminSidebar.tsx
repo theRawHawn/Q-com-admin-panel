@@ -15,7 +15,8 @@ import {
   LifeBuoy,
   FileText,
   Settings,
-  Lock
+  Lock,
+  X
 } from 'lucide-react';
 import { AdminPermission, AdminRole } from '../../types/admin';
 
@@ -59,6 +60,8 @@ interface AdminSidebarProps {
   onSelectTab: (tabId: string) => void;
   userPermissions: AdminPermission[];
   userRole: AdminRole;
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
@@ -66,11 +69,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   onSelectTab,
   userPermissions,
   userRole,
+  isMobileOpen = false,
+  onCloseMobile,
 }) => {
   const groups: SidebarItem['group'][] = ['Operations', 'Supply & Fleet', 'Finance', 'Settings'];
 
-  return (
-    <aside className="w-56 bg-white border-r border-slate-200 text-slate-700 flex flex-col shrink-0 min-h-[calc(100vh-53px)]">
+  const renderSidebarContent = () => (
+    <>
       {/* Navigation Groups */}
       <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-4">
         {groups.map((grp) => {
@@ -88,7 +93,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 return (
                   <button
                     key={item.id}
-                    onClick={() => onSelectTab(item.id)}
+                    onClick={() => {
+                      onSelectTab(item.id);
+                      if (onCloseMobile) onCloseMobile();
+                    }}
                     className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       isActive
                         ? 'bg-emerald-50 text-emerald-700 font-semibold'
@@ -132,6 +140,45 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         <span className="truncate">{userRole.replace('_', ' ')}</span>
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop Persistent Sidebar */}
+      <aside className="hidden md:flex w-56 bg-white border-r border-slate-200 text-slate-700 flex-col shrink-0 min-h-[calc(100vh-53px)]">
+        {renderSidebarContent()}
+      </aside>
+
+      {/* Mobile Drawer Overlay */}
+      {isMobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
+            onClick={onCloseMobile}
+          />
+
+          {/* Drawer Panel */}
+          <aside className="relative w-64 max-w-[80vw] bg-white flex flex-col h-full shadow-2xl z-10 animate-in slide-in-from-left duration-200">
+            <div className="p-3 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-xs">
+                  QC
+                </div>
+                <span className="font-bold text-slate-900 text-sm">Navigation</span>
+              </div>
+              <button
+                onClick={onCloseMobile}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            {renderSidebarContent()}
+          </aside>
+        </div>
+      )}
+    </>
   );
 };

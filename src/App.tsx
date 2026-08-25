@@ -164,6 +164,7 @@ export default function App() {
   const [activeAlertsCount, setActiveAlertsCount] = useState<number>(7);
   const [cities, setCities] = useState<IndianCityConfig[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>('all');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
 
   // Sync API client session role when user switches persona
   useEffect(() => {
@@ -280,6 +281,7 @@ export default function App() {
         selectedCity={selectedCity}
         onSelectCity={setSelectedCity}
         cities={cities}
+        onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
       />
 
       {/* Main Workspace: Sidebar + Dynamic Sub-system View */}
@@ -289,6 +291,8 @@ export default function App() {
           onSelectTab={setActiveTab}
           userPermissions={userPermissions}
           userRole={currentUser.role}
+          isMobileOpen={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
         <main className="flex-1 overflow-y-auto bg-slate-50">
