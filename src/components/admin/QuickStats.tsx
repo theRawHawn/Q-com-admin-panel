@@ -4,10 +4,7 @@ import {
   RotateCcw,
   Bike,
   IndianRupee,
-  TrendingUp,
-  ArrowUpRight,
-  Zap,
-  Clock
+  ArrowUpRight
 } from 'lucide-react';
 
 interface QuickStatsProps {
@@ -93,10 +90,6 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ metrics, onNavigateTab }
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
           Real-Time Quick Stats
-        </span>
-        <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-          <Clock className="h-3 w-3 text-emerald-500" />
-          Auto-synced
         </span>
       </div>
 

@@ -65,11 +65,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="text-lg font-bold text-slate-900 tracking-tight">
             Marketplace Overview
-            <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-normal">
-              {selectedCity === 'all' ? 'National Grid' : selectedCity.toUpperCase()}
-            </span>
           </h1>
         </div>
 
