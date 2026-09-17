@@ -275,7 +275,7 @@ export const RiderEarningsBreakdown: React.FC<RiderEarningsBreakdownProps> = ({
             </span>
           </div>
 
-          <div className="text-2xl font-black text-slate-900 tracking-tight">
+          <div className="text-2xl font-bold font-mono text-slate-900 tracking-tight">
             ₹{breakdown.earnedPerOrder.toFixed(2)}
             <span className="text-xs font-normal text-slate-500 ml-1">/ trip avg</span>
           </div>
@@ -305,7 +305,7 @@ export const RiderEarningsBreakdown: React.FC<RiderEarningsBreakdownProps> = ({
             </span>
           </div>
 
-          <div className="text-2xl font-black text-slate-900 tracking-tight">
+          <div className="text-2xl font-bold font-mono text-slate-900 tracking-tight">
             {breakdown.totalTripsCount}
             <span className="text-xs font-normal text-slate-500 ml-1">orders ({breakdown.timeframeLabel})</span>
           </div>
@@ -333,7 +333,7 @@ export const RiderEarningsBreakdown: React.FC<RiderEarningsBreakdownProps> = ({
             </span>
           </div>
 
-          <div className="text-2xl font-black text-indigo-700 tracking-tight">
+          <div className="text-2xl font-bold font-mono text-indigo-700 tracking-tight">
             ₹{breakdown.totalIncentives.toLocaleString('en-IN')}
             <span className="text-xs font-normal text-slate-500 ml-1">
               ({Math.round((breakdown.totalIncentives / Math.max(1, breakdown.totalEarnings)) * 100)}% of earnings)
@@ -571,7 +571,7 @@ export const RiderEarningsBreakdown: React.FC<RiderEarningsBreakdownProps> = ({
                     </td>
 
                     <td className="px-3.5 py-2.5 text-right whitespace-nowrap">
-                      <span className="font-black text-slate-900 text-sm">
+                      <span className="font-bold font-mono text-slate-900 text-sm">
                         ₹{trip.totalEarned}
                       </span>
                     </td>

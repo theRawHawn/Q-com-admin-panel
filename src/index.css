@@ -1,6 +1,21 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
 @layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
   html {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -13,7 +28,15 @@
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color: #0f172a;
     background-color: #f8fafc;
-    letter-spacing: -0.012em;
+    letter-spacing: -0.011em;
+  }
+
+  *, ::before, ::after {
+    letter-spacing: -0.011em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.02em;
   }
 
   /* Refined, high-precision tabular numbers for all metrics, currencies, and stats */
@@ -44,6 +67,7 @@
 
   /* Clean interactive elements */
   button, input, select, textarea {
+    font-family: inherit;
     font-feature-settings: inherit;
   }
 }

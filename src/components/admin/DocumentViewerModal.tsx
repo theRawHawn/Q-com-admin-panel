@@ -137,7 +137,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
             </div>
 
             {/* Watermark stamp */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-5 rotate-[-25deg] text-6xl font-black uppercase text-slate-900">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-5 rotate-[-25deg] text-6xl font-bold uppercase text-slate-900">
               UIDAI VERIFIED
             </div>
           </div>
@@ -205,7 +205,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
             {/* GST Header */}
             <div className="text-center border-b-2 border-slate-900 pb-3 mb-4">
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Government of India</div>
-              <div className="text-sm font-black text-slate-900 uppercase tracking-wider">Goods and Services Tax Network</div>
+              <div className="text-sm font-bold text-slate-900 uppercase tracking-wider">Goods and Services Tax Network</div>
               <div className="text-[11px] font-bold text-emerald-800 mt-0.5">Form GST REG-06 · Registration Certificate</div>
             </div>
 

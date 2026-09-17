@@ -216,7 +216,7 @@ export const RiderLedgerDashboard: React.FC<RiderLedgerDashboardProps> = ({
                 <Zap className="h-4 w-4" />
               </span>
             </div>
-            <div className="text-2xl font-black text-slate-900 mt-2 tracking-tight">
+            <div className="text-2xl font-bold font-mono text-slate-900 mt-2 tracking-tight">
               ₹{fleetDailyEarned.toLocaleString('en-IN')}
             </div>
             <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 font-medium">
@@ -248,7 +248,7 @@ export const RiderLedgerDashboard: React.FC<RiderLedgerDashboardProps> = ({
                 <TrendingUp className="h-4 w-4" />
               </span>
             </div>
-            <div className="text-2xl font-black text-slate-900 mt-2 tracking-tight">
+            <div className="text-2xl font-bold font-mono text-slate-900 mt-2 tracking-tight">
               ₹{fleetWeeklyEarned.toLocaleString('en-IN')}
             </div>
             <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 font-medium">
@@ -275,7 +275,7 @@ export const RiderLedgerDashboard: React.FC<RiderLedgerDashboardProps> = ({
                 <CreditCard className="h-4 w-4" />
               </span>
             </div>
-            <div className="text-2xl font-black text-slate-900 mt-2 tracking-tight">
+            <div className="text-2xl font-bold font-mono text-slate-900 mt-2 tracking-tight">
               ₹{fleetMonthlyEarned.toLocaleString('en-IN')}
             </div>
             <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 font-medium">
@@ -302,7 +302,7 @@ export const RiderLedgerDashboard: React.FC<RiderLedgerDashboardProps> = ({
                 {pendingCount} Due
               </span>
             </div>
-            <div className="text-2xl font-black text-emerald-950 mt-2 tracking-tight">
+            <div className="text-2xl font-bold font-mono text-emerald-950 mt-2 tracking-tight">
               ₹{fleetPendingPayable.toLocaleString('en-IN')}
             </div>
             <div className="text-xs text-emerald-800 mt-1">

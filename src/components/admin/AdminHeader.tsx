@@ -100,9 +100,8 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         return 'Search customers by name, phone, email, firm...';
       case 'inventory':
         return 'Search SKUs by name, brand, HSN code...';
-      case 'payments':
       case 'refunds':
-        return 'Search transactions, refunds, parties...';
+        return 'Search refunds by order, customer, phone, or UTR...';
       case 'settlements':
         return 'Search store settlements by seller or UTR...';
       case 'dispatch':

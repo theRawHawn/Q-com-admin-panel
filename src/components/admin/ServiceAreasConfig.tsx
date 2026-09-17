@@ -292,7 +292,7 @@ export const ServiceAreasConfig: React.FC<ServiceAreasConfigProps> = ({
             <span>Active Cities & Metros</span>
             <Building2 className="h-4 w-4 text-emerald-600" />
           </div>
-          <div className="text-2xl font-black text-slate-900 font-mono">
+          <div className="text-2xl font-bold text-slate-900 font-mono">
             {cities.filter((c) => c.isActive).length} <span className="text-xs text-slate-400 font-normal">/ {cities.length}</span>
           </div>
           <div className="text-[11px] text-emerald-700 mt-1 flex items-center gap-1 font-medium">
@@ -306,7 +306,7 @@ export const ServiceAreasConfig: React.FC<ServiceAreasConfigProps> = ({
             <span>Authorised Partner Stores</span>
             <Store className="h-4 w-4 text-sky-600" />
           </div>
-          <div className="text-2xl font-black text-slate-900 font-mono">{totalActivePartnerStores}</div>
+          <div className="text-2xl font-bold text-slate-900 font-mono">{totalActivePartnerStores}</div>
           <div className="text-[11px] text-slate-500 mt-1">10-15 Min Local Delivery</div>
         </div>
 
@@ -315,7 +315,7 @@ export const ServiceAreasConfig: React.FC<ServiceAreasConfigProps> = ({
             <span>Active Fleet On Duty</span>
             <Bike className="h-4 w-4 text-indigo-600" />
           </div>
-          <div className="text-2xl font-black text-slate-900 font-mono">{totalActiveRiders}</div>
+          <div className="text-2xl font-bold text-slate-900 font-mono">{totalActiveRiders}</div>
           <div className="text-[11px] text-indigo-700 mt-1 font-medium">EV Scooters & Loaders</div>
         </div>
 
@@ -324,7 +324,7 @@ export const ServiceAreasConfig: React.FC<ServiceAreasConfigProps> = ({
             <span>Avg Delivery SLA</span>
             <Clock className="h-4 w-4 text-amber-600" />
           </div>
-          <div className="text-2xl font-black text-slate-900 font-mono">{avgSla}m</div>
+          <div className="text-2xl font-bold text-slate-900 font-mono">{avgSla}m</div>
           <div className="text-[11px] text-emerald-700 mt-1 font-medium">98.4% SLA Adherence</div>
         </div>
       </div>

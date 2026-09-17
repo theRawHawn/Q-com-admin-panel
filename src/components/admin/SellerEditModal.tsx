@@ -522,7 +522,7 @@ export const SellerEditModal: React.FC<SellerEditModalProps> = ({
                   </label>
                   <div className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 flex items-center justify-between">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-lg font-black text-slate-900 font-mono">
+                      <span className="text-lg font-bold text-slate-900 font-mono">
                         {seller.slaAdherencePercent ?? 98.4}%
                       </span>
                       <span className="text-[11px] font-bold text-emerald-600">

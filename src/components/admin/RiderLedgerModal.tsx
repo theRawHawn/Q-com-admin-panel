@@ -333,7 +333,7 @@ export const RiderLedgerModal: React.FC<RiderLedgerModalProps> = ({
                     }`}
                   >
                     <div className="text-[10px] opacity-80 font-semibold">Full Pending Due</div>
-                    <div className="text-sm font-black mt-0.5">₹{pendingBalance.toLocaleString('en-IN')}</div>
+                    <div className="text-sm font-bold font-mono mt-0.5">₹{pendingBalance.toLocaleString('en-IN')}</div>
                   </button>
 
                   <button

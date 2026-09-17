@@ -835,7 +835,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   {order.pricing.discount > 0 && (
                     <div className="text-emerald-700">Discount: -₹{order.pricing.discount.toLocaleString('en-IN')}</div>
                   )}
-                  <div className="text-sm font-black text-slate-900 pt-1 border-t border-slate-300">
+                  <div className="text-sm font-bold font-mono text-slate-900 pt-1 border-t border-slate-300">
                     Net Total: ₹{order.pricing.total.toLocaleString('en-IN')}
                   </div>
                 </div>

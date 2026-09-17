@@ -180,7 +180,7 @@ export const SellerSettlements: React.FC<SellerSettlementsProps> = ({
               </div>
               <div className="col-span-2 sm:col-span-1 bg-white p-2 rounded-lg border border-slate-300 shadow-2xs">
                 <span className="text-slate-500 text-[10px] block">Net Seller Payable</span>
-                <span className="text-emerald-700 font-black text-sm">₹{set.netPayable.toLocaleString('en-IN')}</span>
+                <span className="text-emerald-700 font-bold font-mono text-sm">₹{set.netPayable.toLocaleString('en-IN')}</span>
               </div>
             </div>
 

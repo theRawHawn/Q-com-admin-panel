@@ -2728,7 +2728,7 @@ adminRouter.put('/refunds/:id', requirePermission('refunds.approve'), (req: Auth
     return res.status(404).json({ success: false, message: 'Refund request not found.' });
   }
 
-  const { amount, reason, channel, customerName, customerPhone, bankUtr, sellerClawback, adminNotes, status } = req.body;
+  const { amount, reason, channel, customerName, customerPhone, bankUtr, sellerClawback, adminNotes, status, holdReason, rejectionReason } = req.body;
 
   if (amount !== undefined && typeof amount === 'number' && amount > 0) {
     refund.amount = Math.min(amount, refund.maxRefundable || amount);
@@ -2740,7 +2740,61 @@ adminRouter.put('/refunds/:id', requirePermission('refunds.approve'), (req: Auth
   if (bankUtr !== undefined) refund.bankUtr = bankUtr;
   if (sellerClawback !== undefined) refund.sellerClawback = !!sellerClawback;
   if (adminNotes !== undefined) refund.internalNotes = adminNotes;
-  if (status !== undefined) refund.status = status;
+  
+  if (status !== undefined) {
+    refund.status = status;
+    const nowTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (!refund.timeline) refund.timeline = [];
+
+    if (status === 'COMPLETED') {
+      refund.approvedBy = req.employee?.name || req.admin?.name || 'Finance Admin';
+      refund.approvedAt = `Today, ${nowTimeStr}`;
+      if (!refund.bankUtr) {
+        refund.bankUtr = `REF-UPI-${Date.now().toString().slice(-8)}${Math.floor(1000 + Math.random() * 9000)}`;
+      }
+      refund.transactionId = refund.bankUtr;
+      refund.timeline.push({
+        stage: 'Disbursed & Completed',
+        timestamp: nowTimeStr,
+        note: `Marked as Refunded by ${req.admin?.name || 'Finance Admin'}. Payout UTR: ${refund.bankUtr}`,
+        actor: req.admin?.name || 'Finance Admin',
+      });
+    } else if (status === 'APPROVED') {
+      refund.approvedBy = req.employee?.name || req.admin?.name || 'Finance Admin';
+      refund.approvedAt = `Today, ${nowTimeStr}`;
+      refund.timeline.push({
+        stage: 'Refund Approved',
+        timestamp: nowTimeStr,
+        note: `Approved by ${req.admin?.name || 'Finance Admin'}. Ready for gateway disbursement.`,
+        actor: req.admin?.name || 'Finance Admin',
+      });
+    } else if (status === 'PENDING') {
+      refund.timeline.push({
+        stage: 'Marked Pending',
+        timestamp: nowTimeStr,
+        note: `Re-queued to pending review by ${req.admin?.name || 'Finance Admin'}.`,
+        actor: req.admin?.name || 'Finance Admin',
+      });
+    } else if (status === 'ON_HOLD') {
+      refund.holdReason = holdReason || 'Operational verification check';
+      refund.timeline.push({
+        stage: 'Put On Hold',
+        timestamp: nowTimeStr,
+        note: `Placed on hold by ${req.admin?.name || 'Finance Admin'}. Reason: ${refund.holdReason}`,
+        actor: req.admin?.name || 'Finance Admin',
+      });
+    } else if (status === 'REJECTED') {
+      refund.rejectionReason = rejectionReason || 'Declined by Finance compliance officer';
+      refund.rejectedBy = req.employee?.name || req.admin?.name || 'Finance Admin';
+      refund.rejectedAt = `Today, ${nowTimeStr}`;
+      refund.timeline.push({
+        stage: 'Refund Declined',
+        timestamp: nowTimeStr,
+        note: `Declined by ${req.admin?.name || 'Finance Admin'}. Reason: ${refund.rejectionReason}`,
+        actor: req.admin?.name || 'Finance Admin',
+      });
+    }
+  }
 
   authoritativeAdminStore.logAudit({
     adminId: req.employee?.id || req.admin?.id || 'admin',

@@ -409,7 +409,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-emerald-600 selection:text-white antialiased">
+    <div className="h-screen h-[100dvh] w-full bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-emerald-600 selection:text-white antialiased overflow-hidden">
       {/* Top Fixed Admin Header */}
       <AdminHeader
         currentUser={currentUser}
@@ -427,7 +427,7 @@ export default function App() {
       />
 
       {/* Main Workspace: Sidebar + Dynamic Sub-system View */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden w-full">
         <AdminSidebar
           activeTab={activeTab}
           onSelectTab={setActiveTab}
@@ -437,7 +437,7 @@ export default function App() {
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
-        <main className="flex-1 overflow-y-auto bg-[#f8fafc] focus:outline-none">
+        <main className="flex-1 min-w-0 min-h-0 overflow-y-auto bg-[#f8fafc] focus:outline-none h-full">
           {renderActiveView()}
         </main>
       </div>

@@ -25,6 +25,8 @@ import {
   Scale,
   Zap,
   ChevronRight,
+  ChevronDown,
+  PauseCircle,
   Sliders
 } from 'lucide-react';
 import { AdminRefund, AdminOrder, AdminPermission, AdminRefundDispute, RefundPolicyConfig } from '../../types/admin';
@@ -50,7 +52,7 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
   searchQuery: externalSearchQuery,
   onSearchQueryChange,
 }) => {
-  const [activeTab, setActiveTab] = useState<'REFUNDS' | 'TRANSACTIONS' | 'DISPUTES'>('REFUNDS');
+  const [activeTab, setActiveTab] = useState<'REFUNDS' | 'DISPUTES'>('REFUNDS');
   const [refunds, setRefunds] = useState<AdminRefund[]>([]);
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [disputes, setDisputes] = useState<AdminRefundDispute[]>([]);
@@ -60,6 +62,7 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [channelFilter, setChannelFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState(externalSearchQuery || '');
+  const [activeOptionsId, setActiveOptionsId] = useState<string | null>(null);
 
   useEffect(() => {
     if (externalSearchQuery !== undefined) {
@@ -122,6 +125,67 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const handleDocumentClick = () => {
+      setActiveOptionsId(null);
+    };
+    document.addEventListener('click', handleDocumentClick);
+    return () => {
+      document.removeEventListener('click', handleDocumentClick);
+    };
+  }, []);
+
+  // Status transition handler for individual refund
+  const handleStatusChange = async (
+    refund: AdminRefund,
+    newStatus: 'PENDING' | 'APPROVED' | 'COMPLETED' | 'REJECTED' | 'ON_HOLD'
+  ) => {
+    setActiveOptionsId(null);
+    if (!canApproveRefund) {
+      showAlert('You do not have permission to modify refund status.', 'error');
+      return;
+    }
+
+    // Modal flows for actions that take notes/reasons/gateway configs
+    if (newStatus === 'APPROVED') {
+      setActionModalConfig({ refund, type: 'APPROVE' });
+      return;
+    }
+    if (newStatus === 'REJECTED') {
+      setActionModalConfig({ refund, type: 'REJECT' });
+      return;
+    }
+    if (newStatus === 'ON_HOLD') {
+      setActionModalConfig({ refund, type: 'HOLD' });
+      return;
+    }
+
+    // Direct update for PENDING or COMPLETED / REFUNDED
+    try {
+      setLoading(true);
+      const generatedUtr = newStatus === 'COMPLETED' 
+        ? (refund.bankUtr || `REF-UPI-${Date.now().toString().slice(-8)}`)
+        : refund.bankUtr;
+
+      const res: any = await adminApi.put(`/api/admin/refunds/${refund.id}`, {
+        status: newStatus,
+        bankUtr: generatedUtr,
+        adminNotes: `Status changed to ${newStatus} by admin supervisor.`,
+      });
+
+      if (res && res.success) {
+        showAlert(res.message || `Refund #${refund.orderNumber} updated to ${newStatus}.`);
+        fetchData();
+      } else {
+        showAlert(res?.message || 'Status update failed.', 'error');
+      }
+    } catch (err: any) {
+      showAlert(err.message || 'Failed to update refund status.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Filtered Refunds
   const filteredRefunds = refunds.filter((r) => {
     const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter;
@@ -139,22 +203,6 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
       (r.transactionId && r.transactionId.toLowerCase().includes(q));
 
     return matchesStatus && matchesChannel && matchesCity && matchesSearch;
-  });
-
-  // Filtered Payment Transactions (Orders)
-  const filteredOrders = orders.filter((ord) => {
-    const matchesCity =
-      !selectedCity || selectedCity === 'all' || (ord.cityName || '').toLowerCase() === selectedCity.toLowerCase();
-    const q = searchQuery.toLowerCase();
-    const matchesSearch =
-      !q ||
-      ord.orderNumber.toLowerCase().includes(q) ||
-      ord.customer.name.toLowerCase().includes(q) ||
-      ord.customer.phone.includes(q) ||
-      (ord.payment.transactionId && ord.payment.transactionId.toLowerCase().includes(q)) ||
-      (ord.payment.method && ord.payment.method.toLowerCase().includes(q));
-
-    return matchesCity && matchesSearch;
   });
 
   // Filtered Disputes
@@ -184,20 +232,35 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
     );
   };
 
-  const handleBulkApprove = async () => {
+  const handleBulkStatusChange = async (targetStatus: 'APPROVED' | 'PENDING' | 'ON_HOLD' | 'REJECTED' | 'COMPLETED') => {
     if (!canApproveRefund || selectedRefundIds.length === 0) return;
     try {
       setLoading(true);
-      const res: any = await adminApi.post('/api/admin/refunds/bulk-approve', {
-        refundIds: selectedRefundIds,
-      });
-      if (res && res.success) {
-        showAlert(res.message || 'Batch approved successfully.');
+      if (targetStatus === 'APPROVED') {
+        const res: any = await adminApi.post('/api/admin/refunds/bulk-approve', {
+          refundIds: selectedRefundIds,
+        });
+        if (res && res.success) {
+          showAlert(res.message || 'Batch approved successfully.');
+          setSelectedRefundIds([]);
+          fetchData();
+        }
+      } else {
+        // Update each item to target status
+        await Promise.all(
+          selectedRefundIds.map((id) =>
+            adminApi.put(`/api/admin/refunds/${id}`, {
+              status: targetStatus,
+              adminNotes: `Batch updated to ${targetStatus} by administrator.`,
+            })
+          )
+        );
+        showAlert(`${selectedRefundIds.length} refunds set to ${targetStatus}.`);
         setSelectedRefundIds([]);
         fetchData();
       }
     } catch (err: any) {
-      showAlert(err.message || 'Batch approval failed.', 'error');
+      showAlert(err.message || 'Batch status change failed.', 'error');
     } finally {
       setLoading(false);
     }
@@ -220,32 +283,22 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
         { header: 'Created At', accessor: (r: AdminRefund) => r.createdAt },
         { header: 'Approved By', accessor: (r: AdminRefund) => r.approvedBy || 'N/A' },
       ];
-      exportToCsv(`refunds_export_${new Date().toISOString().slice(0, 10)}.csv`, columns, filteredRefunds);
+      exportToCsv(`refunds_desk_${new Date().toISOString().slice(0, 10)}.csv`, columns, filteredRefunds);
       showAlert('Refund dataset exported successfully.');
-    } else if (activeTab === 'TRANSACTIONS') {
+    } else {
       const columns = [
-        { header: 'Order Number', accessor: (o: AdminOrder) => o.orderNumber },
-        { header: 'Transaction ID', accessor: (o: AdminOrder) => o.payment.transactionId || `UPI-${o.orderNumber}` },
-        { header: 'Customer', accessor: (o: AdminOrder) => o.customer.name },
-        { header: 'Phone', accessor: (o: AdminOrder) => o.customer.phone },
-        { header: 'City', accessor: (o: AdminOrder) => o.cityName || 'Bengaluru' },
-        { header: 'Payment Method', accessor: (o: AdminOrder) => o.payment.method },
-        { header: 'Status', accessor: (o: AdminOrder) => o.payment.status },
-        { header: 'Total Amount (INR)', accessor: (o: AdminOrder) => o.pricing.total },
-        { header: 'Date', accessor: (o: AdminOrder) => (o as any).createdAt || o.timeline?.[0]?.timestamp || 'Today' },
+        { header: 'Dispute ID', accessor: (d: AdminRefundDispute) => d.id },
+        { header: 'Order Number', accessor: (d: AdminRefundDispute) => d.orderNumber },
+        { header: 'Claim Ref', accessor: (d: AdminRefundDispute) => d.claimReference },
+        { header: 'Customer', accessor: (d: AdminRefundDispute) => d.customerName },
+        { header: 'Bank', accessor: (d: AdminRefundDispute) => d.bankName },
+        { header: 'Amount', accessor: (d: AdminRefundDispute) => d.disputeAmount },
+        { header: 'Status', accessor: (d: AdminRefundDispute) => d.status },
+        { header: 'Created At', accessor: (d: AdminRefundDispute) => d.filedAt },
       ];
-      exportToCsv(`payment_ledger_${new Date().toISOString().slice(0, 10)}.csv`, columns, filteredOrders);
-      showAlert('Payment transaction ledger exported successfully.');
+      exportToCsv(`chargeback_disputes_${new Date().toISOString().slice(0, 10)}.csv`, columns, filteredDisputes);
+      showAlert('Disputes dataset exported successfully.');
     }
-  };
-
-  const handleForceReconcile = async () => {
-    setIsReconciling(true);
-    setTimeout(() => {
-      setIsReconciling(false);
-      showAlert('Payment gateway webhook ledger synchronized. 100% matched with bank settlement dumps.');
-      fetchData();
-    }, 1200);
   };
 
   // KPIs
@@ -283,7 +336,7 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-            Payments & Refunds
+            Refunds Desk
           </h1>
         </div>
 
@@ -392,22 +445,6 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
             </button>
 
             <button
-              onClick={() => setActiveTab('TRANSACTIONS')}
-              className={`pb-2.5 px-3 text-xs font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                activeTab === 'TRANSACTIONS'
-                  ? 'border-slate-900 text-slate-900 font-semibold'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <span>Payment Ledger</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                activeTab === 'TRANSACTIONS' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
-              }`}>
-                {orders.length}
-              </span>
-            </button>
-
-            <button
               onClick={() => setActiveTab('DISPUTES')}
               className={`pb-2.5 px-3 text-xs font-medium border-b-2 transition-colors flex items-center gap-2 ${
                 activeTab === 'DISPUTES'
@@ -425,17 +462,6 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
           </div>
 
           <div className="flex items-center gap-2 pb-2 sm:pb-0">
-            {activeTab === 'TRANSACTIONS' && (
-              <button
-                onClick={handleForceReconcile}
-                disabled={isReconciling}
-                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5"
-              >
-                <RefreshCw className={`w-3 h-3 ${isReconciling ? 'animate-spin' : ''}`} />
-                <span>{isReconciling ? 'Syncing...' : 'Sync Gateway Webhooks'}</span>
-              </button>
-            )}
-
             {activeTab === 'REFUNDS' && (
               <div className="hidden sm:flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200/80">
                 <button
@@ -470,8 +496,6 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
               placeholder={
                 activeTab === 'REFUNDS'
                   ? 'Search by Order ID, customer name, phone, UTR or reason...'
-                  : activeTab === 'TRANSACTIONS'
-                  ? 'Search by Order ID, customer, payment ID...'
                   : 'Search disputes by Claim Ref, bank, customer...'
               }
               value={searchQuery}
@@ -513,23 +537,54 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
 
       {/* Bulk Action Bar for Refunds */}
       {activeTab === 'REFUNDS' && selectedRefundIds.length > 0 && (
-        <div className="p-3 bg-slate-900 text-white rounded-xl flex items-center justify-between text-xs animate-in fade-in duration-150">
+        <div className="p-3 bg-slate-900 text-white rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs animate-in fade-in duration-150">
           <div className="flex items-center gap-2 font-medium">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>{selectedRefundIds.length} refund requests selected</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{selectedRefundIds.length} refund requests selected:</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             {canApproveRefund && (
-              <button
-                onClick={handleBulkApprove}
-                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1"
-              >
-                <span>Batch Approve & Disburse</span>
-              </button>
+              <>
+                <button
+                  onClick={() => handleBulkStatusChange('APPROVED')}
+                  className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs"
+                >
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Approve</span>
+                </button>
+                <button
+                  onClick={() => handleBulkStatusChange('PENDING')}
+                  className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs"
+                >
+                  <Clock className="w-3 h-3" />
+                  <span>Pending</span>
+                </button>
+                <button
+                  onClick={() => handleBulkStatusChange('ON_HOLD')}
+                  className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs"
+                >
+                  <PauseCircle className="w-3 h-3" />
+                  <span>Hold</span>
+                </button>
+                <button
+                  onClick={() => handleBulkStatusChange('REJECTED')}
+                  className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs"
+                >
+                  <Ban className="w-3 h-3" />
+                  <span>Decline</span>
+                </button>
+                <button
+                  onClick={() => handleBulkStatusChange('COMPLETED')}
+                  className="px-2.5 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-2xs"
+                >
+                  <Zap className="w-3 h-3" />
+                  <span>Refunded</span>
+                </button>
+              </>
             )}
             <button
               onClick={() => setSelectedRefundIds([])}
-              className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium"
+              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium ml-1"
             >
               Clear
             </button>
@@ -649,7 +704,7 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
                             </td>
 
                             <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                              <div className="flex items-center justify-end gap-1.5">
+                              <div className="flex items-center justify-end gap-1.5 relative">
                                 {canApproveRefund && ref.status === 'PENDING' && (
                                   <button
                                     onClick={() => setActionModalConfig({ refund: ref, type: 'APPROVE' })}
@@ -670,6 +725,112 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
                                     Release
                                   </button>
                                 )}
+
+                                {/* Options Buttons Dropdown List */}
+                                <div className="relative inline-block text-left">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveOptionsId(activeOptionsId === ref.id ? null : ref.id);
+                                    }}
+                                    title="Status options & actions"
+                                    className={`px-2 py-1 rounded text-xs font-medium border transition-colors flex items-center gap-1 ${
+                                      activeOptionsId === ref.id
+                                        ? 'bg-slate-900 text-white border-slate-900'
+                                        : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs'
+                                    }`}
+                                  >
+                                    <span>Options</span>
+                                    <ChevronDown className="w-3 h-3" />
+                                  </button>
+
+                                  {activeOptionsId === ref.id && (
+                                    <div
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="absolute right-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100 divide-y divide-slate-100"
+                                    >
+                                      <div className="py-1">
+                                        <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                          Update Status
+                                        </div>
+
+                                        <button
+                                          onClick={() => handleStatusChange(ref, 'APPROVED')}
+                                          disabled={!canApproveRefund || ref.status === 'APPROVED' || ref.status === 'COMPLETED'}
+                                          className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                                        >
+                                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                          <span className="font-medium">Approve</span>
+                                          {ref.status === 'APPROVED' && <span className="ml-auto text-[10px] text-emerald-600 font-semibold">Current</span>}
+                                        </button>
+
+                                        <button
+                                          onClick={() => handleStatusChange(ref, 'PENDING')}
+                                          disabled={!canApproveRefund || ref.status === 'PENDING'}
+                                          className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-amber-50 hover:text-amber-800 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                                        >
+                                          <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                          <span className="font-medium">Pending</span>
+                                          {ref.status === 'PENDING' && <span className="ml-auto text-[10px] text-amber-600 font-semibold">Current</span>}
+                                        </button>
+
+                                        <button
+                                          onClick={() => handleStatusChange(ref, 'ON_HOLD')}
+                                          disabled={!canApproveRefund || ref.status === 'ON_HOLD'}
+                                          className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-purple-50 hover:text-purple-800 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                                        >
+                                          <PauseCircle className="w-3.5 h-3.5 text-purple-600" />
+                                          <span className="font-medium">Hold</span>
+                                          {ref.status === 'ON_HOLD' && <span className="ml-auto text-[10px] text-purple-600 font-semibold">Current</span>}
+                                        </button>
+
+                                        <button
+                                          onClick={() => handleStatusChange(ref, 'REJECTED')}
+                                          disabled={!canApproveRefund || ref.status === 'REJECTED'}
+                                          className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-rose-50 hover:text-rose-800 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                                        >
+                                          <Ban className="w-3.5 h-3.5 text-rose-600" />
+                                          <span className="font-medium">Decline</span>
+                                          {ref.status === 'REJECTED' && <span className="ml-auto text-[10px] text-rose-600 font-semibold">Current</span>}
+                                        </button>
+
+                                        <button
+                                          onClick={() => handleStatusChange(ref, 'COMPLETED')}
+                                          disabled={!canApproveRefund || ref.status === 'COMPLETED'}
+                                          className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-teal-50 hover:text-teal-800 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                                        >
+                                          <Zap className="w-3.5 h-3.5 text-teal-600" />
+                                          <span className="font-medium">Refunded</span>
+                                          {ref.status === 'COMPLETED' && <span className="ml-auto text-[10px] text-teal-600 font-semibold">Current</span>}
+                                        </button>
+                                      </div>
+
+                                      <div className="py-1">
+                                        <button
+                                          onClick={() => {
+                                            setActiveOptionsId(null);
+                                            setSelectedRefundForDetail(ref);
+                                          }}
+                                          className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                                        >
+                                          <Eye className="w-3.5 h-3.5 text-slate-500" />
+                                          <span>View Details</span>
+                                        </button>
+
+                                        <button
+                                          onClick={() => {
+                                            setActiveOptionsId(null);
+                                            setEditingRefund(ref);
+                                          }}
+                                          className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                                        >
+                                          <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+                                          <span>Edit Record</span>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
 
                                 <button
                                   onClick={() => setSelectedRefundForDetail(ref)}
@@ -708,7 +869,7 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
               {filteredRefunds.map((ref) => (
                 <div
                   key={ref.id}
-                  className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-xs hover:border-slate-300 transition-all space-y-3"
+                  className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-xs hover:border-slate-300 transition-all space-y-3 relative"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -780,15 +941,122 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
                       </button>
                     </div>
 
-                    {canApproveRefund && ref.status === 'PENDING' && (
-                      <button
-                        onClick={() => setActionModalConfig({ refund: ref, type: 'APPROVE' })}
-                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-medium transition-colors flex items-center gap-1"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Approve</span>
-                      </button>
-                    )}
+                    <div className="flex items-center gap-1.5 relative">
+                      {canApproveRefund && ref.status === 'PENDING' && (
+                        <button
+                          onClick={() => setActionModalConfig({ refund: ref, type: 'APPROVE' })}
+                          className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-medium transition-colors flex items-center gap-1"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Approve</span>
+                        </button>
+                      )}
+
+                      {/* Options Button in Grid Card */}
+                      <div className="relative">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveOptionsId(activeOptionsId === ref.id ? null : ref.id);
+                          }}
+                          className={`px-2 py-1 rounded text-xs font-medium border transition-colors flex items-center gap-1 ${
+                            activeOptionsId === ref.id
+                              ? 'bg-slate-900 text-white border-slate-900'
+                              : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs'
+                          }`}
+                        >
+                          <span>Options</span>
+                          <ChevronDown className="w-3 h-3" />
+                        </button>
+
+                        {activeOptionsId === ref.id && (
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="absolute right-0 bottom-full mb-1 w-44 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-50 text-left animate-in fade-in zoom-in-95 duration-100 divide-y divide-slate-100"
+                          >
+                            <div className="py-1">
+                              <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                Update Status
+                              </div>
+
+                              <button
+                                onClick={() => handleStatusChange(ref, 'APPROVED')}
+                                disabled={!canApproveRefund || ref.status === 'APPROVED' || ref.status === 'COMPLETED'}
+                                className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                <span className="font-medium">Approve</span>
+                                {ref.status === 'APPROVED' && <span className="ml-auto text-[10px] text-emerald-600 font-semibold">Current</span>}
+                              </button>
+
+                              <button
+                                onClick={() => handleStatusChange(ref, 'PENDING')}
+                                disabled={!canApproveRefund || ref.status === 'PENDING'}
+                                className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-amber-50 hover:text-amber-800 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                              >
+                                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                <span className="font-medium">Pending</span>
+                                {ref.status === 'PENDING' && <span className="ml-auto text-[10px] text-amber-600 font-semibold">Current</span>}
+                              </button>
+
+                              <button
+                                onClick={() => handleStatusChange(ref, 'ON_HOLD')}
+                                disabled={!canApproveRefund || ref.status === 'ON_HOLD'}
+                                className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-purple-50 hover:text-purple-800 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                              >
+                                <PauseCircle className="w-3.5 h-3.5 text-purple-600" />
+                                <span className="font-medium">Hold</span>
+                                {ref.status === 'ON_HOLD' && <span className="ml-auto text-[10px] text-purple-600 font-semibold">Current</span>}
+                              </button>
+
+                              <button
+                                onClick={() => handleStatusChange(ref, 'REJECTED')}
+                                disabled={!canApproveRefund || ref.status === 'REJECTED'}
+                                className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-rose-50 hover:text-rose-800 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                              >
+                                <Ban className="w-3.5 h-3.5 text-rose-600" />
+                                <span className="font-medium">Decline</span>
+                                {ref.status === 'REJECTED' && <span className="ml-auto text-[10px] text-rose-600 font-semibold">Current</span>}
+                              </button>
+
+                              <button
+                                onClick={() => handleStatusChange(ref, 'COMPLETED')}
+                                disabled={!canApproveRefund || ref.status === 'COMPLETED'}
+                                className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-teal-50 hover:text-teal-800 flex items-center gap-2 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                              >
+                                <Zap className="w-3.5 h-3.5 text-teal-600" />
+                                <span className="font-medium">Refunded</span>
+                                {ref.status === 'COMPLETED' && <span className="ml-auto text-[10px] text-teal-600 font-semibold">Current</span>}
+                              </button>
+                            </div>
+
+                            <div className="py-1">
+                              <button
+                                onClick={() => {
+                                  setActiveOptionsId(null);
+                                  setSelectedRefundForDetail(ref);
+                                }}
+                                className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-slate-500" />
+                                <span>View Details</span>
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  setActiveOptionsId(null);
+                                  setEditingRefund(ref);
+                                }}
+                                className="w-full px-3 py-1.5 text-xs text-left text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                              >
+                                <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+                                <span>Edit Record</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -797,93 +1065,7 @@ export const PaymentsAndRefunds: React.FC<PaymentsAndRefundsProps> = ({
         </>
       )}
 
-      {/* ==================== TAB 2: PAYMENT LEDGER ==================== */}
-      {activeTab === 'TRANSACTIONS' && (
-        <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs min-w-[800px]">
-              <thead className="bg-slate-50/75 text-slate-500 font-medium text-[11px] border-b border-slate-200/80">
-                <tr>
-                  <th className="py-3 px-3.5 font-sans">Transaction ID</th>
-                  <th className="py-3 px-3.5 font-sans">Order Ref</th>
-                  <th className="py-3 px-3.5 font-sans">Customer & City</th>
-                  <th className="py-3 px-3.5 font-sans">Payment Rail</th>
-                  <th className="py-3 px-3.5 font-sans">Status</th>
-                  <th className="py-3 px-3.5 text-right font-sans">Gross Total</th>
-                  <th className="py-3 px-3.5 text-center font-sans">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filteredOrders.length > 0 ? (
-                  filteredOrders.map((ord) => (
-                    <tr key={ord.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-3 px-3.5 text-slate-700 font-mono">
-                        {ord.payment.transactionId || `PAY-UPI-${ord.orderNumber.replace(/[^0-9]/g, '') || '99201'}`}
-                      </td>
-                      <td className="py-3 px-3.5 text-slate-900 font-semibold font-mono">{ord.orderNumber}</td>
-                      <td className="py-3 px-3.5 text-slate-800">
-                        <div className="font-medium">{ord.customer.name}</div>
-                        <div className="text-[11px] text-slate-500">{ord.cityName || 'Bengaluru'} • {ord.customer.phone}</div>
-                      </td>
-                      <td className="py-3 px-3.5">
-                        <span className="text-slate-600 bg-slate-100 px-2 py-0.5 rounded text-[11px] font-medium">
-                          {ord.payment.method}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3.5 whitespace-nowrap">
-                        {ord.payment.status === 'PAID' ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            Paid
-                          </span>
-                        ) : ord.payment.status === 'REFUNDED' ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-rose-700">
-                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                            Refunded
-                          </span>
-                        ) : ord.payment.status === 'PARTIALLY_REFUNDED' ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                            Partial Refund
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600">
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                            {ord.payment.status}
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-3.5 text-right font-semibold text-slate-900 font-mono">
-                        ₹{ord.pricing.total.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3 px-3.5 text-center">
-                        {canCreateRefund && ord.payment.status !== 'REFUNDED' && (
-                          <button
-                            onClick={() => {
-                              setShowCreateModal(true);
-                            }}
-                            className="px-2.5 py-1 text-rose-700 hover:bg-rose-50 rounded-md text-xs font-medium transition-colors"
-                          >
-                            Refund
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="py-10 text-center text-slate-400 text-xs">
-                      No matching payment transaction records found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* ==================== TAB 3: CHARGEBACK DISPUTES ==================== */}
+      {/* ==================== TAB 2: CHARGEBACK DISPUTES ==================== */}
       {activeTab === 'DISPUTES' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {filteredDisputes.length > 0 ? (

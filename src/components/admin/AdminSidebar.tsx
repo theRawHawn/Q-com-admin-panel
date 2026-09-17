@@ -52,7 +52,6 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: 'inventory', label: 'Master Catalog', icon: Package, requiredPermission: 'inventory.view', group: 'Supply & Fleet' },
 
   // 4. Finance & Growth
-  { id: 'payments', label: 'Payments & Ledger', icon: CreditCard, requiredPermission: 'payments.view', group: 'Finance' },
   { id: 'refunds', label: 'Refunds Desk', icon: RotateCcw, requiredPermission: 'refunds.view', group: 'Finance' },
   { id: 'settlements', label: 'Store Settlements', icon: Receipt, requiredPermission: 'settlements.view', group: 'Finance' },
   { id: 'pricing', label: 'Pricing & Margins', icon: Tag, requiredPermission: 'pricing.view', group: 'Finance' },
@@ -86,7 +85,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const renderSidebarContent = () => (
     <>
       {/* Navigation Groups */}
-      <div className="flex-1 overflow-y-auto px-3 py-3.5 space-y-5">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 py-3.5 space-y-5">
         {groups.map((grp) => {
           const isSuperAdmin = userRole === 'SUPER_ADMIN' || userPermissions.includes('*' as any);
           const itemsInGroup = SIDEBAR_ITEMS.filter((item) => {
@@ -136,7 +135,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       </div>
 
       {/* Role Pill Footer */}
-      <div className="p-3 px-3.5 border-t border-slate-200/80 bg-slate-50/50 flex items-center justify-between text-[11px] text-slate-500 select-none">
+      <div className="p-3 px-3.5 border-t border-slate-200/80 bg-slate-50/50 flex items-center justify-between text-[11px] text-slate-500 select-none shrink-0">
         <div className="flex items-center gap-2 truncate">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 shrink-0"></span>
           <span className="truncate font-medium text-slate-700">{userRole.replace(/_/g, ' ')}</span>
@@ -149,7 +148,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   return (
     <>
       {/* Desktop Persistent Sidebar */}
-      <aside className="hidden md:flex w-56 bg-white border-r border-slate-200/80 text-slate-700 flex-col shrink-0 min-h-[calc(100vh-56px)] select-none">
+      <aside className="hidden md:flex w-56 bg-white border-r border-slate-200/80 text-slate-700 flex-col shrink-0 h-full overflow-hidden select-none">
         {renderSidebarContent()}
       </aside>
 
