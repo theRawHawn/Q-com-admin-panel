@@ -2360,13 +2360,17 @@ adminRouter.get('/inventory', requirePermission('inventory.view'), (req: Authent
   const city = (req.query.city as string || 'all').toLowerCase();
   let products = authoritativeAdminStore.products.map((p) => {
     const sellers = p.sellers || [];
-    // If city is specified, calculate filtered stock or highlight
     const totalStock = sellers.reduce((sum, s) => sum + (s.stockCount || 0), 0);
     const minAlert = p.minStockAlert || 20;
+    
+    // Check seller-level stock health
+    const lowStockSellers = sellers.filter((s) => s.stockCount > 0 && s.stockCount <= (s.minStockAlert || 10));
+    const outOfStockSellers = sellers.filter((s) => s.stockCount === 0);
+
     let status: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK' = 'IN_STOCK';
     if (totalStock === 0) {
       status = 'OUT_OF_STOCK';
-    } else if (totalStock <= minAlert) {
+    } else if (totalStock <= minAlert || lowStockSellers.length > 0 || outOfStockSellers.length > 0) {
       status = 'LOW_STOCK';
     }
 
@@ -2374,13 +2378,15 @@ adminRouter.get('/inventory', requirePermission('inventory.view'), (req: Authent
       ...p,
       stockCount: totalStock,
       sellerCount: sellers.length,
+      lowStockSellerCount: lowStockSellers.length,
+      outOfStockSellerCount: outOfStockSellers.length,
       inStock: totalStock > 0,
       status,
     };
   });
 
   if (city !== 'all') {
-    // Return all products that either have sellers in that city or are available
+    // Return all products that have sellers in that city
     products = products.filter((p) => {
       if (!p.sellers || p.sellers.length === 0) return true;
       return p.sellers.some((s) => s.cityId === city || s.cityName.toLowerCase().includes(city));
