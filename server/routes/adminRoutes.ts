@@ -2358,13 +2358,96 @@ adminRouter.put('/customers/:id', requirePermission('customers.edit'), (req: Aut
 // 17. Inventory Management
 adminRouter.get('/inventory', requirePermission('inventory.view'), (req: AuthenticatedRequest, res: Response) => {
   const city = (req.query.city as string || 'all').toLowerCase();
-  let products = authoritativeAdminStore.products;
+  let products = authoritativeAdminStore.products.map((p) => {
+    const sellers = p.sellers || [];
+    // If city is specified, calculate filtered stock or highlight
+    const totalStock = sellers.reduce((sum, s) => sum + (s.stockCount || 0), 0);
+    const minAlert = p.minStockAlert || 20;
+    let status: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK' = 'IN_STOCK';
+    if (totalStock === 0) {
+      status = 'OUT_OF_STOCK';
+    } else if (totalStock <= minAlert) {
+      status = 'LOW_STOCK';
+    }
+
+    return {
+      ...p,
+      stockCount: totalStock,
+      sellerCount: sellers.length,
+      inStock: totalStock > 0,
+      status,
+    };
+  });
+
   if (city !== 'all') {
-    products = products.filter((p) => (p.cityId || '').toLowerCase() === city || !p.cityId);
+    // Return all products that either have sellers in that city or are available
+    products = products.filter((p) => {
+      if (!p.sellers || p.sellers.length === 0) return true;
+      return p.sellers.some((s) => s.cityId === city || s.cityName.toLowerCase().includes(city));
+    });
   }
+
   res.json({
     success: true,
     products,
+  });
+});
+
+// Adjust stock for a specific seller for a given SKU
+adminRouter.post('/inventory/:id/adjust-seller-stock', requirePermission('inventory.edit_stock'), (req: AuthenticatedRequest, res: Response) => {
+  const { sellerId, newStockCount, reason } = req.body;
+  if (typeof newStockCount !== 'number' || newStockCount < 0) {
+    return res.status(400).json({ success: false, error: 'INVALID_STOCK_COUNT' });
+  }
+  if (!sellerId) {
+    return res.status(400).json({ success: false, error: 'SELLER_ID_REQUIRED' });
+  }
+
+  const prod = authoritativeAdminStore.products.find((p) => p.id === req.params.id || p.sku === req.params.id);
+  if (!prod) return res.status(404).json({ success: false, error: 'PRODUCT_NOT_FOUND' });
+
+  if (!prod.sellers) prod.sellers = [];
+  const sellerEntry = prod.sellers.find((s) => s.sellerId === sellerId);
+  if (!sellerEntry) {
+    return res.status(404).json({ success: false, error: 'SELLER_NOT_FOUND_FOR_SKU' });
+  }
+
+  const oldStock = sellerEntry.stockCount;
+  sellerEntry.stockCount = newStockCount;
+  sellerEntry.lastRestockedAt = 'Just now (Admin Audited)';
+
+  // Recalculate overall product stock and status
+  const totalStock = prod.sellers.reduce((sum, s) => sum + (s.stockCount || 0), 0);
+  prod.stockCount = totalStock;
+  prod.inStock = totalStock > 0;
+  if (totalStock === 0) {
+    prod.status = 'OUT_OF_STOCK';
+  } else if (totalStock <= prod.minStockAlert) {
+    prod.status = 'LOW_STOCK';
+  } else {
+    prod.status = 'IN_STOCK';
+  }
+
+  authoritativeAdminStore.logAudit({
+    adminId: req.admin!.id,
+    adminName: req.admin!.name,
+    adminRole: req.admin!.role,
+    action: 'INVENTORY_SELLER_STOCK_ADJUSTED',
+    targetEntity: 'ProductSellerStock',
+    targetId: `${prod.sku}:${sellerId}`,
+    details: `Adjusted SKU ${prod.sku} (${prod.name}) stock for seller ${sellerEntry.sellerName} (${sellerEntry.cityName}) from ${oldStock} -> ${newStockCount} units. Reason: ${reason || 'Store physical cycle count'}`,
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  res.json({
+    success: true,
+    product: {
+      ...prod,
+      stockCount: totalStock,
+      sellerCount: prod.sellers.length,
+      status: prod.status,
+    },
   });
 });
 
@@ -2374,12 +2457,19 @@ adminRouter.post('/inventory/:id/adjust-stock', requirePermission('inventory.edi
     return res.status(400).json({ success: false, error: 'INVALID_STOCK_COUNT' });
   }
 
-  const prod = authoritativeAdminStore.products.find((p) => p.id === req.params.id);
+  const prod = authoritativeAdminStore.products.find((p) => p.id === req.params.id || p.sku === req.params.id);
   if (!prod) return res.status(404).json({ success: false, error: 'PRODUCT_NOT_FOUND' });
 
   const oldStock = prod.stockCount;
   prod.stockCount = newStockCount;
   prod.inStock = newStockCount > 0;
+  if (newStockCount === 0) {
+    prod.status = 'OUT_OF_STOCK';
+  } else if (newStockCount <= prod.minStockAlert) {
+    prod.status = 'LOW_STOCK';
+  } else {
+    prod.status = 'IN_STOCK';
+  }
 
   authoritativeAdminStore.logAudit({
     adminId: req.admin!.id,
@@ -2388,7 +2478,7 @@ adminRouter.post('/inventory/:id/adjust-stock', requirePermission('inventory.edi
     action: 'INVENTORY_STOCK_ADJUSTED',
     targetEntity: 'Product',
     targetId: prod.id,
-    details: `Adjusted ${prod.name} from ${oldStock} -> ${newStockCount} units. Reason: ${reason || 'Physical cycle count'}`,
+    details: `Adjusted ${prod.name} (${prod.sku}) overall from ${oldStock} -> ${newStockCount} units. Reason: ${reason || 'Physical cycle count'}`,
     ipAddress: req.ip || '127.0.0.1',
     status: 'SUCCESS',
   });

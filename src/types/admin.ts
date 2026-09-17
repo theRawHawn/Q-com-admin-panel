@@ -774,11 +774,27 @@ export interface AdminCustomer {
   lastActive: string;
 }
 
+export interface ProductSellerStock {
+  sellerId: string;
+  sellerName: string;
+  cityId: string;
+  cityName: string;
+  areaName: string;
+  isStoreOnline: boolean;
+  stockCount: number;
+  price: number;
+  mrp: number;
+  minStockAlert: number;
+  lastRestockedAt?: string;
+  sellerContact?: string;
+}
+
 export interface AdminProduct {
   id: string;
+  sku: string;
   name: string;
   category: string;
-  subcategory: string;
+  subcategory?: string;
   brand: string;
   price: number;
   mrp: number;
@@ -788,10 +804,13 @@ export interface AdminProduct {
   hsnCode: string;
   gstRatePercent: number;
   inStock: boolean;
+  status: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK';
+  sellers?: ProductSellerStock[];
+  sellerCount?: number;
   cityId?: string;
-  sellerId: string;
-  sellerName: string;
-  rating: number;
+  sellerId?: string;
+  sellerName?: string;
+  rating?: number;
   image?: string;
 }
 
