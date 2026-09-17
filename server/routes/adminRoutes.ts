@@ -2533,6 +2533,114 @@ adminRouter.post('/inventory/:id/adjust-stock', requirePermission('inventory.edi
   res.json({ success: true, product: prod });
 });
 
+// Master Catalog: Add New Master Product / SKU
+adminRouter.post('/catalog/products', requirePermission('inventory.view'), (req: AuthenticatedRequest, res: Response) => {
+  const { name, sku, category, subcategory, brand, hsnCode, gstRatePercent, mrp, unit, price, image } = req.body;
+  
+  if (!name || !sku || !category || !brand || !hsnCode) {
+    return res.status(400).json({ success: false, error: 'MISSING_REQUIRED_FIELDS', message: 'Name, SKU, Category, Brand, and HSN Code are required.' });
+  }
+
+  // Check for duplicate SKU
+  const existing = authoritativeAdminStore.products.find((p) => p.sku?.toUpperCase() === sku.toUpperCase());
+  if (existing) {
+    return res.status(409).json({ success: false, error: 'DUPLICATE_SKU', message: `SKU "${sku}" already exists in the Master Catalog.` });
+  }
+
+  const newId = `prod-cat-${Date.now()}`;
+  const newProduct: any = {
+    id: newId,
+    sku: sku.trim().toUpperCase(),
+    name: name.trim(),
+    category: category.trim(),
+    subcategory: subcategory?.trim() || '',
+    brand: brand.trim(),
+    price: Number(price) || Number(mrp) || 100,
+    mrp: Number(mrp) || Number(price) || 100,
+    unit: unit?.trim() || 'Piece',
+    stockCount: 0,
+    minStockAlert: 10,
+    hsnCode: hsnCode.trim(),
+    gstRatePercent: Number(gstRatePercent) || 18,
+    image: image?.trim() || '',
+    inStock: false,
+    status: 'OUT_OF_STOCK',
+    rating: 5.0,
+    sellers: [],
+  };
+
+  authoritativeAdminStore.products.unshift(newProduct);
+
+  authoritativeAdminStore.logAudit({
+    adminId: req.admin!.id,
+    adminName: req.admin!.name,
+    adminRole: req.admin!.role,
+    action: 'CATALOG_PRODUCT_CREATED',
+    targetEntity: 'MasterProduct',
+    targetId: newId,
+    details: `Added new Master Product SKU "${newProduct.sku}" (${newProduct.name}) under ${newProduct.category}. HSN: ${newProduct.hsnCode}, GST: ${newProduct.gstRatePercent}%.`,
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  res.status(201).json({ success: true, product: newProduct, message: `Product "${newProduct.name}" added to Master Catalog.` });
+});
+
+// Master Catalog: Edit / Override Master SKU Details
+adminRouter.put('/catalog/products/:id', requirePermission('inventory.view'), (req: AuthenticatedRequest, res: Response) => {
+  const prod = authoritativeAdminStore.products.find((p) => p.id === req.params.id || p.sku === req.params.id);
+  if (!prod) return res.status(404).json({ success: false, error: 'PRODUCT_NOT_FOUND' });
+
+  const { name, category, subcategory, brand, hsnCode, gstRatePercent, mrp, unit, price, image } = req.body;
+
+  if (name) prod.name = name.trim();
+  if (category) prod.category = category.trim();
+  if (subcategory !== undefined) prod.subcategory = subcategory.trim();
+  if (brand) prod.brand = brand.trim();
+  if (hsnCode) prod.hsnCode = hsnCode.trim();
+  if (gstRatePercent !== undefined) prod.gstRatePercent = Number(gstRatePercent);
+  if (mrp !== undefined) prod.mrp = Number(mrp);
+  if (unit) prod.unit = unit.trim();
+  if (price !== undefined) prod.price = Number(price);
+  if (image !== undefined) prod.image = image.trim();
+
+  authoritativeAdminStore.logAudit({
+    adminId: req.admin!.id,
+    adminName: req.admin!.name,
+    adminRole: req.admin!.role,
+    action: 'CATALOG_PRODUCT_UPDATED',
+    targetEntity: 'MasterProduct',
+    targetId: prod.id,
+    details: `Overrode Master Catalog details for SKU ${prod.sku} (${prod.name}).`,
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  res.json({ success: true, product: prod, message: `Master Catalog SKU ${prod.sku} updated successfully.` });
+});
+
+// Master Catalog: Delete / Archive SKU
+adminRouter.delete('/catalog/products/:id', requirePermission('inventory.view'), (req: AuthenticatedRequest, res: Response) => {
+  const idx = authoritativeAdminStore.products.findIndex((p) => p.id === req.params.id || p.sku === req.params.id);
+  if (idx === -1) return res.status(404).json({ success: false, error: 'PRODUCT_NOT_FOUND' });
+
+  const removed = authoritativeAdminStore.products.splice(idx, 1)[0];
+
+  authoritativeAdminStore.logAudit({
+    adminId: req.admin!.id,
+    adminName: req.admin!.name,
+    adminRole: req.admin!.role,
+    action: 'CATALOG_PRODUCT_DELETED',
+    targetEntity: 'MasterProduct',
+    targetId: removed.id,
+    details: `Removed SKU ${removed.sku} (${removed.name}) from Master Catalog.`,
+    ipAddress: req.ip || '127.0.0.1',
+    status: 'SUCCESS',
+  });
+
+  res.json({ success: true, message: `SKU ${removed.sku} removed from Master Catalog.` });
+});
+
 // 18. Refunds Desk
 adminRouter.get('/refunds', requirePermission('refunds.view'), (req: AuthenticatedRequest, res: Response) => {
   const allRefunds = authoritativeAdminStore.refunds;

@@ -49,7 +49,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { id: 'sellers', label: 'Partner Stores', icon: Store, requiredPermission: 'sellers.view', group: 'Supply & Fleet' },
   { id: 'riders', label: 'Riders & Fleet', icon: Bike, requiredPermission: 'riders.view', group: 'Supply & Fleet' },
   { id: 'customers', label: 'Customers', icon: Users, requiredPermission: 'customers.view', group: 'Supply & Fleet' },
-  { id: 'inventory', label: 'Inventory & SKUs', icon: Package, requiredPermission: 'inventory.view', group: 'Supply & Fleet' },
+  { id: 'inventory', label: 'Master Catalog', icon: Package, requiredPermission: 'inventory.view', group: 'Supply & Fleet' },
 
   // 4. Finance & Growth
   { id: 'payments', label: 'Payments & Ledger', icon: CreditCard, requiredPermission: 'payments.view', group: 'Finance' },

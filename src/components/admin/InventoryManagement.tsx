@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Package,
   Search,
@@ -23,6 +23,8 @@ import {
   Download,
   Info,
   Layers,
+  Upload,
+  Image as ImageIcon,
   Phone,
   AlertCircle
 } from 'lucide-react';
@@ -52,6 +54,23 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
   const [sellerModalCityFilter, setSellerModalCityFilter] = useState<string>('ALL');
   const [sellerModalSearch, setSellerModalSearch] = useState<string>('');
   const [sellerModalStatusFilter, setSellerModalStatusFilter] = useState<string>('ALL');
+
+  // Master Catalog Add/Edit Modal states
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
+  const [editingMasterSku, setEditingMasterSku] = useState<AdminProduct | null>(null);
+  const [skuForm, setSkuForm] = useState({
+    sku: '',
+    name: '',
+    brand: '',
+    category: 'Electrical & Switchgear',
+    subcategory: '',
+    hsnCode: '',
+    gstRatePercent: 18,
+    mrp: 100,
+    unit: 'Piece',
+    image: '',
+  });
 
   // Adjust stock states
   const [adjustingSeller, setAdjustingSeller] = useState<{ product: AdminProduct; seller: ProductSellerStock } | null>(null);
@@ -110,6 +129,93 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
   useEffect(() => {
     fetchInventory();
   }, [selectedCity]);
+
+  const openAddMasterSkuModal = () => {
+    setEditingMasterSku(null);
+    setSkuForm({
+      sku: `SKU-${Date.now().toString().slice(-6)}`,
+      name: '',
+      brand: '',
+      category: 'Electrical & Switchgear',
+      subcategory: '',
+      hsnCode: '',
+      gstRatePercent: 18,
+      mrp: 100,
+      unit: 'Piece',
+      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=300&auto=format&fit=crop&q=80',
+    });
+    setIsCatalogModalOpen(true);
+  };
+
+  const openEditMasterSkuModal = (product: AdminProduct) => {
+    setEditingMasterSku(product);
+    setSkuForm({
+      sku: product.sku || product.id,
+      name: product.name,
+      brand: product.brand,
+      category: product.category,
+      subcategory: product.subcategory || '',
+      hsnCode: product.hsnCode || '',
+      gstRatePercent: product.gstRatePercent || 18,
+      mrp: product.mrp || product.price || 100,
+      unit: product.unit || 'Piece',
+      image: product.image || 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=300&auto=format&fit=crop&q=80',
+    });
+    setIsCatalogModalOpen(true);
+  };
+
+  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size exceeds 5MB limit.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSkuForm((prev) => ({ ...prev, image: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveMasterSku = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!skuForm.sku.trim() || !skuForm.name.trim() || !skuForm.brand.trim() || !skuForm.hsnCode.trim()) {
+      alert('Please fill in all required fields (SKU, Name, Brand, HSN Code).');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      if (editingMasterSku) {
+        // Edit existing SKU in Master Catalog
+        const res: any = await adminApi.put(`/api/admin/catalog/products/${editingMasterSku.id}`, skuForm);
+        if (res.success) {
+          showToast(`SKU ${skuForm.sku} updated in Master Catalog.`);
+          setIsCatalogModalOpen(false);
+          await fetchInventory();
+        } else {
+          alert(res.message || 'Failed to update Master SKU.');
+        }
+      } else {
+        // Add new SKU to Master Catalog
+        const res: any = await adminApi.post('/api/admin/catalog/products', skuForm);
+        if (res.success) {
+          showToast(`New Master Product "${skuForm.name}" added to Catalog.`);
+          setIsCatalogModalOpen(false);
+          await fetchInventory();
+        } else {
+          alert(res.message || 'Failed to add Master SKU.');
+        }
+      }
+    } catch (err: any) {
+      console.error('Error saving Master SKU:', err);
+      alert(err.message || 'Server error while saving Master SKU.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Handle single seller stock & price adjustment
   const handleAdjustSellerStock = async () => {
@@ -366,11 +472,20 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <span>SKU Inventory & Multi-Seller Stock</span>
+            <span>Master Catalog</span>
           </h1>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={openAddMasterSkuModal}
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors shadow-xs"
+            title="Add a new master SKU / Model No. to the catalog"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Add SKU to Catalog</span>
+          </button>
+
           <button
             onClick={handleExportCsv}
             className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200/80 transition-colors shadow-xs"
@@ -385,7 +500,7 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
             className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200/80 transition-colors shadow-xs"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
-            <span>Sync Stock</span>
+            <span>Sync Catalog</span>
           </button>
         </div>
       </div>
@@ -499,13 +614,28 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
 
                       {/* 2. Product Details */}
                       <td className="px-4 py-3.5 align-middle">
-                        <div className="font-semibold text-slate-900 text-xs leading-snug group-hover:text-emerald-950 transition-colors">
-                          {p.name}
-                        </div>
-                        <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-500">
-                          <span className="font-normal text-slate-600">Brand: <strong className="font-semibold text-slate-800">{p.brand}</strong></span>
-                          <span className="text-slate-300">•</span>
-                          <span className="truncate text-slate-400">{p.category}{p.subcategory ? ` › ${p.subcategory}` : ''}</span>
+                        <div className="flex items-center gap-2.5">
+                          {p.image ? (
+                            <img
+                              src={p.image}
+                              alt={p.name}
+                              className="w-9 h-9 object-contain rounded-md border border-slate-200 bg-white shrink-0 p-0.5 shadow-2xs"
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-md border border-slate-200 bg-slate-100 flex items-center justify-center shrink-0">
+                              <Package className="h-4 w-4 text-slate-400" />
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-semibold text-slate-900 text-xs leading-snug group-hover:text-emerald-950 transition-colors">
+                              {p.name}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-slate-500">
+                              <span className="font-normal text-slate-600">Brand: <strong className="font-semibold text-slate-800">{p.brand}</strong></span>
+                              <span className="text-slate-300">•</span>
+                              <span className="truncate text-slate-400">{p.category}{p.subcategory ? ` › ${p.subcategory}` : ''}</span>
+                            </div>
+                          </div>
                         </div>
                       </td>
 
@@ -592,14 +722,9 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                           </button>
 
                           <button
-                            onClick={() => {
-                              setAdjustingProductGeneral(p);
-                              setNewStockQty(p.stockCount);
-                              setRestockReason('');
-                            }}
-                            disabled={!canEditStock}
-                            className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 disabled:opacity-40 p-1.5 rounded-md text-xs transition-colors"
-                            title="Adjust total stock audit count"
+                            onClick={() => openEditMasterSkuModal(p)}
+                            className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 p-1.5 rounded-md text-xs transition-colors"
+                            title="Edit / Override Master SKU details"
                           >
                             <Edit2 className="h-3.5 w-3.5 text-slate-400" />
                           </button>
@@ -620,38 +745,52 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
           <div className="bg-white border border-slate-200/90 rounded-2xl w-full max-w-6xl shadow-2xl flex flex-col max-h-[88vh] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
             <div className="p-5 sm:p-6 bg-slate-50/90 border-b border-slate-200/80 flex items-start justify-between gap-4">
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-1 rounded-md shadow-2xs">
-                    {selectedSkuForSellers.sku || selectedSkuForSellers.id}
-                  </span>
-                  <span className="text-xs font-semibold text-slate-700 bg-slate-200/80 px-2.5 py-1 rounded-md">
-                    {selectedSkuForSellers.category}
-                  </span>
-                  <span className="text-xs font-medium text-slate-500">
-                    HSN {selectedSkuForSellers.hsnCode} • {selectedSkuForSellers.gstRatePercent}% GST
-                  </span>
-                </div>
-                
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-                  {selectedSkuForSellers.name}
-                </h2>
-                
-                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
-                  <span>Brand: <strong className="text-slate-900">{selectedSkuForSellers.brand}</strong></span>
-                  <span className="text-slate-300">•</span>
-                  <div className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200/90 text-slate-800 px-2.5 py-0.5 rounded-md font-semibold text-xs">
-                    <span>Price Range:</span>
-                    <strong className="text-slate-950 font-bold">
-                      {modalStats.minPrice !== modalStats.maxPrice
-                        ? `₹${modalStats.minPrice.toLocaleString('en-IN')} – ₹${modalStats.maxPrice.toLocaleString('en-IN')}`
-                        : `₹${modalStats.minPrice.toLocaleString('en-IN')}`}
-                    </strong>
+              <div className="flex items-start gap-4">
+                {selectedSkuForSellers.image ? (
+                  <img
+                    src={selectedSkuForSellers.image}
+                    alt={selectedSkuForSellers.name}
+                    className="w-16 h-16 object-contain rounded-xl border border-slate-200 bg-white p-1 shrink-0 shadow-xs"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-xl border border-slate-200 bg-slate-100 flex items-center justify-center shrink-0">
+                    <Package className="h-8 w-8 text-slate-400" />
                   </div>
-                  <span className="text-slate-300">•</span>
-                  <span className="text-slate-500 font-medium">
-                    Catalog MRP: <strong className="text-slate-700 font-bold">₹{selectedSkuForSellers.mrp.toLocaleString('en-IN')}</strong>
-                  </span>
+                )}
+                
+                <div className="space-y-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-1 rounded-md shadow-2xs">
+                      {selectedSkuForSellers.sku || selectedSkuForSellers.id}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-700 bg-slate-200/80 px-2.5 py-1 rounded-md">
+                      {selectedSkuForSellers.category}
+                    </span>
+                    <span className="text-xs font-medium text-slate-500">
+                      HSN {selectedSkuForSellers.hsnCode} • {selectedSkuForSellers.gstRatePercent}% GST
+                    </span>
+                  </div>
+                  
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+                    {selectedSkuForSellers.name}
+                  </h2>
+                  
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
+                    <span>Brand: <strong className="text-slate-900">{selectedSkuForSellers.brand}</strong></span>
+                    <span className="text-slate-300">•</span>
+                    <div className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200/90 text-slate-800 px-2.5 py-0.5 rounded-md font-semibold text-xs">
+                      <span>Price Range:</span>
+                      <strong className="text-slate-950 font-bold">
+                        {modalStats.minPrice !== modalStats.maxPrice
+                          ? `₹${modalStats.minPrice.toLocaleString('en-IN')} – ₹${modalStats.maxPrice.toLocaleString('en-IN')}`
+                          : `₹${modalStats.minPrice.toLocaleString('en-IN')}`}
+                      </strong>
+                    </div>
+                    <span className="text-slate-300">•</span>
+                    <span className="text-slate-500 font-medium">
+                      Catalog MRP: <strong className="text-slate-700 font-bold">₹{selectedSkuForSellers.mrp.toLocaleString('en-IN')}</strong>
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -1172,6 +1311,218 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                 {isSubmitting ? 'Updating...' : 'Update Overall Stock'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ADD / EDIT MASTER CATALOG SKU MODAL */}
+      {isCatalogModalOpen && (
+        <div className="fixed inset-0 z-60 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+                  <Package className="h-5 w-5 text-emerald-600" />
+                  <span>{editingMasterSku ? 'Edit / Override Master SKU' : 'Add New SKU to Master Catalog'}</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {editingMasterSku
+                    ? `Update master specifications for SKU ${editingMasterSku.sku}`
+                    : 'Add a new standardized SKU/Model No. to the platform master catalog for 3P sellers to list against.'}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsCatalogModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveMasterSku} className="space-y-3.5 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-700 font-semibold block mb-1">SKU / Model No. *</label>
+                  <input
+                    type="text"
+                    disabled={!!editingMasterSku}
+                    placeholder="e.g. SKU-ELE-3201"
+                    value={skuForm.sku}
+                    onChange={(e) => setSkuForm({ ...skuForm, sku: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs font-mono font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:opacity-60"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-slate-700 font-semibold block mb-1">Brand Name *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Schneider Electric, Polycab, Hilti"
+                    value={skuForm.brand}
+                    onChange={(e) => setSkuForm({ ...skuForm, brand: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-700 font-semibold block mb-1">Product Title / Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Schneider Electric 32A Triple Pole MCB (C-Curve 10kA)"
+                  value={skuForm.name}
+                  onChange={(e) => setSkuForm({ ...skuForm, name: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-700 font-semibold block mb-1">Main Category *</label>
+                  <select
+                    value={skuForm.category}
+                    onChange={(e) => setSkuForm({ ...skuForm, category: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  >
+                    <option value="Electrical & Switchgear">Electrical & Switchgear</option>
+                    <option value="Cables & Wiring">Cables & Wiring</option>
+                    <option value="Fasteners & Rigging">Fasteners & Rigging</option>
+                    <option value="Power Tools">Power Tools</option>
+                    <option value="Plumbing & Pipes">Plumbing & Pipes</option>
+                    <option value="Safety & PPE">Safety & PPE</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-slate-700 font-semibold block mb-1">Subcategory</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Circuit Breakers, FR Wires"
+                    value={skuForm.subcategory}
+                    onChange={(e) => setSkuForm({ ...skuForm, subcategory: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-slate-700 font-semibold block mb-1">HSN Code *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 85362030"
+                    value={skuForm.hsnCode}
+                    onChange={(e) => setSkuForm({ ...skuForm, hsnCode: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs font-mono focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-slate-700 font-semibold block mb-1">GST Rate (%) *</label>
+                  <select
+                    value={skuForm.gstRatePercent}
+                    onChange={(e) => setSkuForm({ ...skuForm, gstRatePercent: Number(e.target.value) })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  >
+                    <option value={0}>0% GST</option>
+                    <option value={5}>5% GST</option>
+                    <option value={12}>12% GST</option>
+                    <option value={18}>18% GST</option>
+                    <option value={28}>28% GST</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-slate-700 font-semibold block mb-1">MRP (₹)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="750"
+                    value={skuForm.mrp}
+                    onChange={(e) => setSkuForm({ ...skuForm, mrp: Number(e.target.value) })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs font-mono focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-700 font-semibold block mb-1">Unit Type</label>
+                <input
+                  type="text"
+                  placeholder="Piece, Box, Roll, Meter, Set, Unit"
+                  value={skuForm.unit}
+                  onChange={(e) => setSkuForm({ ...skuForm, unit: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                />
+              </div>
+
+              {/* Official Manufacturer Image Upload Section */}
+              <div className="bg-slate-50/80 border border-slate-200 rounded-xl p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-800 font-bold flex items-center gap-1.5">
+                    <ImageIcon className="h-4 w-4 text-emerald-600" />
+                    <span>Official Manufacturer Image</span>
+                  </label>
+                  <span className="text-[11px] text-slate-500 font-normal">Shown to sellers during store listing</span>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="relative w-16 h-16 rounded-lg border border-slate-200 bg-white overflow-hidden shrink-0 flex items-center justify-center group shadow-2xs">
+                    {skuForm.image ? (
+                      <img src={skuForm.image} alt="Official product visual" className="w-full h-full object-contain p-1" />
+                    ) : (
+                      <Package className="h-6 w-6 text-slate-300" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 space-y-1.5">
+                    <input
+                      type="url"
+                      placeholder="Paste official picture URL (https://...)"
+                      value={skuForm.image}
+                      onChange={(e) => setSkuForm({ ...skuForm, image: e.target.value })}
+                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 placeholder-slate-400 text-xs focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    />
+                    
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        onChange={handleImageFileUpload}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-[11px] font-semibold border border-slate-200 transition-colors shadow-2xs"
+                      >
+                        <Upload className="h-3 w-3 text-emerald-600" />
+                        <span>Upload Local Photo</span>
+                      </button>
+                      <span className="text-[10px] text-slate-400">JPG, PNG, WebP up to 5MB</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsCatalogModalOpen(false)}
+                  className="px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium rounded-lg text-xs transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {isSubmitting ? 'Saving...' : (editingMasterSku ? 'Update Master SKU' : 'Save to Master Catalog')}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
