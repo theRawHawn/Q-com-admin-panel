@@ -243,7 +243,7 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -255,7 +255,7 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             onClick={() => setShowOnboardingModal(true)}
-            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-xs transition-colors"
+            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-md text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-colors cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Onboard Store</span>
@@ -263,18 +263,18 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
 
           <button
             onClick={handleExportSellers}
-            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 px-3 py-1.5 rounded-lg text-xs font-medium shadow-xs transition-colors"
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-3 py-1.5 rounded-md text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <Download className="w-3.5 h-3.5 text-slate-400" />
             <span>Export CSV</span>
           </button>
 
           <button
             onClick={fetchSellers}
-            className="p-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-lg border border-slate-200/80 shadow-xs transition-colors"
+            className="p-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-md border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors cursor-pointer"
             title="Refresh Store List"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
           </button>
         </div>
       </div>
@@ -282,12 +282,12 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
       {/* Filter Tabs & Search Bar */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         {/* Filter Tabs */}
-        <div className="bg-slate-100 p-0.5 rounded-lg flex items-center border border-slate-200/80 text-xs overflow-x-auto scrollbar-none">
+        <div className="bg-slate-100/80 p-0.5 rounded-lg flex items-center border border-slate-200/80 text-xs overflow-x-auto scrollbar-none">
           <button
             onClick={() => setActiveTab('ACTIVE')}
-            className={`px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap cursor-pointer ${
               activeTab === 'ACTIVE'
-                ? 'bg-white text-slate-900 shadow-xs'
+                ? 'bg-white text-slate-950 font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -296,15 +296,15 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
 
           <button
             onClick={() => setActiveTab('APPLICATIONS')}
-            className={`px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'APPLICATIONS'
-                ? 'bg-white text-slate-900 shadow-xs'
+                ? 'bg-white text-slate-950 font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <span>Pending KYC</span>
             {pendingCount > 0 && (
-              <span className="bg-indigo-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+              <span className="bg-slate-900 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
                 {pendingCount}
               </span>
             )}
@@ -312,9 +312,9 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
 
           <button
             onClick={() => setActiveTab('SUSPENDED')}
-            className={`px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'SUSPENDED'
-                ? 'bg-white text-slate-900 shadow-xs'
+                ? 'bg-white text-slate-950 font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -328,9 +328,9 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
 
           <button
             onClick={() => setActiveTab('ALL')}
-            className={`px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap cursor-pointer ${
               activeTab === 'ALL'
-                ? 'bg-white text-slate-900 shadow-xs'
+                ? 'bg-white text-slate-950 font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -340,13 +340,13 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
 
         {/* Search Input */}
         <div className="relative w-full md:w-80">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
           <input
             type="text"
             placeholder="Search store name, GSTIN, owner..."
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 shadow-2xs"
+            className="w-full bg-white border border-slate-200/90 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700/10 focus:border-emerald-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all"
           />
         </div>
       </div>

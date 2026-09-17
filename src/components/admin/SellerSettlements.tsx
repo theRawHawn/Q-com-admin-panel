@@ -95,9 +95,6 @@ export const SellerSettlements: React.FC<SellerSettlementsProps> = ({
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">
             Seller Weekly Settlements
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Weekly Monday automated clearing cycles (Monday 00:00 to Sunday 23:59 order batches)
-          </p>
         </div>
 
         <div className="flex items-center gap-3">

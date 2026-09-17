@@ -2,28 +2,34 @@
 
 @layer base {
   html {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
   }
 
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color: #0f172a;
     background-color: #f8fafc;
-    letter-spacing: -0.011em;
+    letter-spacing: -0.012em;
+  }
+
+  /* Refined, high-precision tabular numbers for all metrics, currencies, and stats */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 
   /* Ensure subtitle and address text remains crisp and highly legible across all themes */
   .text-slate-400 {
-    color: #475569 !important; /* Elevate low-contrast text-slate-400 to text-slate-600 contrast for crisp legibility */
+    color: #64748b !important;
   }
 
-  /* Refined subtle scrollbar */
+  /* Ultra-refined, quiet scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
@@ -35,5 +41,11 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
   }
+
+  /* Clean interactive elements */
+  button, input, select, textarea {
+    font-feature-settings: inherit;
+  }
 }
+
 

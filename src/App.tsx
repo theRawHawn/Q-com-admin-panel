@@ -409,7 +409,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-emerald-600 selection:text-white antialiased">
       {/* Top Fixed Admin Header */}
       <AdminHeader
         currentUser={currentUser}
@@ -437,7 +437,7 @@ export default function App() {
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
-        <main className="flex-1 overflow-y-auto bg-slate-50">
+        <main className="flex-1 overflow-y-auto bg-[#f8fafc] focus:outline-none">
           {renderActiveView()}
         </main>
       </div>

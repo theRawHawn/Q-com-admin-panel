@@ -8,7 +8,6 @@ import {
   RotateCcw,
   CheckCircle2,
   RefreshCw,
-  Zap,
   Calendar,
   CalendarDays,
   Filter,
@@ -252,109 +251,65 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
   const currentPeakLabel = chartMeta?.peakLabel || 'Peak: 312 ord/hr';
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Top Header & Time Horizon Filter Bar */}
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              Overview
-              <span className="text-xs font-normal text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
-                Live Operations
-              </span>
-            </h1>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Overview</h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-auto">
             <button
               onClick={fetchMetrics}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200/80 transition-colors shadow-xs"
+              className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] active:bg-slate-100 cursor-pointer"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
+              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
               <span>Refresh</span>
             </button>
           </div>
         </div>
 
-        {/* Time Horizon Selection Bar: Daily, Weekly, Monthly, Quarterly, Annual, Custom */}
-        <div className="bg-white border border-slate-200/80 rounded-xl p-3 shadow-xs space-y-3">
+        {/* Time Horizon Selection Bar: High-precision segmented control */}
+        <div className="bg-white border border-slate-200/90 rounded-lg p-3 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-3">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-xs font-semibold text-slate-600 flex items-center gap-1.5 mr-1.5">
-                <CalendarDays className="h-3.5 w-3.5 text-emerald-600" />
-                <span>Timeframe:</span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-medium text-slate-500 mr-1 select-none">
+                Timeframe:
               </span>
 
-              <button
-                onClick={() => setTimeframe('daily')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  timeframe === 'daily'
-                    ? 'bg-emerald-600 text-white font-semibold shadow-xs'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-              >
-                Daily
-              </button>
+              {/* Segmented button group - macOS / Linear style */}
+              <div className="inline-flex p-0.5 bg-slate-100/90 border border-slate-200/70 rounded-md">
+                {(['daily', 'weekly', 'monthly', 'quarterly', 'annual'] as TimeframeType[]).map((tf) => (
+                  <button
+                    key={tf}
+                    onClick={() => setTimeframe(tf)}
+                    className={`px-3 py-1 rounded text-xs font-medium capitalize transition-all cursor-pointer ${
+                      timeframe === tf
+                        ? 'bg-white text-slate-900 font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.06)]'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {tf}
+                  </button>
+                ))}
 
-              <button
-                onClick={() => setTimeframe('weekly')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  timeframe === 'weekly'
-                    ? 'bg-emerald-600 text-white font-semibold shadow-xs'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-              >
-                Weekly
-              </button>
-
-              <button
-                onClick={() => setTimeframe('monthly')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  timeframe === 'monthly'
-                    ? 'bg-emerald-600 text-white font-semibold shadow-xs'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-              >
-                Monthly
-              </button>
-
-              <button
-                onClick={() => setTimeframe('quarterly')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  timeframe === 'quarterly'
-                    ? 'bg-emerald-600 text-white font-semibold shadow-xs'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-              >
-                Quarterly
-              </button>
-
-              <button
-                onClick={() => setTimeframe('annual')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  timeframe === 'annual'
-                    ? 'bg-emerald-600 text-white font-semibold shadow-xs'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-              >
-                Annual
-              </button>
-
-              <button
-                onClick={() => setTimeframe('custom')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  timeframe === 'custom'
-                    ? 'bg-emerald-600 text-white font-semibold shadow-xs'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-              >
-                <Calendar className="h-3 w-3" />
-                <span>Manual Date Range</span>
-              </button>
+                <button
+                  onClick={() => setTimeframe('custom')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
+                    timeframe === 'custom'
+                      ? 'bg-white text-slate-900 font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.06)]'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Calendar className="h-3 w-3 text-slate-400" />
+                  <span>Manual Date</span>
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500 bg-slate-50 border border-slate-200/80 px-2.5 py-1 rounded-md self-start lg:self-auto">
+            <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 border border-slate-200/70 px-2.5 py-1 rounded-md self-start lg:self-auto font-mono select-none">
               <span className="text-slate-400">Viewing:</span>
               <span className="font-semibold text-slate-800">{periodLabel || "Today's Metrics"}</span>
             </div>
@@ -362,31 +317,31 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
 
           {/* Manual Date Range Picker Controls */}
           {timeframe === 'custom' && (
-            <div className="pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 animate-in fade-in duration-150">
+            <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 animate-in fade-in duration-100">
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <label className="text-xs font-medium text-slate-600">From:</label>
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-medium text-slate-500">From:</label>
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="bg-slate-50 border border-slate-200 text-slate-800 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                    className="bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-700 font-mono shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
                   />
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  <label className="text-xs font-medium text-slate-600">To:</label>
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-medium text-slate-500">To:</label>
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="bg-slate-50 border border-slate-200 text-slate-800 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                    className="bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-700 font-mono shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
                   />
                 </div>
 
                 <button
                   onClick={handleApplyCustomDateRange}
-                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs px-3.5 py-1.5 rounded-lg font-medium transition-colors shadow-xs flex items-center gap-1"
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs px-3.5 py-1.5 rounded-md font-medium transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.06)] flex items-center gap-1.5 cursor-pointer"
                 >
                   <Check className="h-3.5 w-3.5" />
                   <span>Apply Range</span>
@@ -398,19 +353,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
                 <span className="text-slate-400 text-[11px] mr-1">Presets:</span>
                 <button
                   onClick={() => handleQuickPreset(7)}
-                  className="px-2 py-0.5 rounded text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                  className="px-2 py-1 rounded text-xs bg-slate-100 hover:bg-slate-200/80 text-slate-700 transition-colors cursor-pointer"
                 >
                   Last 7D
                 </button>
                 <button
                   onClick={() => handleQuickPreset(14)}
-                  className="px-2 py-0.5 rounded text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                  className="px-2 py-1 rounded text-xs bg-slate-100 hover:bg-slate-200/80 text-slate-700 transition-colors cursor-pointer"
                 >
                   Last 14D
                 </button>
                 <button
                   onClick={() => handleQuickPreset(30)}
-                  className="px-2 py-0.5 rounded text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                  className="px-2 py-1 rounded text-xs bg-slate-100 hover:bg-slate-200/80 text-slate-700 transition-colors cursor-pointer"
                 >
                   Last 30D
                 </button>
@@ -423,147 +378,205 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
       {/* Quick Stats Component with dynamic period label */}
       <QuickStats metrics={metrics} onNavigateTab={onNavigateTab} periodLabel={periodLabel} />
 
-      {/* Actionable Alerts Row */}
+      {/* Calm Priority Indicators Row (replaces alarming badges) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <button 
           onClick={() => onNavigateTab('dispatch')}
-          className="bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl p-3.5 text-left transition-all group flex items-center justify-between shadow-xs"
+          className="bg-white border border-slate-200/90 hover:border-slate-300 rounded-lg p-3.5 text-left transition-all group flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-pointer"
         >
           <div>
-            <div className="text-xs font-medium text-rose-600 flex items-center gap-1">
-              <AlertTriangle className="h-3.5 w-3.5" />
-              Unassigned
+            <div className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-rose-500 shrink-0"></span>
+              <span>Unassigned</span>
             </div>
-            <div className="text-lg font-bold text-slate-900 mt-0.5">{alerts.ordersWithoutRider}</div>
+            <div className="text-xl font-bold text-slate-900 tracking-tight tabular-nums mt-1.5">
+              {alerts.ordersWithoutRider}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">Awaiting rider match</p>
           </div>
-          <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-700 transition-colors" />
+          <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-700 transition-colors shrink-0" />
         </button>
 
         <button 
           onClick={() => onNavigateTab('sellers')}
-          className="bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl p-3.5 text-left transition-all group flex items-center justify-between shadow-xs"
+          className="bg-white border border-slate-200/90 hover:border-slate-300 rounded-lg p-3.5 text-left transition-all group flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-pointer"
         >
           <div>
-            <div className="text-xs font-medium text-amber-600 flex items-center gap-1">
-              <Store className="h-3.5 w-3.5" />
-              Stores Offline
+            <div className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0"></span>
+              <span>Stores Offline</span>
             </div>
-            <div className="text-lg font-bold text-slate-900 mt-0.5">{alerts.sellersOffline}</div>
+            <div className="text-xl font-bold text-slate-900 tracking-tight tabular-nums mt-1.5">
+              {alerts.sellersOffline}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">Paused fulfillment</p>
           </div>
-          <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-700 transition-colors" />
+          <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-700 transition-colors shrink-0" />
         </button>
 
         <button 
           onClick={() => onNavigateTab('inventory')}
-          className="bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl p-3.5 text-left transition-all group flex items-center justify-between shadow-xs"
+          className="bg-white border border-slate-200/90 hover:border-slate-300 rounded-lg p-3.5 text-left transition-all group flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-pointer"
         >
           <div>
-            <div className="text-xs font-medium text-sky-600 flex items-center gap-1">
-              <Package className="h-3.5 w-3.5" />
-              Low Stock
+            <div className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0"></span>
+              <span>Low Stock</span>
             </div>
-            <div className="text-lg font-bold text-slate-900 mt-0.5">{alerts.lowStockAlerts}</div>
+            <div className="text-xl font-bold text-slate-900 tracking-tight tabular-nums mt-1.5">
+              {alerts.lowStockAlerts}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">Critical reorder SKUs</p>
           </div>
-          <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-700 transition-colors" />
+          <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-700 transition-colors shrink-0" />
         </button>
 
         <button 
           onClick={() => onNavigateTab('refunds')}
-          className="bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl p-3.5 text-left transition-all group flex items-center justify-between shadow-xs"
+          className="bg-white border border-slate-200/90 hover:border-slate-300 rounded-lg p-3.5 text-left transition-all group flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-pointer"
         >
           <div>
-            <div className="text-xs font-medium text-indigo-600 flex items-center gap-1">
-              <RotateCcw className="h-3.5 w-3.5" />
-              Refunds
+            <div className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-purple-500 shrink-0"></span>
+              <span>Refunds</span>
             </div>
-            <div className="text-lg font-bold text-slate-900 mt-0.5">{kpis.refundsCount}</div>
+            <div className="text-xl font-bold text-slate-900 tracking-tight tabular-nums mt-1.5">
+              {kpis.refundsCount}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">Pending settlement</p>
           </div>
-          <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-700 transition-colors" />
+          <ArrowUpRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-slate-700 transition-colors shrink-0" />
         </button>
       </div>
 
       {/* Main Charts & Live Pipeline Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Left 2 Cols: Volume Trend Chart */}
-        <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-xs space-y-4">
+        {/* Left 2 Cols: Volume Trend Chart with cleaner axes and high data-ink ratio */}
+        <div className="lg:col-span-2 bg-white border border-slate-200/90 rounded-lg p-4 sm:p-5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-900">{currentChartTitle}</h3>
-            <span className="text-xs text-slate-400 font-medium">{currentPeakLabel}</span>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 tracking-tight">{currentChartTitle}</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Order distribution by interval</p>
+            </div>
+            <span className="text-xs font-mono text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-200/80 font-medium select-none">
+              {currentPeakLabel}
+            </span>
           </div>
 
-          <div className="grid grid-flow-col auto-cols-fr gap-2.5 items-end h-32 pt-2">
+          <div className="grid grid-flow-col auto-cols-fr gap-2 sm:gap-3 items-end h-36 pt-4 border-b border-slate-100 pb-2">
             {hourlyTrend.map((h: any, i: number) => {
               const maxOrderInSet = Math.max(...hourlyTrend.map((item: any) => item.orders || 1), 1);
-              const heightPct = Math.max(12, ((h.orders || 1) / maxOrderInSet) * 100);
+              const heightPct = Math.max(10, ((h.orders || 1) / maxOrderInSet) * 100);
               return (
-                <div key={i} className="flex flex-col items-center gap-1.5 h-full justify-end group">
-                  <div className="w-full bg-slate-100 rounded-t h-24 flex items-end overflow-hidden">
+                <div key={i} className="flex flex-col items-center gap-1.5 h-full justify-end group cursor-default">
+                  <div className="w-full bg-slate-100/80 rounded-t h-28 flex items-end overflow-hidden">
                     <div
                       style={{ height: `${heightPct}%` }}
-                      className="w-full bg-slate-900 group-hover:bg-emerald-600 transition-all rounded-t"
+                      className="w-full bg-slate-800 group-hover:bg-emerald-700 transition-colors rounded-t"
                       title={`${h.hour}: ${h.orders?.toLocaleString()} orders (₹${h.gmv?.toLocaleString()})`}
                     ></div>
                   </div>
-                  <span className="text-[10px] text-slate-500 font-medium truncate max-w-full">{h.hour}</span>
+                  <span className="text-[11px] font-mono text-slate-400 group-hover:text-slate-700 transition-colors truncate max-w-full select-none">
+                    {h.hour}
+                  </span>
                 </div>
               );
             })}
           </div>
 
-          <div className="pt-3 border-t border-slate-100 grid grid-cols-3 gap-4 text-xs">
+          <div className="grid grid-cols-3 gap-4 text-xs pt-1">
             <div>
-              <span className="text-slate-400 text-[11px] block">B2B Trade Share</span>
-              <span className="font-semibold text-slate-800">{kpis.b2bPercentage}%</span>
+              <span className="text-slate-400 text-[11px] font-medium block">B2B Trade Share</span>
+              <span className="text-sm font-semibold text-slate-900 tabular-nums">{kpis.b2bPercentage}%</span>
             </div>
             <div>
-              <span className="text-slate-400 text-[11px] block">GST ITC Claimed</span>
-              <span className="font-semibold text-slate-800">₹{kpis.totalItcClaimed.toLocaleString()}</span>
+              <span className="text-slate-400 text-[11px] font-medium block">GST ITC Claimed</span>
+              <span className="text-sm font-semibold text-slate-900 tabular-nums">₹{kpis.totalItcClaimed.toLocaleString('en-IN')}</span>
             </div>
             <div>
-              <span className="text-slate-400 text-[11px] block">Cancellations</span>
-              <span className="font-semibold text-slate-800">{kpis.cancelledOrders} ({((kpis.cancelledOrders / (kpis.todayOrders || 1)) * 100).toFixed(1)}%)</span>
+              <span className="text-slate-400 text-[11px] font-medium block">Cancellations</span>
+              <span className="text-sm font-semibold text-slate-900 tabular-nums">
+                {kpis.cancelledOrders} <span className="text-xs font-normal text-slate-400">({((kpis.cancelledOrders / (kpis.todayOrders || 1)) * 100).toFixed(1)}%)</span>
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Right 1 Col: Live Pipeline */}
-        <div className="bg-white border border-slate-200/80 rounded-xl p-4 sm:p-5 shadow-xs space-y-3">
+        {/* Right 1 Col: Live Pipeline - Elegant Progress-style list with Q-Commerce Velocity Visualizer */}
+        <div className="bg-white border border-slate-200/90 rounded-lg p-4 sm:p-5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h3 className="text-sm font-semibold text-slate-900">Live Pipeline</h3>
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 tracking-tight">Live Pipeline</h3>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-semibold">Live Feed</span>
+            </div>
+          </div>
+
+          {/* Fulfillment Velocity Stepper Indicator */}
+          <div className="bg-slate-50/80 border border-slate-100 p-2 rounded-md">
+            <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-1.5">
+              <span>SLA FLOW</span>
+              <span className="text-emerald-700 font-semibold">⚡ 9.4m Avg Cycle</span>
+            </div>
+            <div className="grid grid-cols-4 gap-1 h-1.5 rounded-full overflow-hidden bg-slate-200">
+              <div className="bg-amber-500 rounded-full" title="Store Packing (<2.5m)"></div>
+              <div className="bg-sky-500 rounded-full" title="Rider Handshake (<1m)"></div>
+              <div className="bg-emerald-600 rounded-full" title="Last Mile (<8m)"></div>
+              <div className="bg-slate-400 rounded-full" title="Doorstep (<1m)"></div>
+            </div>
+            <div className="flex justify-between text-[9px] text-slate-400 mt-1 font-mono">
+              <span>Pack</span>
+              <span>Assign</span>
+              <span>Transit</span>
+              <span>Drop</span>
+            </div>
           </div>
 
           <div className="space-y-2">
-            <div className="p-2.5 bg-slate-50/75 rounded-lg flex items-center justify-between text-xs">
+            <div 
+              onClick={() => onNavigateTab('orders')}
+              className="p-2.5 bg-slate-50/70 border border-slate-100 rounded-md flex items-center justify-between text-xs hover:border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer group"
+            >
               <div className="flex items-center gap-2.5">
-                <Package className="h-4 w-4 text-amber-600" />
-                <span className="text-slate-700 font-medium">Preparing in Stores</span>
+                <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0"></span>
+                <span className="text-slate-700 font-medium group-hover:text-slate-950">Preparing in Stores</span>
               </div>
-              <span className="font-bold text-slate-900">{activeNow.ordersPreparing}</span>
+              <span className="text-sm font-bold text-slate-900 tabular-nums">{activeNow.ordersPreparing}</span>
             </div>
 
-            <div className="p-2.5 bg-slate-50/75 rounded-lg flex items-center justify-between text-xs">
+            <div 
+              onClick={() => onNavigateTab('dispatch')}
+              className="p-2.5 bg-slate-50/70 border border-slate-100 rounded-md flex items-center justify-between text-xs hover:border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer group"
+            >
               <div className="flex items-center gap-2.5">
-                <CheckCircle2 className="h-4 w-4 text-sky-600" />
-                <span className="text-slate-700 font-medium">Ready for Pickup</span>
+                <span className="h-2 w-2 rounded-full bg-sky-500 shrink-0"></span>
+                <span className="text-slate-700 font-medium group-hover:text-slate-950">Ready for Pickup</span>
               </div>
-              <span className="font-bold text-slate-900">{activeNow.ordersReadyForPickup}</span>
+              <span className="text-sm font-bold text-slate-900 tabular-nums">{activeNow.ordersReadyForPickup}</span>
             </div>
 
-            <div className="p-2.5 bg-slate-50/75 rounded-lg flex items-center justify-between text-xs">
+            <div 
+              onClick={() => onNavigateTab('orders')}
+              className="p-2.5 bg-slate-50/70 border border-slate-100 rounded-md flex items-center justify-between text-xs hover:border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer group"
+            >
               <div className="flex items-center gap-2.5">
-                <Bike className="h-4 w-4 text-emerald-600" />
-                <span className="text-slate-700 font-medium">Out for Delivery</span>
+                <span className="h-2 w-2 rounded-full bg-emerald-600 shrink-0"></span>
+                <span className="text-slate-700 font-medium group-hover:text-slate-950">Out for Delivery</span>
               </div>
-              <span className="font-bold text-slate-900">{activeNow.ridersDelivering}</span>
+              <span className="text-sm font-bold text-slate-900 tabular-nums">{activeNow.ridersDelivering}</span>
             </div>
 
-            <div className="p-2.5 bg-slate-50/75 rounded-lg flex items-center justify-between text-xs">
+            <div 
+              onClick={() => onNavigateTab('riders')}
+              className="p-2.5 bg-slate-50/70 border border-slate-100 rounded-md flex items-center justify-between text-xs hover:border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer group"
+            >
               <div className="flex items-center gap-2.5">
-                <Zap className="h-4 w-4 text-slate-500" />
-                <span className="text-slate-700 font-medium">Available Riders</span>
+                <span className="h-2 w-2 rounded-full bg-slate-400 shrink-0"></span>
+                <span className="text-slate-700 font-medium group-hover:text-slate-950">Available Fleet</span>
               </div>
-              <span className="font-bold text-slate-900">{activeNow.ridersOnline}</span>
+              <span className="text-sm font-bold text-slate-900 tabular-nums">{activeNow.ridersOnline}</span>
             </div>
           </div>
         </div>

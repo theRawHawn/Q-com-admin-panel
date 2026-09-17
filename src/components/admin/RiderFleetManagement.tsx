@@ -245,7 +245,7 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Top Header with City Filter Context and Master Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -256,18 +256,18 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
           {canBroadcast && (
             <button
               onClick={() => setShowBroadcastModal(true)}
-              className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 px-3 py-1.5 rounded-lg text-xs font-medium shadow-xs transition-colors"
+              className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-3 py-1.5 rounded-md text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors cursor-pointer"
             >
-              <Radio className="h-3.5 w-3.5 text-slate-500" />
+              <Radio className="h-3.5 w-3.5 text-slate-400" />
               <span>Broadcast Notice</span>
             </button>
           )}
 
           <button
             onClick={handleExportRoster}
-            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 px-3 py-1.5 rounded-lg text-xs font-medium shadow-xs transition-colors"
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-3 py-1.5 rounded-md text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors cursor-pointer"
           >
-            <Download className="h-3.5 w-3.5 text-slate-500" />
+            <Download className="h-3.5 w-3.5 text-slate-400" />
             <span>Export CSV</span>
           </button>
 
@@ -277,7 +277,7 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
                 setEditModalRider(null);
                 setIsCreatingRider(true);
               }}
-              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-xs transition-colors"
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-md text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-colors cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Onboard Partner</span>
@@ -287,28 +287,28 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
           <button
             onClick={fetchRiders}
             disabled={loading}
-            className="p-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 rounded-lg transition-colors shadow-xs"
+            className="p-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 rounded-md transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
             title="Refresh Fleet Data"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
           </button>
         </div>
       </div>
 
       {/* Top View Selector Tabs: Fleet Roster vs Pending KYC vs Financial Ledger */}
-      <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200/80 w-full sm:w-max text-xs overflow-x-auto scrollbar-none">
+      <div className="flex items-center bg-slate-100/80 p-0.5 rounded-lg border border-slate-200/80 w-full sm:w-max text-xs overflow-x-auto scrollbar-none">
         <button
           onClick={() => {
             setActiveView('roster');
             if (statusFilter === 'PENDING_APPROVAL') setStatusFilter('ALL');
           }}
-          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap ${
+          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap cursor-pointer ${
             activeView === 'roster' && statusFilter !== 'PENDING_APPROVAL'
-              ? 'bg-white text-slate-900 shadow-xs'
+              ? 'bg-white text-slate-950 font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <Bike className="h-3.5 w-3.5 text-slate-600" />
+          <Bike className="h-3.5 w-3.5 text-slate-500" />
           <span>Fleet Roster & Shifts</span>
         </button>
 
@@ -317,16 +317,16 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
             setActiveView('roster');
             setStatusFilter('PENDING_APPROVAL');
           }}
-          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap ${
+          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap cursor-pointer ${
             activeView === 'roster' && statusFilter === 'PENDING_APPROVAL'
-              ? 'bg-white text-slate-900 shadow-xs'
+              ? 'bg-white text-slate-950 font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <FileCheck className="h-3.5 w-3.5 text-slate-600" />
+          <FileCheck className="h-3.5 w-3.5 text-slate-500" />
           <span>Pending KYC</span>
           {pendingCount > 0 && (
-            <span className="bg-indigo-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+            <span className="bg-slate-900 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
               {pendingCount}
             </span>
           )}
@@ -334,13 +334,13 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
 
         <button
           onClick={() => setActiveView('ledger')}
-          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap ${
+          className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md font-medium transition-all whitespace-nowrap cursor-pointer ${
             activeView === 'ledger'
-              ? 'bg-white text-slate-900 shadow-xs'
+              ? 'bg-white text-slate-950 font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <CreditCard className="h-3.5 w-3.5 text-slate-600" />
+          <CreditCard className="h-3.5 w-3.5 text-slate-500" />
           <span>Earnings & Payouts</span>
           <span className="text-[10px] bg-slate-200/80 text-slate-700 font-medium px-1.5 py-0.2 rounded">
             ₹{(riders.reduce((s, r) => s + (r.todayEarnings || 0), 0)).toLocaleString('en-IN')}
@@ -386,21 +386,21 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
                 <button
                   key={tab.key}
                   onClick={() => setStatusFilter(tab.key)}
-                  className={`p-3 rounded-xl border text-left transition-all shadow-xs ${
+                  className={`p-3.5 rounded-lg border text-left transition-all cursor-pointer ${
                     isSelected
-                      ? 'border-slate-900 bg-slate-900 text-white'
-                      : 'bg-white border-slate-200/80 hover:border-slate-300 text-slate-800'
+                      ? 'border-slate-900 bg-slate-900 text-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]'
+                      : 'bg-white border-slate-200/90 hover:border-slate-300 text-slate-800 shadow-[0_1px_2px_rgba(0,0,0,0.02)]'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className={`text-[11px] font-medium ${isSelected ? 'text-white/80' : 'text-slate-500'}`}>
+                    <span className={`text-xs font-medium ${isSelected ? 'text-white/80' : 'text-slate-500'}`}>
                       {tab.label}
                     </span>
                     {tab.badge && !isSelected && (
                       <span className={`h-1.5 w-1.5 rounded-full ${tab.badge}`} />
                     )}
                   </div>
-                  <div className="text-lg font-bold mt-1 tracking-tight">
+                  <div className="text-xl font-bold mt-1.5 tracking-tight tabular-nums">
                     {tab.value}
                   </div>
                 </button>
@@ -409,7 +409,7 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
           </div>
 
           {/* Filter and Search Bar */}
-          <div className="bg-white border border-slate-200/80 rounded-xl p-3 shadow-xs flex flex-col md:flex-row items-center justify-between gap-2.5">
+          <div className="bg-white border border-slate-200/90 rounded-lg p-3 shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex flex-col md:flex-row items-center justify-between gap-2.5">
             {/* Left Side: Vehicle Filter & Quick info */}
             <div className="flex items-center gap-2.5 w-full md:w-auto">
               <div className="flex items-center gap-1.5">
@@ -417,7 +417,7 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
                 <select
                   value={vehicleTypeFilter}
                   onChange={(e) => setVehicleTypeFilter(e.target.value)}
-                  className="bg-slate-50/75 border border-slate-200/80 rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  className="bg-slate-50 border border-slate-200/90 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-700 cursor-pointer"
                 >
                   <option value="ALL">All Vehicles</option>
                   <option value="EV_SCOOTER">⚡ EV 2-Wheeler</option>
@@ -428,28 +428,28 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
               </div>
 
               <span className="text-xs text-slate-400 hidden sm:inline">
-                <strong className="text-slate-700 font-medium">{filteredRiders.length}</strong> partners
+                <strong className="text-slate-700 font-semibold">{filteredRiders.length}</strong> partners
               </span>
             </div>
 
             {/* Right Side: Search Input & View Switch */}
             <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
               <div className="relative flex-1 md:w-72">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Search by name, phone, plate, or hub..."
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  className="w-full bg-slate-50/75 border border-slate-200/80 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  className="w-full bg-slate-50/80 border border-slate-200/90 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/10 focus:border-emerald-700 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
                 />
               </div>
 
-              <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200/80">
+              <div className="flex items-center bg-slate-100/80 p-0.5 rounded-md border border-slate-200/80">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-1.5 rounded-md transition-colors ${
-                    viewMode === 'grid' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                  className={`p-1.5 rounded transition-all cursor-pointer ${
+                    viewMode === 'grid' ? 'bg-white text-slate-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)] font-medium' : 'text-slate-500 hover:text-slate-800'
                   }`}
                   title="Grid View"
                 >
@@ -457,8 +457,8 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
                 </button>
                 <button
                   onClick={() => setViewMode('table')}
-                  className={`p-1.5 rounded-md transition-colors ${
-                    viewMode === 'table' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                  className={`p-1.5 rounded transition-all cursor-pointer ${
+                    viewMode === 'table' ? 'bg-white text-slate-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)] font-medium' : 'text-slate-500 hover:text-slate-800'
                   }`}
                   title="Table View"
                 >

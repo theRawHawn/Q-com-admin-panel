@@ -131,68 +131,70 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
   const activeCityObj = cities.find((c) => c.id === selectedCity);
 
   return (
-    <header className="bg-white border-b border-slate-200 text-slate-900 px-3 sm:px-5 py-2.5 sticky top-0 z-40 flex items-center justify-between">
+    <header className="bg-white border-b border-slate-200/80 text-slate-900 px-4 sm:px-6 h-14 sticky top-0 z-40 flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
       {/* Brand & Market Scope */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-3">
         {onToggleMobileSidebar && (
           <button
             onClick={onToggleMobileSidebar}
-            className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg md:hidden transition-colors"
-            title="Open Menu"
+            className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md md:hidden transition-colors"
+            title="Open Navigation"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-4.5 w-4.5" />
           </button>
         )}
 
         <div 
           onClick={() => onNavigateToTab('dashboard')} 
-          className="flex items-center gap-2 sm:gap-2.5 cursor-pointer hover:opacity-90 transition-opacity"
+          className="flex items-center gap-2.5 cursor-pointer group select-none"
           title="Go to Dashboard"
         >
-          <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-xs sm:text-sm shadow-xs">
+          <div className="h-7 w-7 rounded-md bg-emerald-800 flex items-center justify-center font-bold text-white text-xs tracking-wider shadow-[0_1px_2px_rgba(6,95,70,0.3)] transition-transform group-hover:scale-[1.02]">
             QC
           </div>
-          <div className="hidden xs:block">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-bold tracking-tight text-slate-900 text-xs sm:text-sm">QuickBuild</span>
-              <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 hidden sm:inline">Admin</span>
-            </div>
+          <div className="hidden xs:flex items-center gap-2">
+            <span className="font-bold tracking-tight text-slate-900 text-sm">QuickBuild</span>
+            <span className="text-[10px] font-semibold text-slate-500 bg-slate-100/90 border border-slate-200/70 px-1.5 py-0.5 rounded tracking-normal">
+              Admin
+            </span>
           </div>
         </div>
 
-        {/* Territory Selector */}
+        {/* Territory Selector - High precision, subtle control */}
         <div className="relative ml-2">
           <button
             onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-            className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/70 px-2.5 py-1 rounded-lg transition-colors text-xs font-medium text-slate-700"
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200/90 hover:border-slate-300 px-2.5 py-1.5 rounded-md transition-all text-xs font-medium text-slate-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)] active:bg-slate-100"
           >
-            <MapPin className="h-3 w-3 text-emerald-600" />
-            <span className="max-w-[120px] truncate">
-              {selectedCity === 'all' ? 'All Hubs' : activeCityObj?.name || selectedCity}
+            <MapPin className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
+            <span className="max-w-[130px] truncate text-slate-800 font-medium">
+              {selectedCity === 'all' ? 'All Hubs (National)' : activeCityObj?.name || selectedCity}
             </span>
-            <ChevronDown className="h-3 w-3 text-slate-400" />
+            <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform duration-150 ${isCityDropdownOpen ? 'rotate-180 text-slate-600' : ''}`} />
           </button>
 
           {isCityDropdownOpen && (
-            <div className="absolute left-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-1.5 animate-in fade-in">
-              <div className="px-2.5 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="absolute left-0 mt-1.5 w-64 bg-white border border-slate-200 rounded-lg shadow-[0_8px_30px_rgb(0,0,0,0.08)] z-50 p-1.5 animate-in fade-in duration-100">
+              <div className="px-2.5 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
                 Select City Hub
               </div>
-              <div className="py-1 max-h-60 overflow-y-auto space-y-0.5">
+              <div className="py-0.5 max-h-60 overflow-y-auto space-y-0.5">
                 <button
                   onClick={() => {
                     onSelectCity('all');
                     setIsCityDropdownOpen(false);
                   }}
-                  className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs transition-colors ${
-                    selectedCity === 'all' ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'hover:bg-slate-50 text-slate-700'
+                  className={`w-full text-left px-2.5 py-1.5 rounded-md flex items-center justify-between text-xs transition-colors ${
+                    selectedCity === 'all' 
+                      ? 'bg-emerald-50/80 text-emerald-900 font-semibold' 
+                      : 'hover:bg-slate-50 text-slate-700'
                   }`}
                 >
                   <span className="flex items-center gap-2">
-                    <Globe2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <Globe2 className="h-3.5 w-3.5 text-emerald-700" />
                     All India (National)
                   </span>
-                  {selectedCity === 'all' && <Check className="h-3.5 w-3.5 text-emerald-600" />}
+                  {selectedCity === 'all' && <Check className="h-3.5 w-3.5 text-emerald-700" />}
                 </button>
 
                 {cities.map((city) => {
@@ -204,15 +206,17 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
                         onSelectCity(city.id);
                         setIsCityDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs transition-colors ${
-                        isSelected ? 'bg-emerald-50 text-emerald-700 font-semibold' : 'hover:bg-slate-50 text-slate-700'
+                      className={`w-full text-left px-2.5 py-1.5 rounded-md flex items-center justify-between text-xs transition-colors ${
+                        isSelected 
+                          ? 'bg-emerald-50/80 text-emerald-900 font-semibold' 
+                          : 'hover:bg-slate-50 text-slate-700'
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <Building2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                         <span className="truncate">{city.name}</span>
                       </div>
-                      {isSelected && <Check className="h-3.5 w-3.5 text-emerald-600" />}
+                      {isSelected && <Check className="h-3.5 w-3.5 text-emerald-700" />}
                     </button>
                   );
                 })}
@@ -222,10 +226,10 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         </div>
       </div>
 
-      {/* Global Quick Search Bar */}
+      {/* Global Quick Search Bar - Linear / Stripe input aesthetic */}
       <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md mx-6 hidden md:block">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
           <input
             type="text"
             placeholder={getSearchPlaceholder(activeTab)}
@@ -234,7 +238,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
               setSearchVal(e.target.value);
               onSearch(e.target.value);
             }}
-            className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-8 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white transition-all"
+            className="w-full bg-slate-50/80 border border-slate-200/90 rounded-md pl-9 pr-14 py-1.5 text-xs text-slate-900 placeholder-slate-400/90 focus:outline-none focus:ring-2 focus:ring-emerald-600/10 focus:border-emerald-700 focus:bg-white transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
           />
           {searchVal && (
             <button
@@ -243,7 +247,8 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
                 setSearchVal('');
                 onSearch('');
               }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 cursor-pointer"
+              title="Clear search"
             >
               <X className="h-3 w-3" />
             </button>
@@ -252,54 +257,81 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
       </form>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-3">
-        {/* Time */}
-        <div className="hidden lg:flex items-center gap-1.5 text-slate-500 text-xs font-mono">
-          <Clock className="h-3.5 w-3.5 text-slate-400" />
+      <div className="flex items-center gap-2.5 sm:gap-3.5">
+        {/* Live Clock */}
+        <div className="hidden lg:flex items-center gap-1.5 text-slate-500 text-xs font-mono tabular-nums select-none">
+          <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
           <span>{currentTime || '08:45 AM'}</span>
         </div>
 
-        {/* Alerts Bell */}
+        <div className="hidden lg:block h-3.5 w-px bg-slate-200/80" />
+
+        {/* Alerts Bell - Quieter, refined indicator */}
         <div className="relative">
           <button
             onClick={() => setIsAlertDropdownOpen(!isAlertDropdownOpen)}
-            className="relative p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
-            title="Alerts"
+            className="relative p-1.5 rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+            title={`Alerts (${activeAlertsCount})`}
           >
             <Bell className="h-4 w-4" />
             {activeAlertsCount > 0 && (
-              <span className="absolute top-0.5 right-0.5 bg-rose-500 text-white font-bold text-[9px] h-3.5 w-3.5 rounded-full flex items-center justify-center">
-                {activeAlertsCount}
+              <span className="absolute top-1 right-1 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-700"></span>
               </span>
             )}
           </button>
 
           {isAlertDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-2 animate-in fade-in">
+            <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-lg shadow-[0_8px_30px_rgb(0,0,0,0.08)] z-50 p-2 animate-in fade-in duration-100">
               <div className="px-2.5 py-1.5 flex items-center justify-between border-b border-slate-100">
-                <span className="text-xs font-bold text-slate-900">Alerts ({activeAlertsCount})</span>
+                <span className="text-xs font-semibold text-slate-900">Priority Operational Alerts</span>
+                <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-medium">
+                  {activeAlertsCount} active
+                </span>
               </div>
-              <div className="divide-y divide-slate-100 py-1 max-h-60 overflow-y-auto">
+              <div className="divide-y divide-slate-100/80 py-1 max-h-64 overflow-y-auto">
                 <div 
                   onClick={() => { onNavigateToTab('dispatch'); setIsAlertDropdownOpen(false); }}
-                  className="p-2 hover:bg-slate-50 cursor-pointer rounded-lg transition-colors"
+                  className="p-2.5 hover:bg-slate-50/90 cursor-pointer rounded-md transition-colors group"
                 >
-                  <div className="text-xs font-semibold text-rose-600">7 Orders Pending Dispatch</div>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Orders packed and waiting for rider assignment.</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-900 group-hover:text-emerald-800">
+                      7 Orders Pending Dispatch
+                    </span>
+                    <span className="text-[10px] font-medium text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/60">
+                      Dispatch
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1">Orders packed and waiting for rider assignment in busy hubs.</p>
                 </div>
                 <div 
                   onClick={() => { onNavigateToTab('sellers'); setIsAlertDropdownOpen(false); }}
-                  className="p-2 hover:bg-slate-50 cursor-pointer rounded-lg transition-colors"
+                  className="p-2.5 hover:bg-slate-50/90 cursor-pointer rounded-md transition-colors group"
                 >
-                  <div className="text-xs font-semibold text-amber-600">Partner Stores Offline</div>
-                  <p className="text-[11px] text-slate-500 mt-0.5">2 stores temporarily paused fulfillment.</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-900 group-hover:text-emerald-800">
+                      2 Partner Stores Offline
+                    </span>
+                    <span className="text-[10px] font-medium text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                      Stores
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1">Merchants temporarily paused fulfillment during standard hours.</p>
                 </div>
                 <div 
                   onClick={() => { onNavigateToTab('inventory'); setIsAlertDropdownOpen(false); }}
-                  className="p-2 hover:bg-slate-50 cursor-pointer rounded-lg transition-colors"
+                  className="p-2.5 hover:bg-slate-50/90 cursor-pointer rounded-md transition-colors group"
                 >
-                  <div className="text-xs font-semibold text-sky-600">Low Stock SKUs</div>
-                  <p className="text-[11px] text-slate-500 mt-0.5">5 high-velocity items need replenishment.</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-900 group-hover:text-emerald-800">
+                      Low Stock SKUs
+                    </span>
+                    <span className="text-[10px] font-medium text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/60">
+                      Inventory
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1">5 high-velocity items need rapid stock replenishment.</p>
                 </div>
               </div>
             </div>
@@ -310,38 +342,38 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         <div className="relative" ref={userMenuRef}>
           <button
             onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-            className="p-0.5 rounded-full hover:ring-2 hover:ring-emerald-500/80 transition-all cursor-pointer focus:outline-none"
+            className="p-0.5 rounded-full hover:ring-2 hover:ring-emerald-700/20 transition-all cursor-pointer focus:outline-none flex items-center"
             title={`${currentUser.name} (${currentUser.roleTitle || currentUser.role})`}
           >
             <img
               src={currentUser.avatar}
               alt={currentUser.name}
-              className="h-8 w-8 rounded-full object-cover border border-slate-200/90 shadow-2xs"
+              className="h-7 w-7 sm:h-8 sm:w-8 rounded-full object-cover border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
             />
           </button>
 
           {isUserDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-3 animate-in fade-in duration-150">
-              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                Logged In Admin Profile
+            <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-lg shadow-[0_8px_30px_rgb(0,0,0,0.08)] z-50 p-3 animate-in fade-in duration-100">
+              <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                Active Administrator
               </div>
 
-              <div className="flex items-center gap-3 p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+              <div className="flex items-center gap-3 p-2.5 bg-slate-50/80 border border-slate-200/80 rounded-lg">
                 <img
                   src={currentUser.avatar}
                   alt={currentUser.name}
-                  className="h-10 w-10 rounded-full object-cover border border-slate-200 shrink-0"
+                  className="h-9 w-9 rounded-full object-cover border border-slate-200 shrink-0"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-bold text-slate-900 truncate">{currentUser.name}</div>
-                  <div className="text-[11px] text-slate-500 truncate mt-0.5">{currentUser.email}</div>
-                  <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full inline-block mt-1">
-                    {currentUser.roleTitle || (currentUser.role === 'SUPER_ADMIN' ? 'Main Admin / Super Admin' : currentUser.role.replace(/_/g, ' '))}
+                  <div className="text-[11px] text-slate-500 truncate">{currentUser.email}</div>
+                  <span className="text-[10px] text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded inline-block mt-1">
+                    {currentUser.roleTitle || (currentUser.role === 'SUPER_ADMIN' ? 'Super Admin' : currentUser.role.replace(/_/g, ' '))}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-3 space-y-2 text-xs">
+              <div className="mt-3 space-y-1.5 text-xs">
                 <div className="flex items-center justify-between py-1 border-b border-slate-100">
                   <span className="text-slate-500 font-medium">Department</span>
                   <span className="font-semibold text-slate-800 text-xs">{currentUser.department}</span>
@@ -349,7 +381,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
                 <div className="flex items-center justify-between py-1">
                   <span className="text-slate-500 font-medium">Session Status</span>
                   <span className="font-semibold text-slate-700 text-xs flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
                     Active Session
                   </span>
                 </div>

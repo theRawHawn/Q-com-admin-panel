@@ -20,7 +20,7 @@ All configurable environment variables are documented in [`.env.example`](./.env
 | `ALLOWED_ORIGINS` | String | *Empty* | No | Comma-separated list of additional external domain origins allowed by CORS (e.g. `https://ops.example.com,https://admin.example.com`). |
 | `CSP_FRAME_ANCESTORS` | String | *Default below* | No | Custom Content Security Policy `frame-ancestors` directive. Default: `"frame-ancestors 'self' https://ai.studio https://*.ai.studio https://*.google.com https://*.run.app"`. |
 | `SERVICE_NAME` | String | `QCOM Marketplace Central Control API` | No | Service identity name returned by `/api/health` and recorded in security audit logs. |
-| `ACTIVE_ZONE` | String | `Bengaluru (BLR-1)` | No | Dark store fulfillment cluster identifier returned by system telemetry. |
+| `ACTIVE_ZONE` | String | `Bengaluru (BLR-1)` | No | Operations fulfillment cluster identifier returned by system telemetry. |
 
 ---
 

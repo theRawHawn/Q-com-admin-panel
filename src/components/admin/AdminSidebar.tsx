@@ -86,7 +86,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const renderSidebarContent = () => (
     <>
       {/* Navigation Groups */}
-      <div className="flex-1 overflow-y-auto px-2.5 py-3 space-y-4">
+      <div className="flex-1 overflow-y-auto px-3 py-3.5 space-y-5">
         {groups.map((grp) => {
           const isSuperAdmin = userRole === 'SUPER_ADMIN' || userPermissions.includes('*' as any);
           const itemsInGroup = SIDEBAR_ITEMS.filter((item) => {
@@ -99,7 +99,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
           return (
             <div key={grp} className="space-y-0.5">
-              <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+              <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 select-none">
                 {grp}
               </div>
               {itemsInGroup.map((item) => {
@@ -113,16 +113,16 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                       onSelectTab(item.id);
                       if (onCloseMobile) onCloseMobile();
                     }}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    className={`relative w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs transition-all text-left group ${
                       isActive
-                        ? 'bg-emerald-50 text-emerald-700 font-semibold'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-slate-100/90 text-slate-950 font-semibold before:absolute before:left-0 before:top-1 before:bottom-1 before:w-[3px] before:bg-emerald-700 before:rounded-r'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                     }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <Icon
                         className={`h-4 w-4 shrink-0 transition-colors ${
-                          isActive ? 'text-emerald-600' : 'text-slate-400'
+                          isActive ? 'text-emerald-700' : 'text-slate-400 group-hover:text-slate-600'
                         }`}
                       />
                       <span className="truncate">{item.label}</span>
@@ -136,9 +136,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       </div>
 
       {/* Role Pill Footer */}
-      <div className="p-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-        <span className="truncate">{userRole.replace('_', ' ')}</span>
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+      <div className="p-3 px-3.5 border-t border-slate-200/80 bg-slate-50/50 flex items-center justify-between text-[11px] text-slate-500 select-none">
+        <div className="flex items-center gap-2 truncate">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 shrink-0"></span>
+          <span className="truncate font-medium text-slate-700">{userRole.replace(/_/g, ' ')}</span>
+        </div>
+        <span className="text-[10px] font-mono text-slate-400 uppercase">RBAC</span>
       </div>
     </>
   );
@@ -146,7 +149,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   return (
     <>
       {/* Desktop Persistent Sidebar */}
-      <aside className="hidden md:flex w-56 bg-white border-r border-slate-200 text-slate-700 flex-col shrink-0 min-h-[calc(100vh-53px)]">
+      <aside className="hidden md:flex w-56 bg-white border-r border-slate-200/80 text-slate-700 flex-col shrink-0 min-h-[calc(100vh-56px)] select-none">
         {renderSidebarContent()}
       </aside>
 
@@ -155,22 +158,22 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         <div className="fixed inset-0 z-50 md:hidden flex">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
             onClick={onCloseMobile}
           />
 
           {/* Drawer Panel */}
-          <aside className="relative w-64 max-w-[80vw] bg-white flex flex-col h-full shadow-2xl z-10 animate-in slide-in-from-left duration-200">
-            <div className="p-3 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-xs">
+          <aside className="relative w-64 max-w-[80vw] bg-white flex flex-col h-full shadow-xl z-10 animate-in slide-in-from-left duration-200">
+            <div className="p-3.5 border-b border-slate-200/80 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="h-7 w-7 rounded-md bg-emerald-800 flex items-center justify-center font-bold text-white text-xs">
                   QC
                 </div>
                 <span className="font-bold text-slate-900 text-sm">Navigation</span>
               </div>
               <button
                 onClick={onCloseMobile}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100"
               >
                 <X className="h-4 w-4" />
               </button>

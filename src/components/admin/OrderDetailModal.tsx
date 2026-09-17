@@ -248,54 +248,54 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+    <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="bg-white border border-slate-200/90 rounded-xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-[0_20px_50px_rgba(0,0,0,0.12)] overflow-hidden animate-in fade-in zoom-in-95">
         
         {/* Modal Top Header Bar */}
-        <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-white sticky top-0 z-20">
+        <div className="px-5 py-4 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3 bg-white sticky top-0 z-20">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-xs font-mono tracking-tight shrink-0">
+            <div className="h-9 w-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-xs font-mono tracking-tight shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
               QC
             </div>
             <div>
               <div className="flex items-center flex-wrap gap-2">
-                <h2 className="text-base sm:text-lg font-bold text-slate-900 font-mono tracking-tight">
+                <h2 className="text-base font-bold text-slate-900 font-mono tracking-tight">
                   {order.orderNumber}
                 </h2>
                 
                 {/* Hold Status Flag */}
                 {order.isHold && (
-                  <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-200/80 uppercase">
-                    <PauseCircle className="h-3 w-3" />
+                  <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-md border border-amber-200/80 uppercase">
+                    <PauseCircle className="h-3 w-3 text-amber-600" />
                     ON HOLD
                   </span>
                 )}
 
                 {/* Priority Flag */}
                 {order.priority === 'CRITICAL_SITE' && (
-                  <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 text-[10px] font-bold px-2 py-0.5 rounded border border-rose-200 uppercase">
-                    <Flame className="h-3 w-3" />
+                  <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-800 text-[10px] font-semibold px-2 py-0.5 rounded-md border border-rose-200/80 uppercase">
+                    <Flame className="h-3 w-3 text-rose-600" />
                     CRITICAL SITE
                   </span>
                 )}
                 {order.priority === 'HIGH' && (
-                  <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-200 uppercase">
+                  <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-md border border-amber-200/80 uppercase">
                     HIGH PRIORITY
                   </span>
                 )}
 
-                <span className="bg-slate-100 text-slate-700 text-[10px] font-mono px-2 py-0.5 rounded uppercase border border-slate-200 font-semibold">
+                <span className="bg-slate-100 text-slate-700 text-[10px] font-mono px-2 py-0.5 rounded-md uppercase border border-slate-200/80 font-semibold">
                   {order.status.replace(/_/g, ' ')}
                 </span>
                 
                 {/* Secure OTP Status & Masked Token */}
-                <div className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-700 text-[10px] font-mono px-2 py-0.5 rounded border border-slate-200">
+                <div className="inline-flex items-center gap-1.5 bg-slate-50 text-slate-700 text-[10px] font-mono px-2 py-0.5 rounded-md border border-slate-200/80">
                   <Key className="h-2.5 w-2.5 text-slate-400" />
                   <span>OTP: {showPlainOtp ? order.deliveryOtp : '••••'}</span>
                   <button
                     onClick={() => setShowPlainOtp(!showPlainOtp)}
                     title={showPlainOtp ? "Hide OTP" : "Reveal OTP (Admin Support Override)"}
-                    className="text-slate-400 hover:text-slate-700 ml-0.5 transition-colors"
+                    className="text-slate-400 hover:text-slate-700 ml-0.5 transition-colors cursor-pointer"
                   >
                     {showPlainOtp ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
                   </button>
@@ -303,7 +303,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                     <button
                       onClick={handleCopyOtp}
                       title="Copy OTP to clipboard"
-                      className="text-emerald-600 hover:text-emerald-700 ml-0.5 transition-colors"
+                      className="text-emerald-700 hover:text-emerald-800 ml-0.5 transition-colors cursor-pointer"
                     >
                       {copiedOtp ? <Check className="h-2.5 w-2.5" /> : <Copy className="h-2.5 w-2.5" />}
                     </button>
@@ -311,14 +311,14 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 </div>
               </div>
 
-              <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-2">
+              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
                 <span>Placed at {order.placedAt}</span>
                 <span>•</span>
                 <span>Est. Arrival: {order.estimatedDeliveryAt}</span>
                 {order.cityName && (
                   <>
                     <span>•</span>
-                    <span className="font-semibold text-slate-700">{order.cityName}</span>
+                    <span className="font-medium text-slate-700">{order.cityName}</span>
                   </>
                 )}
               </p>
@@ -328,33 +328,33 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors"
+              className="p-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
 
         {/* Action / Alert Banners */}
         {actionError && (
-          <div className="mx-4 sm:mx-6 mt-3 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl flex items-center justify-between text-xs font-medium">
+          <div className="mx-4 sm:mx-6 mt-3 p-3 bg-rose-50 border border-rose-200/80 text-rose-900 rounded-lg flex items-center justify-between text-xs font-medium">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 flex-shrink-0 text-rose-600" />
               <span>{actionError}</span>
             </div>
-            <button onClick={() => setActionError('')} className="text-rose-500 hover:text-rose-800">
+            <button onClick={() => setActionError('')} className="text-rose-500 hover:text-rose-800 cursor-pointer">
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
         )}
 
         {actionSuccess && (
-          <div className="mx-4 sm:mx-6 mt-3 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center justify-between text-xs font-medium">
+          <div className="mx-4 sm:mx-6 mt-3 p-3 bg-emerald-50 border border-emerald-200/80 text-emerald-900 rounded-lg flex items-center justify-between text-xs font-medium">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-600" />
               <span>{actionSuccess}</span>
             </div>
-            <button onClick={() => setActionSuccess('')} className="text-emerald-500 hover:text-emerald-800">
+            <button onClick={() => setActionSuccess('')} className="text-emerald-500 hover:text-emerald-800 cursor-pointer">
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -362,7 +362,7 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 
         {/* Hold Alert Banner if Active */}
         {order.isHold && (
-          <div className="mx-4 sm:mx-6 mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-900">
+          <div className="mx-4 sm:mx-6 mt-3 p-3 bg-amber-50 border border-amber-200/80 rounded-lg flex items-center justify-between text-xs text-amber-900">
             <div className="flex items-center gap-2 font-medium">
               <PauseCircle className="h-4 w-4 text-amber-600 shrink-0" />
               <span>
@@ -372,21 +372,21 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
             <button
               onClick={() => handleToggleHold(false)}
               disabled={isSubmitting}
-              className="bg-amber-600 hover:bg-amber-700 text-white font-medium px-2.5 py-1 rounded text-[11px] inline-flex items-center gap-1 transition-colors"
+              className="bg-amber-700 hover:bg-amber-800 text-white font-medium px-2.5 py-1 rounded-md text-xs inline-flex items-center gap-1 transition-colors cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
             >
-              <PlayCircle className="h-3 w-3" />
+              <PlayCircle className="h-3.5 w-3.5" />
               <span>Release Hold</span>
             </button>
           </div>
         )}
 
         {/* Navigation Tabs */}
-        <div className="px-4 sm:px-6 pt-3 border-b border-slate-200 bg-slate-50/50 flex items-center gap-2 overflow-x-auto text-xs">
+        <div className="px-5 pt-2 border-b border-slate-200/80 bg-slate-50/60 flex items-center gap-3 overflow-x-auto text-xs">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-3 py-2 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+            className={`pb-2.5 pt-1.5 font-medium border-b-2 transition-all whitespace-nowrap cursor-pointer ${
               activeTab === 'overview'
-                ? 'border-slate-900 text-slate-900'
+                ? 'border-slate-900 text-slate-950 font-semibold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -394,37 +394,37 @@ export const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('items')}
-            className={`px-3 py-2 font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+            className={`pb-2.5 pt-1.5 font-medium border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'items'
-                ? 'border-slate-900 text-slate-900'
+                ? 'border-slate-900 text-slate-950 font-semibold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <span>Items & Substitutions</span>
-            <span className="bg-slate-200 text-slate-700 rounded-full px-1.5 py-0.2 text-[10px]">
+            <span className="bg-slate-200/80 text-slate-700 rounded-full px-1.5 py-0.2 text-[10px] font-semibold">
               {order.items.length}
             </span>
           </button>
           <button
             onClick={() => setActiveTab('dispatch')}
-            className={`px-3 py-2 font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+            className={`pb-2.5 pt-1.5 font-medium border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'dispatch'
-                ? 'border-slate-900 text-slate-900'
+                ? 'border-slate-900 text-slate-950 font-semibold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <span>Dispatch & Stepper</span>
             {order.rider ? (
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
             ) : (
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
             )}
           </button>
           <button
             onClick={() => setActiveTab('notes')}
-            className={`px-3 py-2 font-semibold border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+            className={`pb-2.5 pt-1.5 font-medium border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'notes'
-                ? 'border-slate-900 text-slate-900'
+                ? 'border-slate-900 text-slate-950 font-semibold'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >

@@ -180,7 +180,7 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -192,53 +192,53 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             onClick={handleExportOrders}
-            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-xs"
+            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-md text-xs font-medium transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.06)] cursor-pointer"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Export CSV</span>
           </button>
           <button
             onClick={fetchOrders}
-            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200/80 transition-colors shadow-xs"
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
             <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-xs space-y-2.5">
+      <div className="bg-white border border-slate-200/90 rounded-lg p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-3">
         <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
             <input
               type="text"
               placeholder="Search by order ID, customer, phone, store, area..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full bg-slate-50/75 border border-slate-200/80 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+              className="w-full bg-slate-50/80 border border-slate-200/80 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/10 focus:border-emerald-700 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
             />
           </div>
           <button
             type="submit"
-            className="bg-slate-900 hover:bg-slate-800 text-white font-medium px-3.5 py-1.5 rounded-lg text-xs transition-colors"
+            className="bg-slate-900 hover:bg-slate-800 text-white font-medium px-3.5 py-1.5 rounded-md text-xs transition-colors cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
           >
             Search
           </button>
         </form>
 
         {/* Filter Chips */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100/80">
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
             {['ALL', 'placed', 'picking', 'packed', 'out_for_delivery', 'delivered', 'cancelled'].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-2.5 py-1 rounded-md text-[11px] transition-colors ${
+                className={`px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer ${
                   statusFilter === st
-                    ? 'bg-slate-900 text-white font-medium shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80'
+                    ? 'bg-slate-900 text-white font-medium shadow-[0_1px_2px_rgba(0,0,0,0.06)]'
+                    : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/70'
                 }`}
               >
                 {st === 'ALL' ? 'All Orders' : st === 'picking' ? 'Preparing' : st.replace(/_/g, ' ')}
@@ -251,9 +251,9 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-[11px] text-slate-700 focus:outline-none"
+              className="bg-slate-50 border border-slate-200/90 rounded-md px-2.5 py-1 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-700 font-medium cursor-pointer"
             >
-              <option value="ALL">All Urgency Levels</option>
+              <option value="ALL">All Urgency</option>
               <option value="NORMAL">Normal</option>
               <option value="HIGH">High Priority</option>
               <option value="CRITICAL_SITE">Critical Site</option>
@@ -262,7 +262,7 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({
             {/* Hold Toggle */}
             <button
               onClick={() => setHoldOnlyFilter(!holdOnlyFilter)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-colors inline-flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors inline-flex items-center gap-1 cursor-pointer ${
                 holdOnlyFilter
                   ? 'bg-amber-600 text-white border-amber-600'
                   : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -276,10 +276,10 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({
       </div>
 
       {/* Order Table */}
-      <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-xs">
+      <div className="bg-white border border-slate-200/90 rounded-lg overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs min-w-[840px]">
-            <thead className="bg-slate-50/75 text-slate-500 text-[11px] font-medium border-b border-slate-200/80">
+            <thead className="bg-slate-50/80 text-slate-500 text-[11px] font-semibold uppercase tracking-wider border-b border-slate-200/80">
               <tr>
                 <th className="px-4 py-3 w-44">Order</th>
                 <th className="px-4 py-3 w-48">Customer & Area</th>
@@ -366,9 +366,9 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({
                     <td className="px-4 py-3.5 text-right whitespace-nowrap pr-4">
                       <button
                         onClick={() => setSelectedOrder(ord)}
-                        className="text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded text-xs font-semibold inline-flex items-center gap-1 transition-colors"
+                        className="text-slate-700 bg-white hover:bg-slate-50 hover:text-slate-950 border border-slate-200/90 px-2.5 py-1 rounded-md text-xs font-medium inline-flex items-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all cursor-pointer"
                       >
-                        <Eye className="h-3 w-3 text-slate-600" />
+                        <Eye className="h-3.5 w-3.5 text-slate-400" />
                         <span>Manage</span>
                       </button>
                     </td>
