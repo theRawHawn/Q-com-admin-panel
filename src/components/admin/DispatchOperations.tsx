@@ -130,61 +130,61 @@ export const DispatchOperations: React.FC<DispatchOperationsProps> = ({
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">
             Live Dispatch
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
             <input
               type="text"
               placeholder="Search unassigned orders & fleet roster..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 shadow-2xs"
+              className="w-full bg-slate-50/80 border border-slate-200/80 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/10 focus:border-emerald-700 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
             />
           </div>
 
           <button
             onClick={fetchData}
-            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 transition-colors shadow-2xs self-start sm:self-auto shrink-0"
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] shrink-0 cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
             <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* Fleet Stats Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="bg-white border border-slate-200/90 rounded-lg p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
           <span className="text-xs font-medium text-slate-500">Available Fleet</span>
-          <div className="text-xl font-bold text-slate-900 mt-1">{availableRiders.length + 143}</div>
-          <span className="text-[11px] text-emerald-600 font-medium">Ready for pickup</span>
+          <div className="text-xl font-bold font-mono text-slate-900 mt-1">{availableRiders.length + 143}</div>
+          <span className="text-[11px] text-emerald-700 font-medium">Ready for pickup</span>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+        <div className="bg-white border border-slate-200/90 rounded-lg p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
           <span className="text-xs font-medium text-slate-500">En Route</span>
-          <div className="text-xl font-bold text-slate-900 mt-1">{busyRiders.length + 57}</div>
+          <div className="text-xl font-bold font-mono text-slate-900 mt-1">{busyRiders.length + 57}</div>
           <span className="text-[11px] text-slate-500">Delivering</span>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+        <div className="bg-white border border-slate-200/90 rounded-lg p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
           <span className="text-xs font-medium text-slate-500">Awaiting Rider</span>
-          <div className="text-xl font-bold text-slate-900 mt-1">{unassignedOrders.length + 5}</div>
+          <div className="text-xl font-bold font-mono text-slate-900 mt-1">{unassignedOrders.length + 5}</div>
           <span className="text-[11px] text-rose-600 font-medium">Requires assignment</span>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs">
+        <div className="bg-white border border-slate-200/90 rounded-lg p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
           <span className="text-xs font-medium text-slate-500">Avg Assignment Time</span>
-          <div className="text-xl font-bold text-slate-900 mt-1">1.8 min</div>
-          <span className="text-[11px] text-emerald-600 font-medium">Target: &lt;3 min</span>
+          <div className="text-xl font-bold font-mono text-slate-900 mt-1">1.8 min</div>
+          <span className="text-[11px] text-emerald-700 font-medium">Target: &lt;3 min</span>
         </div>
       </div>
 

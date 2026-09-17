@@ -12,7 +12,6 @@ import { InventoryManagement } from './components/admin/InventoryManagement';
 import { PaymentsAndRefunds } from './components/admin/PaymentsAndRefunds';
 import { SellerSettlements } from './components/admin/SellerSettlements';
 import { ServiceAreasConfig } from './components/admin/ServiceAreasConfig';
-import { PricingEconomicsConfig } from './components/admin/PricingEconomicsConfig';
 import { SupportDesk } from './components/admin/SupportDesk';
 import { AuditLogsViewer } from './components/admin/AuditLogsViewer';
 import { MarketplaceSettings } from './components/admin/MarketplaceSettings';
@@ -366,14 +365,6 @@ export default function App() {
       case 'settlements':
         return (
           <SellerSettlements
-            userPermissions={userPermissions}
-            searchQuery={globalSearchQuery}
-            onSearchQueryChange={setGlobalSearchQuery}
-          />
-        );
-      case 'pricing':
-        return (
-          <PricingEconomicsConfig
             userPermissions={userPermissions}
             searchQuery={globalSearchQuery}
             onSearchQueryChange={setGlobalSearchQuery}

@@ -245,7 +245,7 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Top Header with City Filter Context and Master Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>

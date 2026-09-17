@@ -102,7 +102,7 @@ export const SupportDesk: React.FC<SupportDeskProps> = ({ userPermissions }) => 
   const resolvedCount = tickets.filter((t) => t.status === 'RESOLVED').length;
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -112,15 +112,15 @@ export const SupportDesk: React.FC<SupportDeskProps> = ({ userPermissions }) => 
         <button
           onClick={fetchTickets}
           disabled={loading}
-          className="self-start sm:self-auto flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200/80 transition-colors shadow-xs"
+          className="self-start sm:self-auto flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-slate-600' : 'text-slate-500'}`} />
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
           <span>Refresh</span>
         </button>
       </div>
 
       {/* KPI Status Filter Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: 'All Tickets', count: tickets.length, key: 'ALL' as const },
           { label: 'Open Triage', count: openCount, key: 'OPEN' as const, badge: 'bg-rose-500' },
@@ -132,21 +132,21 @@ export const SupportDesk: React.FC<SupportDeskProps> = ({ userPermissions }) => 
             <button
               key={tab.key}
               onClick={() => setStatusFilter(tab.key)}
-              className={`p-3 rounded-xl border text-left transition-all shadow-xs ${
+              className={`p-3.5 rounded-lg border text-left transition-all cursor-pointer ${
                 isSelected
-                  ? 'border-slate-900 bg-slate-900 text-white'
-                  : 'bg-white border-slate-200/80 hover:border-slate-300 text-slate-800'
+                  ? 'border-slate-900 bg-slate-900 text-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]'
+                  : 'bg-white border-slate-200/90 hover:border-slate-300 text-slate-800 shadow-[0_1px_2px_rgba(0,0,0,0.02)]'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-[11px] font-medium ${isSelected ? 'text-white/80' : 'text-slate-500'}`}>
+                <span className={`text-[11px] font-medium ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
                   {tab.label}
                 </span>
                 {tab.badge && !isSelected && (
                   <span className={`h-1.5 w-1.5 rounded-full ${tab.badge}`} />
                 )}
               </div>
-              <div className="text-lg font-bold mt-1 tracking-tight">
+              <div className="text-xl font-bold font-mono mt-1 tracking-tight">
                 {tab.count}
               </div>
             </button>
@@ -155,15 +155,15 @@ export const SupportDesk: React.FC<SupportDeskProps> = ({ userPermissions }) => 
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-3 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-2.5">
+      <div className="bg-white border border-slate-200/90 rounded-lg p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative flex-1 w-full sm:max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
           <input
             type="text"
             placeholder="Search by ID, customer, order number, subject..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50/75 border border-slate-200/80 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+            className="w-full bg-slate-50/80 border border-slate-200/80 rounded-md pl-9 pr-8 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/10 focus:border-emerald-700 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
           />
           {searchQuery && (
             <button

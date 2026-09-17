@@ -176,30 +176,30 @@ export const PromotionsManager: React.FC = () => {
   });
 
   return (
-    <div className="p-3.5 sm:p-6 max-w-7xl mx-auto space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">
             Promotions & Coupons
           </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
-            onClick={fetchPromotions}
-            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 transition-colors shadow-2xs"
+            onClick={openCreateModal}
+            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-md text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-colors cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
-            <span>Refresh</span>
+            <Plus className="h-3.5 w-3.5" />
+            <span>Create Promo Coupon</span>
           </button>
 
           <button
-            onClick={openCreateModal}
-            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors"
+            onClick={fetchPromotions}
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
           >
-            <Plus className="h-4 w-4" />
-            <span>Create Promo Coupon</span>
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+            <span>Refresh</span>
           </button>
         </div>
       </div>

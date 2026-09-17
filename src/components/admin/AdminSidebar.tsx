@@ -10,7 +10,6 @@ import {
   CreditCard,
   RotateCcw,
   Receipt,
-  Tag,
   MapPin,
   LifeBuoy,
   FileText,
@@ -54,7 +53,6 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   // 4. Finance & Growth
   { id: 'refunds', label: 'Refunds Desk', icon: RotateCcw, requiredPermission: 'refunds.view', group: 'Finance' },
   { id: 'settlements', label: 'Store Settlements', icon: Receipt, requiredPermission: 'settlements.view', group: 'Finance' },
-  { id: 'pricing', label: 'Pricing & Margins', icon: Tag, requiredPermission: 'pricing.view', group: 'Finance' },
 
   // 5. Governance & Settings
   { id: 'employees', label: 'Employees & Roles', icon: Shield, requiredPermission: 'users.view', group: 'Settings' },

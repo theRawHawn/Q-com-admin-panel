@@ -655,7 +655,7 @@ export const EmployeeRoleManager: React.FC = () => {
     .filter((g) => g.permissions.length > 0);
 
   return (
-    <div className="p-3.5 sm:p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Toast Notification */}
       {statusNotification && (
         <div

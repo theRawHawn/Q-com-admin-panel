@@ -239,30 +239,30 @@ export const SponsoredAdsManager: React.FC = () => {
   const totalAdRevenue = campaigns.reduce((acc, c) => acc + (c.spentBudget || 0), 0);
 
   return (
-    <div className="p-3.5 sm:p-6 max-w-7xl mx-auto space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">
             Sponsored Ads & Media
           </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
-            onClick={fetchCampaigns}
-            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 transition-colors shadow-2xs"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-md text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-colors cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-purple-600' : 'text-slate-500'}`} />
-            <span>Refresh</span>
+            <Plus className="h-3.5 w-3.5" />
+            <span>New Ad Campaign</span>
           </button>
 
           <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors"
+            onClick={fetchCampaigns}
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
           >
-            <Plus className="h-4 w-4" />
-            <span>New Ad Campaign</span>
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+            <span>Refresh</span>
           </button>
         </div>
       </div>

@@ -31,7 +31,7 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ userPe
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -42,92 +42,92 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ userPe
       </div>
 
       {saved && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-medium flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-600" />
           <span>Marketplace infrastructure configuration saved successfully.</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Emergency Kill Switches */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xs space-y-4">
-          <h3 className="font-bold text-slate-900 text-base border-b border-slate-200 pb-3 flex items-center gap-2">
+        <div className="bg-white border border-slate-200/90 rounded-lg p-5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-4">
+          <h3 className="font-semibold text-slate-900 text-sm border-b border-slate-100 pb-3 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-rose-600" />
             Operational Kill Switches & Safety Limits
           </h3>
 
-          <div className="space-y-4 text-xs">
-            <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+          <div className="space-y-3 text-xs">
+            <div className="flex items-center justify-between p-3 bg-slate-50/80 rounded-md border border-slate-200/80">
               <div>
-                <span className="font-bold text-slate-900 block">Emergency Maintenance Mode</span>
+                <span className="font-semibold text-slate-900 block">Emergency Maintenance Mode</span>
                 <span className="text-slate-500 text-[11px]">Pauses incoming customer checkout while in progress</span>
               </div>
               <button
                 onClick={() => setMaintenanceMode(!maintenanceMode)}
                 disabled={!canManageSettings}
-                className={`px-3 py-1.5 rounded-xl font-mono font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-md font-mono text-xs font-semibold transition-all cursor-pointer ${
                   maintenanceMode
                     ? 'bg-rose-600 text-white shadow-xs'
-                    : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                    : 'bg-slate-200/80 text-slate-700 hover:bg-slate-300'
                 }`}
               >
                 {maintenanceMode ? 'ENABLED' : 'DISABLED'}
               </button>
             </div>
 
-            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-              <span className="font-bold text-slate-900 block">Default Delivery Buffer SLA</span>
+            <div className="p-3 bg-slate-50/80 rounded-md border border-slate-200/80 space-y-2">
+              <span className="font-semibold text-slate-900 block">Default Delivery Buffer SLA</span>
               <div className="flex items-center gap-2 font-mono">
                 <input
                   type="number"
                   defaultValue={15}
                   disabled={!canManageSettings}
-                  className="w-20 bg-white border border-slate-300 rounded-lg p-2 text-slate-900 font-bold"
+                  className="w-16 bg-white border border-slate-200 rounded-md px-2.5 py-1 text-slate-900 font-bold text-xs"
                 />
-                <span className="text-slate-600">minutes from placement to contractor handover</span>
+                <span className="text-slate-600 text-xs">minutes from placement to contractor handover</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Notification Gateways */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xs space-y-4">
-          <h3 className="font-bold text-slate-900 text-base border-b border-slate-200 pb-3 flex items-center gap-2">
-            <Bell className="h-4 w-4 text-sky-600" />
+        <div className="bg-white border border-slate-200/90 rounded-lg p-5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-4">
+          <h3 className="font-semibold text-slate-900 text-sm border-b border-slate-100 pb-3 flex items-center gap-2">
+            <Bell className="h-4 w-4 text-slate-600" />
             Communication & Dispatch Gateways
           </h3>
 
-          <div className="space-y-4 text-xs">
-            <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+          <div className="space-y-3 text-xs">
+            <div className="flex items-center justify-between p-3 bg-slate-50/80 rounded-md border border-slate-200/80">
               <div>
-                <span className="font-bold text-slate-900 block">SMS OTP Gateway (DLT Compliant)</span>
+                <span className="font-semibold text-slate-900 block">SMS OTP Gateway (DLT Compliant)</span>
                 <span className="text-slate-500 text-[11px]">Delivery handover OTPs & contractor sign-in</span>
               </div>
               <button
                 onClick={() => setSmsGatewayActive(!smsGatewayActive)}
                 disabled={!canManageSettings}
-                className={`px-3 py-1.5 rounded-xl font-mono font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-md font-mono text-xs font-semibold transition-all cursor-pointer ${
                   smsGatewayActive
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                    ? 'bg-emerald-700 text-white shadow-xs'
+                    : 'bg-slate-200/80 text-slate-700 hover:bg-slate-300'
                 }`}
               >
                 {smsGatewayActive ? 'ONLINE' : 'OFFLINE'}
               </button>
             </div>
 
-            <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+            <div className="flex items-center justify-between p-3 bg-slate-50/80 rounded-md border border-slate-200/80">
               <div>
-                <span className="font-bold text-slate-900 block">WhatsApp Business API Webhooks</span>
+                <span className="font-semibold text-slate-900 block">WhatsApp Business API Webhooks</span>
                 <span className="text-slate-500 text-[11px]">Real-time map tracking links sent to electricians</span>
               </div>
               <button
                 onClick={() => setWhatsappAlerts(!whatsappAlerts)}
                 disabled={!canManageSettings}
-                className={`px-3 py-1.5 rounded-xl font-mono font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-md font-mono text-xs font-semibold transition-all cursor-pointer ${
                   whatsappAlerts
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                    ? 'bg-emerald-700 text-white shadow-xs'
+                    : 'bg-slate-200/80 text-slate-700 hover:bg-slate-300'
                 }`}
               >
                 {whatsappAlerts ? 'ONLINE' : 'OFFLINE'}
@@ -141,9 +141,9 @@ export const MarketplaceSettings: React.FC<MarketplaceSettingsProps> = ({ userPe
         <div className="flex justify-end">
           <button
             onClick={handleSave}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-2.5 rounded-xl text-xs flex items-center gap-2 transition-all shadow-xs"
+            className="bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2 rounded-md text-xs flex items-center gap-2 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.06)] cursor-pointer"
           >
-            <Save className="h-4 w-4" />
+            <Save className="h-3.5 w-3.5" />
             <span>Save System Parameters</span>
           </button>
         </div>

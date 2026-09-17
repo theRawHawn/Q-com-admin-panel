@@ -116,30 +116,30 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
   const { financials, operationalSla, b2bTrade, categories, trendData, retailMediaMetrics, filterMeta } = data || {};
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Executive Reports & Analytics</h1>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => fetchReports(false)}
-            disabled={isRefreshing}
-            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200/80 transition-colors shadow-xs"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
-            <span>Refresh</span>
-          </button>
-
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             onClick={handleExport}
             disabled={!data}
-            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded-md text-xs font-medium shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-colors disabled:opacity-50 cursor-pointer"
           >
-            <Download className="h-4 w-4" />
-            <span>Export Report</span>
+            <Download className="h-3.5 w-3.5" />
+            <span>Export Analytics</span>
+          </button>
+
+          <button
+            onClick={() => fetchReports(false)}
+            disabled={isRefreshing}
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+            <span>Refresh</span>
           </button>
         </div>
       </div>

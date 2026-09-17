@@ -301,7 +301,7 @@ export const CustomerManagement: React.FC<CustomerManagementProps> = ({
   ];
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Toast Feedback */}
       {feedbackMsg && (
         <div

@@ -120,8 +120,6 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         return 'Search audit logs...';
       case 'service_areas':
         return 'Search hubs & service zones...';
-      case 'pricing':
-        return 'Search pricing parameters & rules...';
       default:
         return 'Search current module...';
     }

@@ -248,7 +248,7 @@ export const ServiceAreasConfig: React.FC<ServiceAreasConfigProps> = ({
   const avgSla = Math.round((zones.reduce((acc, z) => acc + (z.avgSlaMins || 15), 0) / (zones.length || 1)) * 10) / 10;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
@@ -258,29 +258,29 @@ export const ServiceAreasConfig: React.FC<ServiceAreasConfigProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
           <button
             onClick={() => setIsAddCityOpen(true)}
-            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-lg text-xs transition-colors shadow-xs"
+            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white font-medium px-3 py-1.5 rounded-md text-xs transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.06)] cursor-pointer"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
             <span>Launch New City</span>
           </button>
 
           <button
             onClick={() => setIsAddZoneOpen(true)}
-            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-3.5 py-2 rounded-lg text-xs border border-slate-300 transition-colors shadow-2xs"
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 font-medium px-3 py-1.5 rounded-md text-xs border border-slate-200/90 transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
           >
-            <Layers className="h-4 w-4 text-sky-600" />
+            <Layers className="h-3.5 w-3.5 text-slate-400" />
             <span>Add Partner Store Zone</span>
           </button>
 
           <button
             onClick={fetchData}
-            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-600 px-3 py-2 rounded-lg text-xs font-semibold border border-slate-300 transition-colors shadow-2xs"
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
             title="Refresh Indian Grid"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : ''}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
           </button>
         </div>
       </div>
