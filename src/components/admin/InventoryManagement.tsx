@@ -1317,196 +1317,203 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
 
       {/* ADD / EDIT MASTER CATALOG SKU MODAL */}
       {isCatalogModalOpen && (
-        <div className="fixed inset-0 z-60 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-60 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[88vh] my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-100 shrink-0 flex items-start justify-between gap-3 bg-white">
               <div>
                 <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
                   <Package className="h-5 w-5 text-emerald-600" />
                   <span>{editingMasterSku ? 'Edit / Override Master SKU' : 'Add New SKU to Master Catalog'}</span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
                   {editingMasterSku
                     ? `Update master specifications for SKU ${editingMasterSku.sku}`
                     : 'Add a new standardized SKU/Model No. to the platform master catalog for 3P sellers to list against.'}
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setIsCatalogModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveMasterSku} className="space-y-3.5 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-slate-700 font-semibold block mb-1">SKU / Model No. *</label>
-                  <input
-                    type="text"
-                    disabled={!!editingMasterSku}
-                    placeholder="e.g. SKU-ELE-3201"
-                    value={skuForm.sku}
-                    onChange={(e) => setSkuForm({ ...skuForm, sku: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs font-mono font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:opacity-60"
-                    required
-                  />
+            {/* Form */}
+            <form onSubmit={handleSaveMasterSku} className="flex flex-col flex-1 overflow-hidden min-h-0">
+              {/* Scrollable Content */}
+              <div className="p-4 sm:p-5 space-y-3.5 text-xs overflow-y-auto flex-1">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-slate-700 font-semibold block mb-1">SKU / Model No. *</label>
+                    <input
+                      type="text"
+                      disabled={!!editingMasterSku}
+                      placeholder="e.g. SKU-ELE-3201"
+                      value={skuForm.sku}
+                      onChange={(e) => setSkuForm({ ...skuForm, sku: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs font-mono font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:opacity-60"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-slate-700 font-semibold block mb-1">Brand Name *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Schneider Electric, Polycab, Hilti"
+                      value={skuForm.brand}
+                      onChange={(e) => setSkuForm({ ...skuForm, brand: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      required
+                    />
+                  </div>
                 </div>
+
                 <div>
-                  <label className="text-slate-700 font-semibold block mb-1">Brand Name *</label>
+                  <label className="text-slate-700 font-semibold block mb-1">Product Title / Name *</label>
                   <input
                     type="text"
-                    placeholder="e.g. Schneider Electric, Polycab, Hilti"
-                    value={skuForm.brand}
-                    onChange={(e) => setSkuForm({ ...skuForm, brand: e.target.value })}
+                    placeholder="e.g. Schneider Electric 32A Triple Pole MCB (C-Curve 10kA)"
+                    value={skuForm.name}
+                    onChange={(e) => setSkuForm({ ...skuForm, name: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
                     required
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="text-slate-700 font-semibold block mb-1">Product Title / Name *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Schneider Electric 32A Triple Pole MCB (C-Curve 10kA)"
-                  value={skuForm.name}
-                  onChange={(e) => setSkuForm({ ...skuForm, name: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-slate-700 font-semibold block mb-1">Main Category *</label>
-                  <select
-                    value={skuForm.category}
-                    onChange={(e) => setSkuForm({ ...skuForm, category: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
-                  >
-                    <option value="Electrical & Switchgear">Electrical & Switchgear</option>
-                    <option value="Cables & Wiring">Cables & Wiring</option>
-                    <option value="Fasteners & Rigging">Fasteners & Rigging</option>
-                    <option value="Power Tools">Power Tools</option>
-                    <option value="Plumbing & Pipes">Plumbing & Pipes</option>
-                    <option value="Safety & PPE">Safety & PPE</option>
-                  </select>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-slate-700 font-semibold block mb-1">Main Category *</label>
+                    <select
+                      value={skuForm.category}
+                      onChange={(e) => setSkuForm({ ...skuForm, category: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    >
+                      <option value="Electrical & Switchgear">Electrical & Switchgear</option>
+                      <option value="Cables & Wiring">Cables & Wiring</option>
+                      <option value="Fasteners & Rigging">Fasteners & Rigging</option>
+                      <option value="Power Tools">Power Tools</option>
+                      <option value="Plumbing & Pipes">Plumbing & Pipes</option>
+                      <option value="Safety & PPE">Safety & PPE</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-slate-700 font-semibold block mb-1">Subcategory</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Circuit Breakers, FR Wires"
+                      value={skuForm.subcategory}
+                      onChange={(e) => setSkuForm({ ...skuForm, subcategory: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    />
+                  </div>
                 </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-slate-700 font-semibold block mb-1">HSN Code *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 85362030"
+                      value={skuForm.hsnCode}
+                      onChange={(e) => setSkuForm({ ...skuForm, hsnCode: e.target.value })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs font-mono focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-slate-700 font-semibold block mb-1">GST Rate (%) *</label>
+                    <select
+                      value={skuForm.gstRatePercent}
+                      onChange={(e) => setSkuForm({ ...skuForm, gstRatePercent: Number(e.target.value) })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    >
+                      <option value={0}>0% GST</option>
+                      <option value={5}>5% GST</option>
+                      <option value={12}>12% GST</option>
+                      <option value={18}>18% GST</option>
+                      <option value={28}>28% GST</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-slate-700 font-semibold block mb-1">MRP (₹)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="750"
+                      value={skuForm.mrp}
+                      onChange={(e) => setSkuForm({ ...skuForm, mrp: Number(e.target.value) })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs font-mono focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="text-slate-700 font-semibold block mb-1">Subcategory</label>
+                  <label className="text-slate-700 font-semibold block mb-1">Unit Type</label>
                   <input
                     type="text"
-                    placeholder="e.g. Circuit Breakers, FR Wires"
-                    value={skuForm.subcategory}
-                    onChange={(e) => setSkuForm({ ...skuForm, subcategory: e.target.value })}
+                    placeholder="Piece, Box, Roll, Meter, Set, Unit"
+                    value={skuForm.unit}
+                    onChange={(e) => setSkuForm({ ...skuForm, unit: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-slate-700 font-semibold block mb-1">HSN Code *</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 85362030"
-                    value={skuForm.hsnCode}
-                    onChange={(e) => setSkuForm({ ...skuForm, hsnCode: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs font-mono focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-slate-700 font-semibold block mb-1">GST Rate (%) *</label>
-                  <select
-                    value={skuForm.gstRatePercent}
-                    onChange={(e) => setSkuForm({ ...skuForm, gstRatePercent: Number(e.target.value) })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
-                  >
-                    <option value={0}>0% GST</option>
-                    <option value={5}>5% GST</option>
-                    <option value={12}>12% GST</option>
-                    <option value={18}>18% GST</option>
-                    <option value={28}>28% GST</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-slate-700 font-semibold block mb-1">MRP (₹)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    placeholder="750"
-                    value={skuForm.mrp}
-                    onChange={(e) => setSkuForm({ ...skuForm, mrp: Number(e.target.value) })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 text-xs font-mono focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-slate-700 font-semibold block mb-1">Unit Type</label>
-                <input
-                  type="text"
-                  placeholder="Piece, Box, Roll, Meter, Set, Unit"
-                  value={skuForm.unit}
-                  onChange={(e) => setSkuForm({ ...skuForm, unit: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
-                />
-              </div>
-
-              {/* Official Manufacturer Image Upload Section */}
-              <div className="bg-slate-50/80 border border-slate-200 rounded-xl p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-slate-800 font-bold flex items-center gap-1.5">
-                    <ImageIcon className="h-4 w-4 text-emerald-600" />
-                    <span>Official Manufacturer Image</span>
-                  </label>
-                  <span className="text-[11px] text-slate-500 font-normal">Shown to sellers during store listing</span>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="relative w-16 h-16 rounded-lg border border-slate-200 bg-white overflow-hidden shrink-0 flex items-center justify-center group shadow-2xs">
-                    {skuForm.image ? (
-                      <img src={skuForm.image} alt="Official product visual" className="w-full h-full object-contain p-1" />
-                    ) : (
-                      <Package className="h-6 w-6 text-slate-300" />
-                    )}
+                {/* Official Manufacturer Image Upload Section */}
+                <div className="bg-slate-50/80 border border-slate-200 rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-slate-800 font-bold flex items-center gap-1.5">
+                      <ImageIcon className="h-4 w-4 text-emerald-600" />
+                      <span>Official Manufacturer Image</span>
+                    </label>
+                    <span className="text-[11px] text-slate-500 font-normal">Shown to sellers during store listing</span>
                   </div>
 
-                  <div className="flex-1 space-y-1.5">
-                    <input
-                      type="url"
-                      placeholder="Paste official picture URL (https://...)"
-                      value={skuForm.image}
-                      onChange={(e) => setSkuForm({ ...skuForm, image: e.target.value })}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 placeholder-slate-400 text-xs focus:outline-none focus:ring-1 focus:ring-slate-900"
-                    />
-                    
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-3">
+                    <div className="relative w-16 h-16 rounded-lg border border-slate-200 bg-white overflow-hidden shrink-0 flex items-center justify-center group shadow-2xs">
+                      {skuForm.image ? (
+                        <img src={skuForm.image} alt="Official product visual" className="w-full h-full object-contain p-1" />
+                      ) : (
+                        <Package className="h-6 w-6 text-slate-300" />
+                      )}
+                    </div>
+
+                    <div className="flex-1 space-y-1.5">
                       <input
-                        type="file"
-                        ref={fileInputRef}
-                        accept="image/*"
-                        onChange={handleImageFileUpload}
-                        className="hidden"
+                        type="url"
+                        placeholder="Paste official picture URL (https://...)"
+                        value={skuForm.image}
+                        onChange={(e) => setSkuForm({ ...skuForm, image: e.target.value })}
+                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900 placeholder-slate-400 text-xs focus:outline-none focus:ring-1 focus:ring-slate-900"
                       />
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-[11px] font-semibold border border-slate-200 transition-colors shadow-2xs"
-                      >
-                        <Upload className="h-3 w-3 text-emerald-600" />
-                        <span>Upload Local Photo</span>
-                      </button>
-                      <span className="text-[10px] text-slate-400">JPG, PNG, WebP up to 5MB</span>
+                      
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          accept="image/*"
+                          onChange={handleImageFileUpload}
+                          className="hidden"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-[11px] font-semibold border border-slate-200 transition-colors shadow-2xs"
+                        >
+                          <Upload className="h-3 w-3 text-emerald-600" />
+                          <span>Upload Local Photo</span>
+                        </button>
+                        <span className="text-[10px] text-slate-400">JPG, PNG, WebP up to 5MB</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              {/* Fixed Footer */}
+              <div className="p-4 border-t border-slate-100 bg-slate-50/80 shrink-0 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsCatalogModalOpen(false)}
