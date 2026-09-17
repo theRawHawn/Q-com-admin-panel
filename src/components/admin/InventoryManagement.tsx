@@ -449,7 +449,7 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                 <th className="px-4 py-3 w-[140px]">SKU</th>
                 <th className="px-4 py-3 min-w-[240px]">Product Details</th>
                 <th className="px-4 py-3 text-center w-[130px]">HSN & GST</th>
-                <th className="px-4 py-3 text-right w-[150px]">Price Range / MRP</th>
+                <th className="px-4 py-3 text-right w-[150px]">Price Range</th>
                 <th className="px-4 py-3 text-center w-[170px]">Overall Stock</th>
                 <th className="px-4 py-3 text-center w-[130px]">Status</th>
                 <th className="px-4 py-3 text-right pr-4 w-[130px]">Action</th>
@@ -559,7 +559,7 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                           </div>
                         ) : (
                           <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                            Across {sellersCount} Sellers • Min Buffer: {health.minBuffer}
+                            Across {sellersCount} {sellersCount === 1 ? 'Seller' : 'Sellers'}
                           </div>
                         )}
                       </td>
