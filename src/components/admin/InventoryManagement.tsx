@@ -368,9 +368,6 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
           <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <span>SKU Inventory & Multi-Seller Stock</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Central catalog showing overall stock aggregated across all trade sellers with real-time availability status.
-          </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -444,15 +441,15 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
       <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs min-w-[900px]">
-            <thead className="bg-slate-50/80 text-slate-600 text-xs font-semibold border-b border-slate-200">
+            <thead className="bg-slate-50 text-slate-600 text-xs font-semibold border-b border-slate-200">
               <tr>
-                <th className="px-4 py-3 w-[140px]">SKU</th>
-                <th className="px-4 py-3 min-w-[240px]">Product Details</th>
-                <th className="px-4 py-3 text-center w-[130px]">HSN & GST</th>
-                <th className="px-4 py-3 text-right w-[150px]">Price Range</th>
-                <th className="px-4 py-3 text-center w-[170px]">Overall Stock</th>
-                <th className="px-4 py-3 text-center w-[130px]">Status</th>
-                <th className="px-4 py-3 text-right pr-4 w-[130px]">Action</th>
+                <th className="px-4 py-3 text-left w-36">SKU</th>
+                <th className="px-4 py-3 text-left min-w-[240px]">Product Details</th>
+                <th className="px-4 py-3 text-center w-28">HSN & GST</th>
+                <th className="px-4 py-3 text-right w-36">Price Range</th>
+                <th className="px-4 py-3 text-center w-28">Overall Stock</th>
+                <th className="px-4 py-3 text-center w-28">Status</th>
+                <th className="px-4 py-3 text-right pr-4 w-32">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -495,7 +492,7 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                           <span>{p.sku || p.id}</span>
                         </div>
                         <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
-                          <Store className="h-3 w-3 text-slate-400" />
+                          <Store className="h-3 w-3 text-slate-400 shrink-0" />
                           <span>{sellersCount} {sellersCount === 1 ? 'Seller' : 'Sellers'} stocking</span>
                         </div>
                       </td>
@@ -505,10 +502,10 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                         <div className="font-semibold text-slate-900 text-xs leading-snug group-hover:text-emerald-950 transition-colors">
                           {p.name}
                         </div>
-                        <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500">
-                          <span className="font-medium text-slate-700">Brand: <strong className="text-slate-900 font-semibold">{p.brand}</strong></span>
+                        <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-500">
+                          <span className="font-normal text-slate-600">Brand: <strong className="font-semibold text-slate-800">{p.brand}</strong></span>
                           <span className="text-slate-300">•</span>
-                          <span className="truncate">{p.category} {p.subcategory ? `› ${p.subcategory}` : ''}</span>
+                          <span className="truncate text-slate-400">{p.category}{p.subcategory ? ` › ${p.subcategory}` : ''}</span>
                         </div>
                       </td>
 
@@ -517,14 +514,14 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                         <div className="font-mono text-xs font-medium text-slate-800">
                           HSN {p.hsnCode}
                         </div>
-                        <div className="inline-block mt-0.5 bg-blue-50 text-blue-700 border border-blue-200/70 px-1.5 py-0.2 rounded text-[11px] font-semibold">
+                        <div className="inline-block mt-0.5 text-blue-700 bg-blue-50 border border-blue-200/70 px-1.5 py-0.2 rounded text-[11px] font-semibold">
                           {p.gstRatePercent}% GST
                         </div>
                       </td>
 
                       {/* 4. SKU Price Range / MRP */}
                       <td className="px-4 py-3.5 align-middle text-right whitespace-nowrap">
-                        <div className="font-bold text-slate-900 text-xs tabular-nums">
+                        <div className="font-semibold text-slate-900 text-xs tabular-nums">
                           {hasPriceRange
                             ? `₹${p.minPrice!.toLocaleString('en-IN')} – ₹${p.maxPrice!.toLocaleString('en-IN')}`
                             : `₹${(p.minPrice || p.price).toLocaleString('en-IN')}`}
@@ -534,7 +531,7 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                         </div>
                       </td>
 
-                      {/* 5. Overall Current Stock (Sum of all sellers) */}
+                      {/* 5. Overall Current Stock */}
                       <td className="px-4 py-3.5 align-middle text-center whitespace-nowrap">
                         <div className={`text-xs font-bold tabular-nums ${
                           health.isGlobalOutOfStock
@@ -543,51 +540,34 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                             ? 'text-amber-600'
                             : 'text-slate-900'
                         }`}>
-                          {health.totalStock.toLocaleString('en-IN')} <span className="font-normal text-slate-600">{p.unit}s</span>
+                          {health.totalStock.toLocaleString('en-IN')} <span className="font-normal text-slate-500">{p.unit}s</span>
                         </div>
-                        
-                        {/* Seller-Level Stock Status Tag */}
-                        {health.hasSellerOutOfStock ? (
-                          <div className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-rose-700 bg-rose-50 border border-rose-200/80 px-1.5 py-0.2 rounded">
-                            <AlertTriangle className="h-2.5 w-2.5 text-rose-600 shrink-0" />
-                            <span>{health.outOfStockSellers.length} Store Empty</span>
-                          </div>
-                        ) : health.hasSellerLowStock ? (
-                          <div className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200/80 px-1.5 py-0.2 rounded">
-                            <AlertCircle className="h-2.5 w-2.5 text-amber-600 shrink-0" />
-                            <span>{health.lowStockSellers.length} Store Low</span>
-                          </div>
-                        ) : (
-                          <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                            Across {sellersCount} {sellersCount === 1 ? 'Seller' : 'Sellers'}
-                          </div>
-                        )}
                       </td>
 
-                      {/* 6. Status (Auto updated based on stock availability) */}
+                      {/* 6. Status */}
                       <td className="px-4 py-3.5 align-middle text-center whitespace-nowrap">
                         {health.isGlobalOutOfStock ? (
-                          <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded text-xs font-medium">
+                          <span className="inline-flex items-center gap-1.5 bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-0.5 rounded-full text-xs font-medium">
                             <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
                             Out of Stock
                           </span>
                         ) : health.hasSellerOutOfStock ? (
-                          <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-300 px-2 py-0.5 rounded text-xs font-medium" title={`${health.outOfStockSellers.length} store(s) out of stock`}>
+                          <span className="inline-flex items-center gap-1.5 bg-rose-50 text-rose-700 border border-rose-300 px-2.5 py-0.5 rounded-full text-xs font-medium" title={`${health.outOfStockSellers.length} store(s) out of stock`}>
                             <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
                             Out of Stock ({health.outOfStockSellers.length})
                           </span>
                         ) : health.isGlobalLowStock ? (
-                          <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded text-xs font-medium">
+                          <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-medium">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                             Low Stock
                           </span>
                         ) : health.hasSellerLowStock ? (
-                          <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-300 px-2 py-0.5 rounded text-xs font-medium" title={`${health.lowStockSellers.length} store(s) below safety buffer`}>
+                          <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded-full text-xs font-medium" title={`${health.lowStockSellers.length} store(s) below safety buffer`}>
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                             Low Stock ({health.lowStockSellers.length})
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-xs font-medium">
+                          <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full text-xs font-medium">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                             In Stock
                           </span>
