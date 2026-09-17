@@ -798,6 +798,9 @@ export interface AdminProduct {
   brand: string;
   price: number;
   mrp: number;
+  avgPrice?: number;
+  minPrice?: number;
+  maxPrice?: number;
   unit: string;
   stockCount: number;
   minStockAlert: number;
@@ -807,6 +810,8 @@ export interface AdminProduct {
   status: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK';
   sellers?: ProductSellerStock[];
   sellerCount?: number;
+  lowStockSellerCount?: number;
+  outOfStockSellerCount?: number;
   cityId?: string;
   sellerId?: string;
   sellerName?: string;

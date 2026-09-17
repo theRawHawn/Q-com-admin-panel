@@ -2367,6 +2367,14 @@ adminRouter.get('/inventory', requirePermission('inventory.view'), (req: Authent
     const lowStockSellers = sellers.filter((s) => s.stockCount > 0 && s.stockCount <= (s.minStockAlert || 10));
     const outOfStockSellers = sellers.filter((s) => s.stockCount === 0);
 
+    // Compute dynamic Average Listed Price across all active seller listings
+    const sellerPrices = sellers.map((s) => s.price).filter((pr) => typeof pr === 'number' && pr > 0);
+    const avgPrice = sellerPrices.length > 0
+      ? Math.round(sellerPrices.reduce((sum, pr) => sum + pr, 0) / sellerPrices.length)
+      : p.price;
+    const minPrice = sellerPrices.length > 0 ? Math.min(...sellerPrices) : p.price;
+    const maxPrice = sellerPrices.length > 0 ? Math.max(...sellerPrices) : p.price;
+
     let status: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK' = 'IN_STOCK';
     if (totalStock === 0 || outOfStockSellers.length > 0) {
       status = 'OUT_OF_STOCK';
@@ -2376,6 +2384,10 @@ adminRouter.get('/inventory', requirePermission('inventory.view'), (req: Authent
 
     return {
       ...p,
+      price: avgPrice,
+      avgPrice,
+      minPrice,
+      maxPrice,
       stockCount: totalStock,
       sellerCount: sellers.length,
       lowStockSellerCount: lowStockSellers.length,
@@ -2399,11 +2411,11 @@ adminRouter.get('/inventory', requirePermission('inventory.view'), (req: Authent
   });
 });
 
-// Adjust stock for a specific seller for a given SKU
+// Adjust stock & price for a specific seller for a given SKU
 adminRouter.post('/inventory/:id/adjust-seller-stock', requirePermission('inventory.edit_stock'), (req: AuthenticatedRequest, res: Response) => {
-  const { sellerId, newStockCount, reason } = req.body;
-  if (typeof newStockCount !== 'number' || newStockCount < 0) {
-    return res.status(400).json({ success: false, error: 'INVALID_STOCK_COUNT' });
+  const { sellerId, newStockCount, newPrice, newMinStockAlert, reason } = req.body;
+  if (typeof newStockCount !== 'number' && typeof newPrice !== 'number' && typeof newMinStockAlert !== 'number') {
+    return res.status(400).json({ success: false, error: 'NO_VALID_UPDATE_FIELDS_PROVIDED' });
   }
   if (!sellerId) {
     return res.status(400).json({ success: false, error: 'SELLER_ID_REQUIRED' });
@@ -2419,16 +2431,41 @@ adminRouter.post('/inventory/:id/adjust-seller-stock', requirePermission('invent
   }
 
   const oldStock = sellerEntry.stockCount;
-  sellerEntry.stockCount = newStockCount;
+  const oldPrice = sellerEntry.price;
+
+  if (typeof newStockCount === 'number' && newStockCount >= 0) {
+    sellerEntry.stockCount = newStockCount;
+  }
+  if (typeof newPrice === 'number' && newPrice > 0) {
+    sellerEntry.price = newPrice;
+  }
+  if (typeof newMinStockAlert === 'number' && newMinStockAlert >= 0) {
+    sellerEntry.minStockAlert = newMinStockAlert;
+  }
   sellerEntry.lastRestockedAt = 'Just now (Admin Audited)';
 
-  // Recalculate overall product stock and status
+  // Recalculate overall product stock, dynamic avgPrice, and status
   const totalStock = prod.sellers.reduce((sum, s) => sum + (s.stockCount || 0), 0);
+  const sellerPrices = prod.sellers.map((s) => s.price).filter((pr) => typeof pr === 'number' && pr > 0);
+  const avgPrice = sellerPrices.length > 0
+    ? Math.round(sellerPrices.reduce((sum, pr) => sum + pr, 0) / sellerPrices.length)
+    : prod.price;
+  const minPrice = sellerPrices.length > 0 ? Math.min(...sellerPrices) : prod.price;
+  const maxPrice = sellerPrices.length > 0 ? Math.max(...sellerPrices) : prod.price;
+
   prod.stockCount = totalStock;
+  prod.price = avgPrice;
+  prod.avgPrice = avgPrice;
+  prod.minPrice = minPrice;
+  prod.maxPrice = maxPrice;
   prod.inStock = totalStock > 0;
-  if (totalStock === 0) {
+
+  const lowStockSellers = prod.sellers.filter((s) => s.stockCount > 0 && s.stockCount <= (s.minStockAlert || 10));
+  const outOfStockSellers = prod.sellers.filter((s) => s.stockCount === 0);
+
+  if (totalStock === 0 || outOfStockSellers.length > 0) {
     prod.status = 'OUT_OF_STOCK';
-  } else if (totalStock <= prod.minStockAlert) {
+  } else if (totalStock <= (prod.minStockAlert || 20) || lowStockSellers.length > 0) {
     prod.status = 'LOW_STOCK';
   } else {
     prod.status = 'IN_STOCK';
@@ -2441,7 +2478,7 @@ adminRouter.post('/inventory/:id/adjust-seller-stock', requirePermission('invent
     action: 'INVENTORY_SELLER_STOCK_ADJUSTED',
     targetEntity: 'ProductSellerStock',
     targetId: `${prod.sku}:${sellerId}`,
-    details: `Adjusted SKU ${prod.sku} (${prod.name}) stock for seller ${sellerEntry.sellerName} (${sellerEntry.cityName}) from ${oldStock} -> ${newStockCount} units. Reason: ${reason || 'Store physical cycle count'}`,
+    details: `Adjusted SKU ${prod.sku} (${prod.name}) for seller ${sellerEntry.sellerName} (${sellerEntry.cityName}): Stock ${oldStock} -> ${sellerEntry.stockCount}u, Price ₹${oldPrice} -> ₹${sellerEntry.price}. Reason: ${reason || 'Store physical cycle count & price sync'}`,
     ipAddress: req.ip || '127.0.0.1',
     status: 'SUCCESS',
   });
@@ -2450,6 +2487,10 @@ adminRouter.post('/inventory/:id/adjust-seller-stock', requirePermission('invent
     success: true,
     product: {
       ...prod,
+      price: avgPrice,
+      avgPrice,
+      minPrice,
+      maxPrice,
       stockCount: totalStock,
       sellerCount: prod.sellers.length,
       status: prod.status,

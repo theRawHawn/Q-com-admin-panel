@@ -57,6 +57,8 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
   const [adjustingSeller, setAdjustingSeller] = useState<{ product: AdminProduct; seller: ProductSellerStock } | null>(null);
   const [adjustingProductGeneral, setAdjustingProductGeneral] = useState<AdminProduct | null>(null);
   const [newStockQty, setNewStockQty] = useState<number>(0);
+  const [newSellerPrice, setNewSellerPrice] = useState<number>(0);
+  const [newMinStockAlert, setNewMinStockAlert] = useState<number>(10);
   const [restockReason, setRestockReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
@@ -109,7 +111,7 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
     fetchInventory();
   }, [selectedCity]);
 
-  // Handle single seller stock adjustment
+  // Handle single seller stock & price adjustment
   const handleAdjustSellerStock = async () => {
     if (!adjustingSeller) return;
     try {
@@ -117,10 +119,12 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
       const res: any = await adminApi.post(`/api/admin/inventory/${adjustingSeller.product.id}/adjust-seller-stock`, {
         sellerId: adjustingSeller.seller.sellerId,
         newStockCount: newStockQty,
-        reason: restockReason || 'Physical store inventory cycle count',
+        newPrice: newSellerPrice,
+        newMinStockAlert: newMinStockAlert,
+        reason: restockReason || 'Physical store inventory cycle count & price sync',
       });
       if (res.success) {
-        showToast(`Stock updated to ${newStockQty} units for ${adjustingSeller.seller.sellerName}`);
+        showToast(`Updated ${adjustingSeller.seller.sellerName}: ${newStockQty} units @ ₹${newSellerPrice}`);
         setAdjustingSeller(null);
         setRestockReason('');
         await fetchInventory();
@@ -278,14 +282,26 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
     const sellers = modalFilteredSellers;
     const totalUnits = sellers.reduce((sum, s) => sum + s.stockCount, 0);
     const onlineCount = sellers.filter((s) => s.isStoreOnline).length;
-    const lowStockCount = sellers.filter((s) => s.stockCount <= (s.minStockAlert || 10)).length;
+    const outOfStockCount = sellers.filter((s) => s.stockCount === 0).length;
+    const lowStockCount = sellers.filter((s) => s.stockCount > 0 && s.stockCount <= (s.minStockAlert || 10)).length;
+    const validPrices = sellers.map((s) => s.price).filter((pr) => typeof pr === 'number' && pr > 0);
+    const avgPrice = validPrices.length > 0
+      ? Math.round(validPrices.reduce((sum, pr) => sum + pr, 0) / validPrices.length)
+      : (selectedSkuForSellers?.price || 0);
+    const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : (selectedSkuForSellers?.price || 0);
+    const maxPrice = validPrices.length > 0 ? Math.max(...validPrices) : (selectedSkuForSellers?.price || 0);
+
     return {
       totalUnits,
       sellerCount: sellers.length,
       onlineCount,
+      outOfStockCount,
       lowStockCount,
+      avgPrice,
+      minPrice,
+      maxPrice,
     };
-  }, [modalFilteredSellers]);
+  }, [modalFilteredSellers, selectedSkuForSellers]);
 
   // Check if selected SKU in modal has any low stock alerts
   const modalAlertInfo = useMemo(() => {
@@ -433,7 +449,7 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                 <th className="px-4 py-3 w-[150px]">SKU</th>
                 <th className="px-4 py-3 min-w-[220px]">Product Details</th>
                 <th className="px-4 py-3 text-center w-[140px]">HSN & GST</th>
-                <th className="px-4 py-3 text-right w-[140px]">SKU Price / MRP</th>
+                <th className="px-4 py-3 text-right w-[160px]">Price Range / MRP</th>
                 <th className="px-4 py-3 text-center w-[190px]">Overall Current Stock</th>
                 <th className="px-4 py-3 text-center w-[140px]">Status</th>
                 <th className="px-4 py-3 text-right pr-4 w-[130px]">Action</th>
@@ -459,7 +475,7 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                 filteredProducts.map((p) => {
                   const health = getProductStockHealth(p);
                   const sellersCount = p.sellers ? p.sellers.length : (p.sellerCount || 1);
-                  const discountPct = p.mrp > p.price ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : 0;
+                  const hasPriceRange = p.minPrice && p.maxPrice && p.minPrice !== p.maxPrice;
 
                   return (
                     <tr
@@ -509,18 +525,15 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                         </div>
                       </td>
 
-                      {/* 4. SKU Price / MRP */}
+                      {/* 4. SKU Price Range / MRP */}
                       <td className="px-4 py-3.5 text-right whitespace-nowrap">
                         <div className="font-bold text-slate-900 text-sm">
-                          ₹{p.price.toLocaleString('en-IN')}
+                          {hasPriceRange
+                            ? `₹${p.minPrice!.toLocaleString('en-IN')} – ₹${p.maxPrice!.toLocaleString('en-IN')}`
+                            : `₹${(p.minPrice || p.price).toLocaleString('en-IN')}`}
                         </div>
-                        <div className="text-[10px] text-slate-500 font-medium mt-0.5 flex items-center justify-end gap-1">
+                        <div className="text-[10px] text-slate-400 font-medium mt-0.5">
                           <span className="line-through">MRP ₹{p.mrp.toLocaleString('en-IN')}</span>
-                          {discountPct > 0 && (
-                            <span className="text-emerald-700 font-bold bg-emerald-50 px-1 rounded text-[9px]">
-                              {discountPct}% OFF
-                            </span>
-                          )}
                         </div>
                       </td>
 
@@ -626,43 +639,57 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
 
       {/* SKU SELLER DISTRIBUTION & STOCK BREAKDOWN MODAL */}
       {selectedSkuForSellers && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-          <div className="bg-white border border-slate-200/90 rounded-2xl w-full max-w-5xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+          <div className="bg-white border border-slate-200/90 rounded-2xl w-full max-w-6xl shadow-2xl flex flex-col max-h-[88vh] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="p-4 sm:p-5 bg-slate-50/80 border-b border-slate-200/80 flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+            <div className="p-5 sm:p-6 bg-slate-50/90 border-b border-slate-200/80 flex items-start justify-between gap-4">
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/90 px-2.5 py-1 rounded-md shadow-2xs">
                     {selectedSkuForSellers.sku || selectedSkuForSellers.id}
                   </span>
-                  <span className="text-[11px] font-semibold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded">
+                  <span className="text-xs font-semibold text-slate-700 bg-slate-200/80 px-2.5 py-1 rounded-md">
                     {selectedSkuForSellers.category}
                   </span>
-                  <span className="text-[11px] text-slate-500 font-medium">
-                    HSN {selectedSkuForSellers.hsnCode} ({selectedSkuForSellers.gstRatePercent}% GST)
+                  <span className="text-xs font-medium text-slate-500">
+                    HSN {selectedSkuForSellers.hsnCode} • {selectedSkuForSellers.gstRatePercent}% GST
                   </span>
                 </div>
-                <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
                   {selectedSkuForSellers.name}
                 </h2>
-                <div className="text-xs text-slate-600 flex items-center gap-2">
+                
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
                   <span>Brand: <strong className="text-slate-900">{selectedSkuForSellers.brand}</strong></span>
-                  <span>•</span>
-                  <span>Catalog Price: <strong className="text-slate-900">₹{selectedSkuForSellers.price.toLocaleString('en-IN')}</strong> (MRP ₹{selectedSkuForSellers.mrp.toLocaleString('en-IN')})</span>
+                  <span className="text-slate-300">•</span>
+                  <div className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200/90 text-slate-800 px-2.5 py-0.5 rounded-md font-semibold text-xs">
+                    <span>Price Range:</span>
+                    <strong className="text-slate-950 font-bold">
+                      {modalStats.minPrice !== modalStats.maxPrice
+                        ? `₹${modalStats.minPrice.toLocaleString('en-IN')} – ₹${modalStats.maxPrice.toLocaleString('en-IN')}`
+                        : `₹${modalStats.minPrice.toLocaleString('en-IN')}`}
+                    </strong>
+                  </div>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-slate-500 font-medium">
+                    Catalog MRP: <strong className="text-slate-700 font-bold">₹{selectedSkuForSellers.mrp.toLocaleString('en-IN')}</strong>
+                  </span>
                 </div>
               </div>
 
               <button
                 onClick={() => setSelectedSkuForSellers(null)}
-                className="text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-100 p-1.5 rounded-lg border border-slate-200 transition-colors shadow-2xs shrink-0"
+                className="text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-100 p-2 rounded-xl border border-slate-200 transition-colors shadow-2xs shrink-0"
+                title="Close"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Store Alert Banners (if applicable) */}
             {modalAlertInfo && modalAlertInfo.hasSellerOutOfStock && (
-              <div className="bg-rose-50 border-b border-rose-200 px-4 py-2.5 flex items-center gap-2 text-xs text-rose-900">
+              <div className="bg-rose-50 border-b border-rose-200 px-5 py-3 flex items-center gap-2.5 text-xs text-rose-900">
                 <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
                 <span>
                   <strong>Out of Stock Alert:</strong>{' '}
@@ -674,7 +701,7 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
               </div>
             )}
             {modalAlertInfo && modalAlertInfo.hasSellerLowStock && !modalAlertInfo.hasSellerOutOfStock && (
-              <div className="bg-amber-50/90 border-b border-amber-200 px-4 py-2.5 flex items-center gap-2 text-xs text-amber-900">
+              <div className="bg-amber-50/90 border-b border-amber-200 px-5 py-3 flex items-center gap-2.5 text-xs text-amber-900">
                 <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
                 <span>
                   <strong>Store Buffer Warning:</strong>{' '}
@@ -687,15 +714,15 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
             )}
 
             {/* Modal Quick Filter & Search Bar */}
-            <div className="p-4 bg-white border-b border-slate-100 space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div className="p-4 sm:p-5 bg-white border-b border-slate-100 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {/* City Filter */}
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Filter By City</label>
+                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">Filter By City</label>
                   <select
                     value={sellerModalCityFilter}
                     onChange={(e) => setSellerModalCityFilter(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    className="w-full bg-slate-50 border border-slate-200/90 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
                   >
                     <option value="ALL">All Operating Cities</option>
                     <option value="bengaluru">Bengaluru (KA)</option>
@@ -710,26 +737,26 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
 
                 {/* Area / Store Search */}
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Search Seller / Area</label>
+                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">Search Seller / Area</label>
                   <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                     <input
                       type="text"
                       placeholder="Search store name, locality, hub..."
                       value={sellerModalSearch}
                       onChange={(e) => setSellerModalSearch(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200/80 rounded-lg pl-8 pr-2.5 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                      className="w-full bg-slate-50 border border-slate-200/90 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
                     />
                   </div>
                 </div>
 
                 {/* Store Status Filter */}
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-500 block mb-1">Store / Stock State</label>
+                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">Store / Stock State</label>
                   <select
                     value={sellerModalStatusFilter}
                     onChange={(e) => setSellerModalStatusFilter(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    className="w-full bg-slate-50 border border-slate-200/90 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
                   >
                     <option value="ALL">All Stores & Stock Levels</option>
                     <option value="ONLINE">Online Stores Only</option>
@@ -742,89 +769,104 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
               </div>
 
               {/* Aggregated Scope Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100">
-                <div className="bg-slate-50/80 border border-slate-200/70 rounded-lg p-2 text-center">
-                  <span className="text-[10px] text-slate-500 font-medium block">Total Units in Scope</span>
-                  <span className="text-sm font-bold text-slate-900">
-                    {modalStats.totalUnits} {selectedSkuForSellers.unit}s
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                  <span className="text-[11px] text-slate-500 font-medium block">Total Units in Scope</span>
+                  <span className="text-base font-bold text-slate-900 mt-0.5 block">
+                    {modalStats.totalUnits.toLocaleString('en-IN')} <span className="text-xs font-semibold text-slate-500">{selectedSkuForSellers.unit}s</span>
                   </span>
                 </div>
-                <div className="bg-slate-50/80 border border-slate-200/70 rounded-lg p-2 text-center">
-                  <span className="text-[10px] text-slate-500 font-medium block">Stocking Sellers</span>
-                  <span className="text-sm font-bold text-slate-900">{modalStats.sellerCount} Stores</span>
+                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                  <span className="text-[11px] text-slate-500 font-medium block">Stocking Sellers</span>
+                  <span className="text-base font-bold text-slate-900 mt-0.5 block">
+                    {modalStats.sellerCount} Stores <span className="text-xs font-semibold text-emerald-700">({modalStats.onlineCount} Online)</span>
+                  </span>
                 </div>
-                <div className="bg-slate-50/80 border border-slate-200/70 rounded-lg p-2 text-center">
-                  <span className="text-[10px] text-slate-500 font-medium block">Online Fulfillment</span>
-                  <span className="text-sm font-bold text-emerald-700">{modalStats.onlineCount} Online</span>
+                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                  <span className="text-[11px] text-slate-500 font-medium block">Price Range Across Stores</span>
+                  <span className="text-base font-bold text-slate-900 mt-0.5 block">
+                    {modalStats.minPrice !== modalStats.maxPrice
+                      ? `₹${modalStats.minPrice.toLocaleString('en-IN')} – ₹${modalStats.maxPrice.toLocaleString('en-IN')}`
+                      : `₹${modalStats.minPrice.toLocaleString('en-IN')}`}
+                  </span>
                 </div>
-                <div className="bg-slate-50/80 border border-slate-200/70 rounded-lg p-2 text-center">
-                  <span className="text-[10px] text-slate-500 font-medium block">Low Stock Stores</span>
-                  <span className={`text-sm font-bold ${modalStats.lowStockCount > 0 ? 'text-amber-600' : 'text-slate-700'}`}>
-                    {modalStats.lowStockCount} Stores
+                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+                  <span className="text-[11px] text-slate-500 font-medium block">Stock Availability</span>
+                  <span className={`text-base font-bold mt-0.5 block ${
+                    modalStats.outOfStockCount > 0
+                      ? 'text-rose-600'
+                      : modalStats.lowStockCount > 0
+                      ? 'text-amber-600'
+                      : 'text-emerald-700'
+                  }`}>
+                    {modalStats.outOfStockCount > 0
+                      ? `${modalStats.outOfStockCount} Stores Empty`
+                      : modalStats.lowStockCount > 0
+                      ? `${modalStats.lowStockCount} Stores Low`
+                      : 'All Stores Healthy'}
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Sellers Breakdown Table */}
-            <div className="overflow-y-auto flex-1 p-4">
-              <table className="w-full text-left text-xs min-w-[750px]">
-                <thead className="bg-slate-50 text-slate-500 text-[11px] font-medium border-b border-slate-200">
+            <div className="overflow-y-auto flex-1 p-5 sm:p-6 min-h-[280px]">
+              <table className="w-full text-left text-xs min-w-[880px]">
+                <thead className="bg-slate-50/90 text-slate-600 text-xs font-semibold border-b border-slate-200 uppercase tracking-wider">
                   <tr>
-                    <th className="px-3.5 py-2.5">Seller & Trade Partner</th>
-                    <th className="px-3.5 py-2.5">City & Hub Area</th>
-                    <th className="px-3.5 py-2.5 text-center">Store Status</th>
-                    <th className="px-3.5 py-2.5 text-center">Available Stock</th>
-                    <th className="px-3.5 py-2.5 text-right">Store Price / MRP</th>
-                    <th className="px-3.5 py-2.5 text-center">Safety Buffer</th>
-                    <th className="px-3.5 py-2.5 text-right pr-4">Action</th>
+                    <th className="px-4 py-3">Seller & Trade Partner</th>
+                    <th className="px-4 py-3">City & Hub Area</th>
+                    <th className="px-4 py-3 text-center">Store Status</th>
+                    <th className="px-4 py-3 text-right">Store Listed Price</th>
+                    <th className="px-4 py-3 text-center">Available Stock</th>
+                    <th className="px-4 py-3 text-center">Safety Buffer</th>
+                    <th className="px-4 py-3 text-right pr-4">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
                   {modalFilteredSellers.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
-                        <Store className="h-6 w-6 mx-auto mb-1 text-slate-300" />
-                        <span>No sellers found matching the selected city/area filter</span>
+                      <td colSpan={7} className="px-4 py-12 text-center text-slate-400">
+                        <Store className="h-8 w-8 mx-auto mb-2 text-slate-300" />
+                        <span className="text-sm font-medium">No sellers found matching the selected city or search filter</span>
                       </td>
                     </tr>
                   ) : (
                     modalFilteredSellers.map((s) => {
                       const isSellerOutOfStock = s.stockCount === 0;
                       const isSellerLowStock = s.stockCount > 0 && s.stockCount <= (s.minStockAlert || 10);
-                      const isHighlighted = isSellerOutOfStock || isSellerLowStock;
 
                       return (
                         <tr
                           key={s.sellerId}
                           className={`transition-colors ${
                             isSellerOutOfStock
-                              ? 'bg-rose-50/50 hover:bg-rose-50'
+                              ? 'bg-rose-50/40 hover:bg-rose-50/70'
                               : isSellerLowStock
-                              ? 'bg-amber-50/40 hover:bg-amber-50/70'
+                              ? 'bg-amber-50/30 hover:bg-amber-50/60'
                               : 'hover:bg-slate-50/80'
                           }`}
                         >
                           {/* Seller Name & Contact */}
-                          <td className="px-3.5 py-3">
+                          <td className="px-4 py-3.5">
                             <div className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
                               <span>{s.sellerName}</span>
                               {isSellerOutOfStock ? (
-                                <span className="bg-rose-100 text-rose-800 text-[9px] font-bold px-1.5 py-0.2 rounded border border-rose-200">
+                                <span className="bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5 rounded border border-rose-200">
                                   EMPTY (0u)
                                 </span>
                               ) : isSellerLowStock ? (
-                                <span className="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 rounded border border-amber-200">
+                                <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-200">
                                   LOW
                                 </span>
                               ) : null}
                             </div>
-                            <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
-                              <Phone className="h-2.5 w-2.5 text-slate-400" />
+                            <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-1">
+                              <Phone className="h-3 w-3 text-slate-400" />
                               <span>{s.sellerContact || '+91 98450 12345'}</span>
                               {s.lastRestockedAt && (
                                 <>
-                                  <span>•</span>
+                                  <span className="text-slate-300">•</span>
                                   <span>Synced: {s.lastRestockedAt}</span>
                                 </>
                               )}
@@ -832,66 +874,70 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                           </td>
 
                           {/* City & Area */}
-                          <td className="px-3.5 py-3">
+                          <td className="px-4 py-3.5">
                             <div className="flex items-center gap-1.5">
-                              <span className="font-semibold text-slate-900 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded text-[10px]">
+                              <span className="font-semibold text-slate-900 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[10px]">
                                 {s.cityName}
                               </span>
                             </div>
-                            <div className="text-[11px] text-slate-600 font-medium flex items-center gap-1 mt-0.5">
-                              <MapPin className="h-2.5 w-2.5 text-slate-400 shrink-0" />
-                              <span className="truncate max-w-[200px]">{s.areaName}</span>
+                            <div className="text-xs text-slate-600 font-medium flex items-center gap-1 mt-1">
+                              <MapPin className="h-3 w-3 text-slate-400 shrink-0" />
+                              <span className="truncate max-w-[220px]">{s.areaName}</span>
                             </div>
                           </td>
 
                           {/* Store Online Status */}
-                          <td className="px-3.5 py-3 text-center whitespace-nowrap">
+                          <td className="px-4 py-3.5 text-center whitespace-nowrap">
                             {s.isStoreOnline ? (
-                              <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[10px] font-semibold">
+                              <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-md text-[11px] font-semibold">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                 Online
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-[10px] font-semibold">
+                              <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-1 rounded-md text-[11px] font-semibold">
                                 <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                                 Offline
                               </span>
                             )}
                           </td>
 
+                          {/* Store Listed Price / MRP */}
+                          <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                            <div className="font-bold text-slate-900 text-sm">
+                              ₹{s.price.toLocaleString('en-IN')}
+                            </div>
+                            <div className="text-[10px] text-slate-400 line-through mt-0.5">
+                              MRP ₹{s.mrp.toLocaleString('en-IN')}
+                            </div>
+                          </td>
+
                           {/* Available Stock Units */}
-                          <td className="px-3.5 py-3 text-center whitespace-nowrap">
-                            <div className={`text-xs font-bold ${
+                          <td className="px-4 py-3.5 text-center whitespace-nowrap">
+                            <div className={`text-sm font-bold ${
                               isSellerOutOfStock ? 'text-rose-600' : isSellerLowStock ? 'text-amber-700' : 'text-slate-900'
                             }`}>
-                              {s.stockCount} <span className="text-[10px] font-semibold text-slate-600">{selectedSkuForSellers.unit}s</span>
+                              {s.stockCount} <span className="text-xs font-semibold text-slate-600">{selectedSkuForSellers.unit}s</span>
                             </div>
-                            <div className="text-[9px] font-medium mt-0.5">
+                            <div className="text-[10px] font-medium mt-0.5">
                               {isSellerOutOfStock ? (
-                                <span className="text-rose-600 font-semibold">Out of Stock</span>
+                                <span className="text-rose-600 font-semibold bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">Out of Stock</span>
                               ) : isSellerLowStock ? (
-                                <span className="text-amber-700 font-semibold">Below Safety Buffer</span>
+                                <span className="text-amber-700 font-semibold bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">Low Stock</span>
                               ) : (
                                 <span className="text-emerald-700 font-semibold">In Stock</span>
                               )}
                             </div>
                           </td>
 
-                          {/* Store Price / MRP */}
-                          <td className="px-3.5 py-3 text-right whitespace-nowrap">
-                            <div className="font-bold text-slate-900 text-xs">₹{s.price.toLocaleString('en-IN')}</div>
-                            <div className="text-[10px] text-slate-500 line-through">MRP ₹{s.mrp.toLocaleString('en-IN')}</div>
-                          </td>
-
                           {/* Safety Buffer */}
-                          <td className="px-3.5 py-3 text-center whitespace-nowrap">
-                            <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                              {s.minStockAlert} units
+                          <td className="px-4 py-3.5 text-center whitespace-nowrap">
+                            <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md">
+                              {s.minStockAlert || 10} units
                             </span>
                           </td>
 
                           {/* Action */}
-                          <td className="px-3.5 py-3 text-right whitespace-nowrap pr-4">
+                          <td className="px-4 py-3.5 text-right whitespace-nowrap pr-4">
                             <button
                               onClick={() => {
                                 setAdjustingSeller({
@@ -899,19 +945,21 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                                   seller: s,
                                 });
                                 setNewStockQty(s.stockCount);
+                                setNewSellerPrice(s.price);
+                                setNewMinStockAlert(s.minStockAlert || 10);
                                 setRestockReason('');
                               }}
                               disabled={!canEditStock}
-                              className={`px-2.5 py-1 rounded text-xs font-semibold inline-flex items-center gap-1 transition-colors border ${
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-colors border shadow-2xs ${
                                 isSellerOutOfStock
-                                  ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-600 shadow-2xs'
+                                  ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-600'
                                   : isSellerLowStock
-                                  ? 'bg-amber-600 hover:bg-amber-700 text-white border-amber-600 shadow-2xs'
-                                  : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                                  ? 'bg-amber-600 hover:bg-amber-700 text-white border-amber-600'
+                                  : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border-emerald-200/90'
                               }`}
                             >
-                              <Edit2 className="h-3 w-3" />
-                              <span>{isSellerOutOfStock ? 'Restock (0 Units)' : isSellerLowStock ? 'Replenish' : 'Adjust Stock'}</span>
+                              <Edit2 className="h-3.5 w-3.5" />
+                              <span>{isSellerOutOfStock ? 'Restock' : 'Adjust Stock & Price'}</span>
                             </button>
                           </td>
                         </tr>
@@ -923,11 +971,11 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-              <span>Showing {modalFilteredSellers.length} sellers for SKU <strong>{selectedSkuForSellers.sku}</strong></span>
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+              <span>Showing <strong>{modalFilteredSellers.length}</strong> sellers for SKU <strong>{selectedSkuForSellers.sku}</strong></span>
               <button
                 onClick={() => setSelectedSkuForSellers(null)}
-                className="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg text-xs transition-colors shadow-2xs"
+                className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg text-xs transition-colors shadow-2xs"
               >
                 Done
               </button>
@@ -936,43 +984,44 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
         </div>
       )}
 
-      {/* ADJUST SPECIFIC SELLER STOCK MODAL */}
+      {/* ADJUST SPECIFIC SELLER STOCK & PRICE MODAL */}
       {adjustingSeller && (
-        <div className="fixed inset-0 z-60 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200/90 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-60 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200/90 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-start justify-between">
               <div>
-                <span className="font-mono text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                <span className="font-mono text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
                   {adjustingSeller.product.sku}
                 </span>
-                <h3 className="font-bold text-slate-900 text-sm mt-1">Adjust Store Inventory</h3>
+                <h3 className="font-bold text-slate-900 text-base mt-1.5">Adjust Store Stock & Listed Price</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Update stock for <strong>{adjustingSeller.seller.sellerName}</strong> ({adjustingSeller.seller.cityName}).
+                  Update inventory and catalog price for <strong>{adjustingSeller.seller.sellerName}</strong> ({adjustingSeller.seller.cityName}).
                 </p>
               </div>
               <button
                 onClick={() => setAdjustingSeller(null)}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="space-y-3.5 text-xs">
+            <div className="space-y-4 text-xs">
+              {/* Unit Count */}
               <div>
-                <label className="text-slate-700 font-semibold block mb-1">
-                  Verified Unit Count ({adjustingSeller.product.unit}s)
+                <label className="text-slate-700 font-semibold block mb-1.5">
+                  Verified Unit Stock ({adjustingSeller.product.unit}s)
                 </label>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setNewStockQty(Math.max(0, newStockQty - 10))}
-                    className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold border border-slate-200"
+                    className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold border border-slate-200 transition-colors"
                   >
                     -10
                   </button>
                   <button
                     onClick={() => setNewStockQty(Math.max(0, newStockQty - 1))}
-                    className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold border border-slate-200"
+                    className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold border border-slate-200 transition-colors"
                   >
                     -1
                   </button>
@@ -981,50 +1030,86 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                     min={0}
                     value={newStockQty}
                     onChange={(e) => setNewStockQty(Math.max(0, Number(e.target.value)))}
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-3 text-center text-slate-900 font-mono text-base font-bold focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-center text-slate-900 font-mono text-base font-bold focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
                   />
                   <button
                     onClick={() => setNewStockQty(newStockQty + 1)}
-                    className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold border border-slate-200"
+                    className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold border border-slate-200 transition-colors"
                   >
                     +1
                   </button>
                   <button
                     onClick={() => setNewStockQty(newStockQty + 10)}
-                    className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold border border-slate-200"
+                    className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold border border-slate-200 transition-colors"
                   >
                     +10
                   </button>
                 </div>
-                <div className="text-[10px] text-slate-400 mt-1 flex justify-between">
-                  <span>Current Store Stock: {adjustingSeller.seller.stockCount} units</span>
-                  <span>Safety Buffer: {adjustingSeller.seller.minStockAlert} units</span>
+                <div className="text-[11px] text-slate-500 mt-1 flex justify-between">
+                  <span>Current: {adjustingSeller.seller.stockCount} units</span>
+                  <span>Safety Buffer: {newMinStockAlert} units</span>
                 </div>
               </div>
 
+              {/* Seller Listed Price */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-700 font-semibold block mb-1.5">
+                    Seller Listed Price (₹)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={newSellerPrice}
+                    onChange={(e) => setNewSellerPrice(Math.max(1, Number(e.target.value)))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-slate-900 font-mono text-sm font-bold focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  />
+                  <div className="text-[10px] text-slate-400 mt-1">
+                    Catalog MRP: ₹{adjustingSeller.product.mrp}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-slate-700 font-semibold block mb-1.5">
+                    Min Stock Safety Buffer (Units)
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={newMinStockAlert}
+                    onChange={(e) => setNewMinStockAlert(Math.max(0, Number(e.target.value)))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-slate-900 font-mono text-sm font-bold focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  />
+                  <div className="text-[10px] text-slate-400 mt-1">
+                    Triggers low stock alert when ≤ threshold
+                  </div>
+                </div>
+              </div>
+
+              {/* Reason */}
               <div>
-                <label className="text-slate-700 font-semibold block mb-1">Adjustment Reason / Audit Trail</label>
+                <label className="text-slate-700 font-semibold block mb-1.5">Adjustment Reason / Audit Trail</label>
                 <input
                   type="text"
-                  placeholder="e.g. Physical cycle count audit, Inbound supplier delivery..."
+                  placeholder="e.g. Physical cycle count audit, Inbound supplier delivery, Price update..."
                   value={restockReason}
                   onChange={(e) => setRestockReason(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-900"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
               <button
                 onClick={() => setAdjustingSeller(null)}
-                className="px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium rounded-lg text-xs transition-colors"
+                className="px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium rounded-lg text-xs transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAdjustSellerStock}
                 disabled={isSubmitting}
-                className="px-4 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors disabled:opacity-50"
+                className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? 'Updating...' : 'Save & Update Store Stock'}
               </button>
