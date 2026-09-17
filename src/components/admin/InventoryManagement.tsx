@@ -45,7 +45,6 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(externalSearchQuery || '');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK'>('ALL');
 
   // Modal states
@@ -155,19 +154,6 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
     }
   };
 
-  // Categories list
-  const categories = [
-    'ALL',
-    'Electrical & Switchgear',
-    'Cables & Wiring',
-    'Fasteners & Rigging',
-    'Power Tools',
-    'Plumbing & Drainage',
-    'Industrial Bearings',
-    'Safety & Industrial PPE',
-    'Construction Chemicals',
-  ];
-
   // Helper to evaluate stock health for a product and its sellers
   const getProductStockHealth = (p: AdminProduct) => {
     const sellers = p.sellers || [];
@@ -182,8 +168,9 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
     const hasSellerLowStock = lowStockSellers.length > 0;
     const hasSellerOutOfStock = outOfStockSellers.length > 0;
 
-    const isAnyLowOrAlert = isGlobalLowStock || hasSellerLowStock || hasSellerOutOfStock;
-    const isHealthy = !isGlobalOutOfStock && !isGlobalLowStock && !hasSellerLowStock && !hasSellerOutOfStock;
+    const isAnyOutOfStock = isGlobalOutOfStock || hasSellerOutOfStock;
+    const isAnyLowStock = isGlobalLowStock || hasSellerLowStock;
+    const isHealthy = !isAnyOutOfStock && !isAnyLowStock;
 
     return {
       totalStock,
@@ -194,12 +181,13 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
       isGlobalLowStock,
       hasSellerLowStock,
       hasSellerOutOfStock,
-      isAnyLowOrAlert,
+      isAnyOutOfStock,
+      isAnyLowStock,
       isHealthy,
     };
   };
 
-  // Compute status counts for filter chips
+  // Compute status counts for filter chips with multi-seller intelligence
   const statusCounts = useMemo(() => {
     let all = products.length;
     let healthy = 0;
@@ -208,11 +196,13 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
 
     products.forEach((p) => {
       const health = getProductStockHealth(p);
-      if (health.isGlobalOutOfStock) {
+      if (health.isAnyOutOfStock) {
         outOfStock++;
-      } else if (health.isAnyLowOrAlert) {
+      }
+      if (health.isAnyLowStock) {
         low++;
-      } else {
+      }
+      if (health.isHealthy) {
         healthy++;
       }
     });
@@ -223,17 +213,14 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
   // Filtered Products for Master SKU Table
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      // Category filter
-      const matchesCat = categoryFilter === 'ALL' || p.category === categoryFilter;
-
       // Status filter with multi-seller intelligence
       let matchesStatus = true;
       const health = getProductStockHealth(p);
 
       if (statusFilter === 'OUT_OF_STOCK') {
-        matchesStatus = health.isGlobalOutOfStock || health.hasSellerOutOfStock;
+        matchesStatus = health.isAnyOutOfStock;
       } else if (statusFilter === 'LOW_STOCK') {
-        matchesStatus = health.isAnyLowOrAlert;
+        matchesStatus = health.isAnyLowStock;
       } else if (statusFilter === 'IN_STOCK') {
         matchesStatus = health.isHealthy;
       }
@@ -246,11 +233,11 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
         p.name.toLowerCase().includes(q) ||
         p.brand.toLowerCase().includes(q) ||
         p.hsnCode.includes(q) ||
-        (p.sellers && p.sellers.some((s) => s.sellerName.toLowerCase().includes(q) || s.areaName.toLowerCase().includes(q)));
+        (p.sellers && p.sellers.some((s) => s.sellerName.toLowerCase().includes(q) || s.areaName.toLowerCase().includes(q) || s.cityName.toLowerCase().includes(q)));
 
-      return matchesCat && matchesStatus && matchesSearch;
+      return matchesStatus && matchesSearch;
     });
-  }, [products, categoryFilter, statusFilter, searchQuery]);
+  }, [products, statusFilter, searchQuery]);
 
   // Filtered sellers in the SKU Breakdown Modal
   const modalFilteredSellers = useMemo(() => {
@@ -313,10 +300,14 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
     const rows = filteredProducts.map((p) => {
       const health = getProductStockHealth(p);
       const statusLabel = health.isGlobalOutOfStock
-        ? 'Out of Stock'
-        : health.isAnyLowOrAlert
-        ? 'Low Stock / Hub Alert'
-        : 'In Stock (Healthy)';
+        ? 'Out of Stock (All Stores)'
+        : health.hasSellerOutOfStock
+        ? `Out of Stock (${health.outOfStockSellers.length} Hubs Empty)`
+        : health.isGlobalLowStock
+        ? 'Low Stock (Overall)'
+        : health.hasSellerLowStock
+        ? `Low Stock (${health.lowStockSellers.length} Hubs Low)`
+        : 'In Stock';
 
       return [
         `"${p.sku || p.id}"`,
@@ -386,8 +377,8 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
         </div>
       </div>
 
-      {/* Search & Category Filter Bar */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-xs space-y-3">
+      {/* Search & Stock Filter Bar */}
+      <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-xs">
         <div className="flex flex-col md:flex-row items-center gap-2.5">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
@@ -414,7 +405,7 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
             {[
               { key: 'ALL', label: `All Stock (${statusCounts.all})`, color: 'bg-slate-900 text-white' },
               { key: 'IN_STOCK', label: `In Stock (${statusCounts.healthy})`, color: 'bg-emerald-700 text-white' },
-              { key: 'LOW_STOCK', label: `Low Stock / Alerts (${statusCounts.low})`, color: 'bg-amber-600 text-white' },
+              { key: 'LOW_STOCK', label: `Low Stock (${statusCounts.low})`, color: 'bg-amber-600 text-white' },
               { key: 'OUT_OF_STOCK', label: `Out of Stock (${statusCounts.outOfStock})`, color: 'bg-rose-700 text-white' },
             ].map((st) => (
               <button
@@ -430,24 +421,6 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Categories Chips */}
-        <div className="flex flex-wrap items-center gap-1.5 text-xs pt-1 border-t border-slate-100">
-          <span className="text-[11px] text-slate-400 font-medium mr-1">Categories:</span>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setCategoryFilter(cat)}
-              className={`px-2.5 py-0.5 rounded-md text-[11px] transition-colors ${
-                categoryFilter === cat
-                  ? 'bg-emerald-600 text-white font-medium shadow-xs'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/70'
-              }`}
-            >
-              {cat === 'ALL' ? 'All Verticals' : cat}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -586,17 +559,22 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                         {health.isGlobalOutOfStock ? (
                           <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded text-[11px] font-semibold shadow-2xs">
                             <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                            Out of Stock
+                            Out of Stock (All Stores)
+                          </span>
+                        ) : health.hasSellerOutOfStock ? (
+                          <span className="inline-flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-300 px-2 py-0.5 rounded text-[11px] font-semibold shadow-2xs" title={`${health.outOfStockSellers.length} store(s) out of stock`}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                            Out of Stock ({health.outOfStockSellers.length} Hub{health.outOfStockSellers.length > 1 ? 's' : ''})
                           </span>
                         ) : health.isGlobalLowStock ? (
                           <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded text-[11px] font-semibold shadow-2xs">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                             Low Stock (Overall)
                           </span>
-                        ) : health.hasSellerLowStock || health.hasSellerOutOfStock ? (
+                        ) : health.hasSellerLowStock ? (
                           <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-300 px-2 py-0.5 rounded text-[11px] font-semibold shadow-2xs" title={`${health.lowStockSellers.length} store(s) below safety buffer`}>
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                            Low Stock ({health.lowStockSellers.length + health.outOfStockSellers.length} Hub{health.lowStockSellers.length + health.outOfStockSellers.length > 1 ? 's' : ''})
+                            Low Stock ({health.lowStockSellers.length} Hub{health.lowStockSellers.length > 1 ? 's' : ''})
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-semibold shadow-2xs">
@@ -682,15 +660,27 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
               </button>
             </div>
 
-            {/* Low Stock Store Banner Alert (if applicable) */}
-            {modalAlertInfo && (modalAlertInfo.hasSellerLowStock || modalAlertInfo.hasSellerOutOfStock) && (
-              <div className="bg-amber-50/90 border-b border-amber-200 px-4 py-2.5 flex items-center gap-2 text-xs text-amber-900">
-                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+            {/* Store Alert Banners (if applicable) */}
+            {modalAlertInfo && modalAlertInfo.hasSellerOutOfStock && (
+              <div className="bg-rose-50 border-b border-rose-200 px-4 py-2.5 flex items-center gap-2 text-xs text-rose-900">
+                <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
                 <span>
-                  <strong>Store Inventory Alert:</strong>{' '}
-                  {modalAlertInfo.lowStockSellers.length + modalAlertInfo.outOfStockSellers.length} store(s) are below safety buffer:{' '}
-                  {[...modalAlertInfo.outOfStockSellers, ...modalAlertInfo.lowStockSellers]
-                    .map((s) => `${s.sellerName} (${s.cityName}: ${s.stockCount} units, buffer: ${s.minStockAlert})`)
+                  <strong>Out of Stock Alert:</strong>{' '}
+                  {modalAlertInfo.outOfStockSellers.length} store(s) have 0 units available:{' '}
+                  {modalAlertInfo.outOfStockSellers
+                    .map((s) => `${s.sellerName} (${s.cityName})`)
+                    .join('; ')}
+                </span>
+              </div>
+            )}
+            {modalAlertInfo && modalAlertInfo.hasSellerLowStock && !modalAlertInfo.hasSellerOutOfStock && (
+              <div className="bg-amber-50/90 border-b border-amber-200 px-4 py-2.5 flex items-center gap-2 text-xs text-amber-900">
+                <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
+                <span>
+                  <strong>Store Buffer Warning:</strong>{' '}
+                  {modalAlertInfo.lowStockSellers.length} store(s) below minimum safety buffer ({modalAlertInfo.minBuffer} units):{' '}
+                  {modalAlertInfo.lowStockSellers
+                    .map((s) => `${s.sellerName} (${s.cityName}: ${s.stockCount}u)`)
                     .join('; ')}
                 </span>
               </div>
@@ -819,11 +809,15 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                           <td className="px-3.5 py-3">
                             <div className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
                               <span>{s.sellerName}</span>
-                              {isHighlighted && (
-                                <span className="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 rounded">
-                                  {isSellerOutOfStock ? 'EMPTY' : 'LOW'}
+                              {isSellerOutOfStock ? (
+                                <span className="bg-rose-100 text-rose-800 text-[9px] font-bold px-1.5 py-0.2 rounded border border-rose-200">
+                                  EMPTY (0u)
                                 </span>
-                              )}
+                              ) : isSellerLowStock ? (
+                                <span className="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 rounded border border-amber-200">
+                                  LOW
+                                </span>
+                              ) : null}
                             </div>
                             <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
                               <Phone className="h-2.5 w-2.5 text-slate-400" />
@@ -909,13 +903,15 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                               }}
                               disabled={!canEditStock}
                               className={`px-2.5 py-1 rounded text-xs font-semibold inline-flex items-center gap-1 transition-colors border ${
-                                isHighlighted
+                                isSellerOutOfStock
+                                  ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-600 shadow-2xs'
+                                  : isSellerLowStock
                                   ? 'bg-amber-600 hover:bg-amber-700 text-white border-amber-600 shadow-2xs'
                                   : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
                               }`}
                             >
                               <Edit2 className="h-3 w-3" />
-                              <span>{isHighlighted ? 'Replenish' : 'Adjust Stock'}</span>
+                              <span>{isSellerOutOfStock ? 'Restock (0 Units)' : isSellerLowStock ? 'Replenish' : 'Adjust Stock'}</span>
                             </button>
                           </td>
                         </tr>

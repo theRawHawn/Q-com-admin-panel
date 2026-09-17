@@ -2368,9 +2368,9 @@ adminRouter.get('/inventory', requirePermission('inventory.view'), (req: Authent
     const outOfStockSellers = sellers.filter((s) => s.stockCount === 0);
 
     let status: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK' = 'IN_STOCK';
-    if (totalStock === 0) {
+    if (totalStock === 0 || outOfStockSellers.length > 0) {
       status = 'OUT_OF_STOCK';
-    } else if (totalStock <= minAlert || lowStockSellers.length > 0 || outOfStockSellers.length > 0) {
+    } else if (totalStock <= minAlert || lowStockSellers.length > 0) {
       status = 'LOW_STOCK';
     }
 
