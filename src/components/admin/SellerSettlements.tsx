@@ -216,7 +216,7 @@ export const SellerSettlements: React.FC<SellerSettlementsProps> = ({
                     isStoreOnline: true,
                     canReceiveOrders: true,
                     isOrderingEnabled: true,
-                    commissionRatePercent: 8.5,
+                    commissionRatePercent: 15.0,
                     rating: 4.8,
                     totalOrders: 280,
                     activeOrdersCount: 6,

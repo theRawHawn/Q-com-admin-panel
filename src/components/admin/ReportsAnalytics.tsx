@@ -84,7 +84,7 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
     if (!data) return;
     const reportRows = [
       { category: 'Executive KPI', metric: 'Total Marketplace GMV', value: `₹${(data.financials?.totalGmv || 0).toLocaleString('en-IN')}` },
-      { category: 'Executive KPI', metric: 'Platform Commission (9.0%)', value: `₹${(data.financials?.platformCommissionRevenue || 0).toLocaleString('en-IN')}` },
+      { category: 'Executive KPI', metric: `Platform Commission (${data.financials?.commissionTakeRatePct || 15.0}%)`, value: `₹${(data.financials?.platformCommissionRevenue || 0).toLocaleString('en-IN')}` },
       { category: 'Executive KPI', metric: 'Rider Delivery Payouts (Pass-Through)', value: `₹${(data.financials?.riderDeliveryPayouts || data.financials?.deliveryFeeRevenue || 0).toLocaleString('en-IN')}` },
       { category: 'Executive KPI', metric: 'Retail Media Ad Revenue', value: `₹${(data.financials?.retailMediaAdRevenue || 0).toLocaleString('en-IN')}` },
       { category: 'Executive KPI', metric: 'Refunds & Claims Settled', value: `₹${(data.financials?.totalRefundsProcessed || 0).toLocaleString('en-IN')}` },
@@ -314,7 +314,7 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
               <div className="text-lg font-bold text-emerald-700 mt-1">
                 ₹{(financials?.platformCommissionRevenue || 0).toLocaleString('en-IN')}
               </div>
-              <span className="text-[11px] text-slate-500 font-medium">9.0% Take Rate</span>
+              <span className="text-[11px] text-slate-500 font-medium">{financials?.commissionTakeRatePct || 15.0}% Take Rate</span>
             </div>
 
             <div className="bg-white border border-slate-200/80 rounded-xl p-3.5 shadow-xs">
@@ -372,7 +372,7 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
-                    <span className="text-slate-600 font-medium">Commission (9%)</span>
+                    <span className="text-slate-600 font-medium">Commission ({financials?.commissionTakeRatePct || 15}%)</span>
                   </div>
                 </div>
               </div>

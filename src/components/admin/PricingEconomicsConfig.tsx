@@ -212,19 +212,22 @@ export const PricingEconomicsConfig: React.FC<PricingEconomicsConfigProps> = ({
             <div className="space-y-4 text-xs font-mono">
               <div>
                 <label className="text-slate-700 font-sans font-semibold block mb-1">
-                  Default Seller Commission Rate (%)
+                  Default Seller Commission Rate (%) (Min 15.0%)
                 </label>
                 <div className="relative">
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">%</span>
                   <input
                     type="number"
                     step="0.1"
+                    min="15.0"
+                    max="50.0"
                     value={config.defaultCommissionPercent}
-                    onChange={(e) => setConfig({ ...config, defaultCommissionPercent: Number(e.target.value) })}
+                    onChange={(e) => setConfig({ ...config, defaultCommissionPercent: Math.max(15, Number(e.target.value)) })}
                     disabled={!canEditPricing}
                     className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
+                <p className="text-[10px] text-slate-500 mt-1 font-sans">Platform policy enforces a minimum 15.0% take rate across all partner stores and orders.</p>
               </div>
 
               <div>

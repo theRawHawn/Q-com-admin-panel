@@ -126,6 +126,10 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
 
   const handleUpdateCommission = async (sellerId: string) => {
     if (!canEditCommission) return;
+    if (tempCommission < 15) {
+      alert('Platform commission take rate must be at least 15.0%');
+      return;
+    }
     try {
       await adminApi.post(`/api/admin/sellers/${sellerId}/update-commission`, {
         commissionRatePercent: tempCommission,
@@ -559,6 +563,8 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
                           <input
                             type="number"
                             step="0.1"
+                            min="15"
+                            max="50"
                             value={tempCommission}
                             onChange={(e) => setTempCommission(Number(e.target.value))}
                             className="w-16 bg-white border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-900 font-mono"

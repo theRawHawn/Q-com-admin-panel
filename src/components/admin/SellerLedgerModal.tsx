@@ -68,7 +68,7 @@ export const SellerLedgerModal: React.FC<SellerLedgerModalProps> = ({
 
   // Financial calculations
   const grossSales = currentSeller.weeklySales || (currentSeller.totalOrders ? currentSeller.totalOrders * 680 : 38400);
-  const commissionRate = currentSeller.commissionRatePercent ?? 8.5;
+  const commissionRate = Math.max(15.0, currentSeller.commissionRatePercent ?? 15.0);
   const pendingBalance = currentSeller.pendingPayableBalance ?? Math.max(1200, Math.round(grossSales * (1 - (commissionRate + 1.1) / 100)));
   const settledTotal = currentSeller.settledBalance || currentSeller.totalSettledPayouts || Math.round(pendingBalance * 4.6);
 

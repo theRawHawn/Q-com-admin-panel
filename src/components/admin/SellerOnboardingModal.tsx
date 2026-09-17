@@ -45,7 +45,7 @@ export const SellerOnboardingModal: React.FC<SellerOnboardingModalProps> = ({
     accountNumber: '',
     ifsc: '',
     bankName: '',
-    commissionRatePercent: 8.5,
+    commissionRatePercent: 15.0,
     avgPrepTimeMins: 5.0,
     status: 'ACTIVE',
     gstVerified: true,
@@ -304,11 +304,11 @@ export const SellerOnboardingModal: React.FC<SellerOnboardingModalProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Marketplace Commission %</label>
+                <label className="block text-slate-700 font-semibold mb-1">Marketplace Commission % (Min 15%)</label>
                 <input
                   type="number"
                   step="0.1"
-                  min="0"
+                  min="15"
                   max="50"
                   value={formData.commissionRatePercent}
                   onChange={(e) => setFormData({ ...formData, commissionRatePercent: Number(e.target.value) })}

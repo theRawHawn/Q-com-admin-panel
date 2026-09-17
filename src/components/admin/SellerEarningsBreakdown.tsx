@@ -67,8 +67,8 @@ export const SellerEarningsBreakdown: React.FC<SellerEarningsBreakdownProps> = (
     }
   };
 
-  // Base seller profile metrics with fallbacks
-  const commissionRate = seller.commissionRatePercent ?? 8.5;
+  // Base seller profile metrics with fallbacks (15% min take rate)
+  const commissionRate = Math.max(15.0, seller.commissionRatePercent ?? 15.0);
   const dailyOrders = seller.todayOrders || seller.activeOrdersCount || Math.max(8, Math.round((seller.totalOrders || 140) / 18));
   const dailySales = seller.todaySales || Math.round(dailyOrders * 680);
 

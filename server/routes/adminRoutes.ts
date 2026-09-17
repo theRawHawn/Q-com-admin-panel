@@ -1424,8 +1424,8 @@ adminRouter.post('/sellers/:id/toggle-status', requirePermission('sellers.suspen
 // 12. Update Seller Commission
 adminRouter.post('/sellers/:id/update-commission', requirePermission('sellers.edit_commission'), (req: AuthenticatedRequest, res: Response) => {
   const { commissionRatePercent } = req.body;
-  if (typeof commissionRatePercent !== 'number' || commissionRatePercent < 0 || commissionRatePercent > 50) {
-    return res.status(400).json({ success: false, error: 'INVALID_COMMISSION_PERCENT' });
+  if (typeof commissionRatePercent !== 'number' || commissionRatePercent < 15 || commissionRatePercent > 50) {
+    return res.status(400).json({ success: false, error: 'INVALID_COMMISSION_PERCENT', message: 'Platform commission take rate must be at least 15.0%' });
   }
 
   const seller = authoritativeAdminStore.sellers.find((s) => s.id === req.params.id);
@@ -1496,7 +1496,7 @@ adminRouter.post('/sellers/create', requirePermission('sellers.create'), (req: A
     isStoreOnline: status === 'ACTIVE',
     canReceiveOrders: status === 'ACTIVE',
     isOrderingEnabled: status === 'ACTIVE',
-    commissionRatePercent: typeof commissionRatePercent === 'number' ? commissionRatePercent : 8.5,
+    commissionRatePercent: typeof commissionRatePercent === 'number' && commissionRatePercent >= 15 ? commissionRatePercent : 15.0,
     rating: 5.0,
     totalOrders: 0,
     activeOrdersCount: 0,
@@ -1576,7 +1576,7 @@ adminRouter.put('/sellers/:id', requirePermission('sellers.edit'), (req: Authent
       ...bankAccount,
     };
   }
-  if (typeof commissionRatePercent === 'number') seller.commissionRatePercent = commissionRatePercent;
+  if (typeof commissionRatePercent === 'number') seller.commissionRatePercent = Math.max(15.0, commissionRatePercent);
   if (typeof avgPrepTimeMins === 'number') seller.avgPrepTimeMins = avgPrepTimeMins;
   if (typeof slaAdherencePercent === 'number') seller.slaAdherencePercent = slaAdherencePercent;
   if (typeof isStoreOnline === 'boolean') seller.isStoreOnline = isStoreOnline;
@@ -3067,18 +3067,42 @@ adminRouter.post('/cities/:id/config', requirePermission('service_areas.manage')
 });
 
 // 21. Pricing Configuration
-adminRouter.get('/pricing', requirePermission('pricing.view'), (req: AuthenticatedRequest, res: Response) => {
+adminRouter.get(['/pricing', '/pricing-config'], requirePermission('pricing.view'), (req: AuthenticatedRequest, res: Response) => {
+  const p = authoritativeAdminStore.pricingConfig;
   res.json({
     success: true,
-    pricing: authoritativeAdminStore.pricingConfig,
+    pricing: p,
+    config: {
+      baseDeliveryFee: p.baseDeliveryFee,
+      freeDeliveryThreshold: p.freeDeliveryThreshold,
+      platformFee: p.platformFee,
+      urgencyFee: p.urgencyHandlingFee,
+      defaultCommissionPercent: Math.max(15.0, p.defaultSellerCommissionPercent),
+      riderBasePayout: p.riderBasePay,
+      riderPerKmIncentive: p.riderPerKmPay,
+      surgeActive: p.surgeActive,
+      surgeMultiplier: p.surgeMultiplier,
+    },
   });
 });
 
-adminRouter.post('/pricing/update', requirePermission('pricing.manage'), (req: AuthenticatedRequest, res: Response) => {
-  const newConfig = req.body;
+adminRouter.post(['/pricing/update', '/pricing-config'], requirePermission('pricing.manage'), (req: AuthenticatedRequest, res: Response) => {
+  const newConfig = req.body || {};
+  const commRate = newConfig.defaultCommissionPercent ?? newConfig.defaultSellerCommissionPercent;
+  
+  const updatedSellerComm = typeof commRate === 'number' ? Math.max(15.0, commRate) : authoritativeAdminStore.pricingConfig.defaultSellerCommissionPercent;
+
   authoritativeAdminStore.pricingConfig = {
     ...authoritativeAdminStore.pricingConfig,
-    ...newConfig,
+    baseDeliveryFee: newConfig.baseDeliveryFee ?? authoritativeAdminStore.pricingConfig.baseDeliveryFee,
+    freeDeliveryThreshold: newConfig.freeDeliveryThreshold ?? authoritativeAdminStore.pricingConfig.freeDeliveryThreshold,
+    platformFee: newConfig.platformFee ?? authoritativeAdminStore.pricingConfig.platformFee,
+    urgencyHandlingFee: newConfig.urgencyFee ?? newConfig.urgencyHandlingFee ?? authoritativeAdminStore.pricingConfig.urgencyHandlingFee,
+    defaultSellerCommissionPercent: updatedSellerComm,
+    riderBasePay: newConfig.riderBasePayout ?? newConfig.riderBasePay ?? authoritativeAdminStore.pricingConfig.riderBasePay,
+    riderPerKmPay: newConfig.riderPerKmIncentive ?? newConfig.riderPerKmPay ?? authoritativeAdminStore.pricingConfig.riderPerKmPay,
+    surgeActive: newConfig.surgeActive ?? authoritativeAdminStore.pricingConfig.surgeActive,
+    surgeMultiplier: newConfig.surgeMultiplier ?? authoritativeAdminStore.pricingConfig.surgeMultiplier,
   };
 
   authoritativeAdminStore.logAudit({
@@ -3088,14 +3112,26 @@ adminRouter.post('/pricing/update', requirePermission('pricing.manage'), (req: A
     action: 'PRICING_ECONOMICS_CONFIG_UPDATED',
     targetEntity: 'PricingConfig',
     targetId: 'GLOBAL_CONFIG',
-    details: `Updated parameters: Free Threshold=₹${authoritativeAdminStore.pricingConfig.freeDeliveryThreshold}, Base Fee=₹${authoritativeAdminStore.pricingConfig.baseDeliveryFee}`,
+    details: `Updated parameters: Free Threshold=₹${authoritativeAdminStore.pricingConfig.freeDeliveryThreshold}, Base Fee=₹${authoritativeAdminStore.pricingConfig.baseDeliveryFee}, Min Commission=${authoritativeAdminStore.pricingConfig.defaultSellerCommissionPercent}%`,
     ipAddress: req.ip || '127.0.0.1',
     status: 'SUCCESS',
   });
 
+  const p = authoritativeAdminStore.pricingConfig;
   res.json({
     success: true,
-    pricing: authoritativeAdminStore.pricingConfig,
+    pricing: p,
+    config: {
+      baseDeliveryFee: p.baseDeliveryFee,
+      freeDeliveryThreshold: p.freeDeliveryThreshold,
+      platformFee: p.platformFee,
+      urgencyFee: p.urgencyHandlingFee,
+      defaultCommissionPercent: p.defaultSellerCommissionPercent,
+      riderBasePayout: p.riderBasePay,
+      riderPerKmIncentive: p.riderPerKmPay,
+      surgeActive: p.surgeActive,
+      surgeMultiplier: p.surgeMultiplier,
+    },
   });
 });
 
@@ -3734,6 +3770,9 @@ adminRouter.get('/reports/summary', requirePermission('reports.view'), (req: Aut
   const baseDayOrders = filteredOrders.length + (city === 'all' ? 1346 : 140);
   const baseDayGmv = filteredOrders.reduce((acc, o) => acc + (o.pricing?.total || 0), 0) + (city === 'all' ? 693844.62 : 78500);
 
+  // Platform commission take-rate (minimum 15.0%)
+  const takeRate = Math.max(0.15, (authoritativeAdminStore.pricingConfig?.defaultSellerCommissionPercent || 15.0) / 100);
+
   let multiplier = 1;
   let periodLabel = "Today's Live";
   let comparisonLabel = "vs yesterday";
@@ -3750,7 +3789,7 @@ adminRouter.get('/reports/summary', requirePermission('reports.view'), (req: Aut
       return {
         period: d,
         gmv,
-        commission: Math.round(gmv * 0.09),
+        commission: Math.round(gmv * takeRate),
         orders: Math.round(baseDayOrders * multiplier * dayFactor),
       };
     });
@@ -3765,7 +3804,7 @@ adminRouter.get('/reports/summary', requirePermission('reports.view'), (req: Aut
       return {
         period: w,
         gmv,
-        commission: Math.round(gmv * 0.09),
+        commission: Math.round(gmv * takeRate),
         orders: Math.round(baseDayOrders * multiplier * wkFactor),
       };
     });
@@ -3780,7 +3819,7 @@ adminRouter.get('/reports/summary', requirePermission('reports.view'), (req: Aut
       return {
         period: m,
         gmv,
-        commission: Math.round(gmv * 0.09),
+        commission: Math.round(gmv * takeRate),
         orders: Math.round(baseDayOrders * multiplier * mFactor),
       };
     });
@@ -3795,7 +3834,7 @@ adminRouter.get('/reports/summary', requirePermission('reports.view'), (req: Aut
       return {
         period: q,
         gmv,
-        commission: Math.round(gmv * 0.09),
+        commission: Math.round(gmv * takeRate),
         orders: Math.round(baseDayOrders * multiplier * qFactor),
       };
     });
@@ -3817,7 +3856,7 @@ adminRouter.get('/reports/summary', requirePermission('reports.view'), (req: Aut
       return {
         period: segments === 1 ? 'Day 1' : `Segment ${i + 1}`,
         gmv,
-        commission: Math.round(gmv * 0.09),
+        commission: Math.round(gmv * takeRate),
         orders: Math.round((baseDayOrders * multiplier) / segments),
       };
     });
@@ -3833,7 +3872,7 @@ adminRouter.get('/reports/summary', requirePermission('reports.view'), (req: Aut
       return {
         period: h,
         gmv,
-        commission: Math.round(gmv * 0.09),
+        commission: Math.round(gmv * takeRate),
         orders: Math.round(baseDayOrders * hFactor),
       };
     });
@@ -3841,7 +3880,7 @@ adminRouter.get('/reports/summary', requirePermission('reports.view'), (req: Aut
 
   const totalGmv = Math.round(baseDayGmv * multiplier * 100) / 100;
   const totalOrdersCount = Math.round(baseDayOrders * multiplier);
-  const platformCommissionRevenue = Math.round(totalGmv * 0.09 * 100) / 100; // 9.0% take rate
+  const platformCommissionRevenue = Math.round(totalGmv * takeRate * 100) / 100; // 15.0% minimum take rate
   
   // Rider delivery fleet payouts (100% disbursed to riders based on base trip pay, distance, material weight & surge)
   const avgRiderTripCompensation = 48; // avg ₹48 compensation per delivery trip disbursed to fleet
@@ -3893,7 +3932,7 @@ adminRouter.get('/reports/summary', requirePermission('reports.view'), (req: Aut
       financials: {
         totalGmv,
         platformCommissionRevenue,
-        commissionTakeRatePct: 9.0,
+        commissionTakeRatePct: Math.round(takeRate * 1000) / 10,
         riderDeliveryPayouts,
         deliveryFeeRevenue: riderDeliveryPayouts,
         retailMediaAdRevenue,

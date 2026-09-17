@@ -66,7 +66,7 @@ export const SellerEditModal: React.FC<SellerEditModalProps> = ({
     accountNumber: seller.bankAccount?.accountNumber || '',
     ifsc: seller.bankAccount?.ifsc || '',
     bankName: seller.bankAccount?.bankName || '',
-    commissionRatePercent: seller.commissionRatePercent ?? 8.5,
+    commissionRatePercent: Math.max(15.0, seller.commissionRatePercent ?? 15.0),
     avgPrepTimeMins: seller.avgPrepTimeMins ?? 5.0,
     slaAdherencePercent: seller.slaAdherencePercent ?? 98.5,
     isStoreOnline: seller.isStoreOnline ?? true,
@@ -700,7 +700,7 @@ export const SellerEditModal: React.FC<SellerEditModalProps> = ({
                       <input
                         type="number"
                         step="0.1"
-                        min="0"
+                        min="15"
                         max="50"
                         value={formData.commissionRatePercent}
                         onChange={(e) => setFormData({ ...formData, commissionRatePercent: Number(e.target.value) })}
@@ -708,7 +708,7 @@ export const SellerEditModal: React.FC<SellerEditModalProps> = ({
                       />
                       <span className="text-slate-500 font-bold text-sm">%</span>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1">Platform deduction percent on gross seller order volume.</p>
+                    <p className="text-[11px] text-slate-500 mt-1">Platform deduction percent on gross seller order volume (min 15.0%).</p>
                   </div>
 
                   <div>
