@@ -1326,11 +1326,6 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({
                   <Package className="h-5 w-5 text-emerald-600" />
                   <span>{editingMasterSku ? 'Edit / Override Master SKU' : 'Add New SKU to Master Catalog'}</span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                  {editingMasterSku
-                    ? `Update master specifications for SKU ${editingMasterSku.sku}`
-                    : 'Add a new standardized SKU/Model No. to the platform master catalog for 3P sellers to list against.'}
-                </p>
               </div>
               <button
                 type="button"
