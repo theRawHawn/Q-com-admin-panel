@@ -147,7 +147,7 @@ export const DispatchOperations: React.FC<DispatchOperationsProps> = ({
               placeholder="Search unassigned orders & fleet roster..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full bg-slate-50/80 border border-slate-200/80 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/10 focus:border-emerald-700 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+              className="w-full bg-slate-50/80 border border-slate-200/80 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#009DE0]/15 focus:border-[#009DE0] transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
             />
           </div>
 
@@ -155,7 +155,7 @@ export const DispatchOperations: React.FC<DispatchOperationsProps> = ({
             onClick={fetchData}
             className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] shrink-0 cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#009DE0]' : 'text-slate-500'}`} />
             <span>Refresh</span>
           </button>
         </div>
@@ -241,7 +241,7 @@ export const DispatchOperations: React.FC<DispatchOperationsProps> = ({
                       setSelectedRiderId(e.target.value);
                     }}
                     disabled={!canAssignRider || isSubmitting}
-                    className="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                   >
                     <option value="">Select rider...</option>
                     {availableRiders.map((r) => (
@@ -259,7 +259,7 @@ export const DispatchOperations: React.FC<DispatchOperationsProps> = ({
                       !selectedRiderId ||
                       isSubmitting
                     }
-                    className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-medium px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors shrink-0"
+                    className="bg-[#009DE0] hover:bg-[#0087c2] disabled:opacity-40 text-white font-medium px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors shrink-0 shadow-[0_2px_8px_rgba(0,157,224,0.25)]"
                   >
                     <Send className="h-3 w-3" />
                     <span>Assign</span>
@@ -342,7 +342,7 @@ export const DispatchOperations: React.FC<DispatchOperationsProps> = ({
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs space-y-3">
           <div className="border-b border-slate-100 pb-2">
             <h3 className="font-semibold text-slate-900 text-sm flex items-center gap-1.5">
-              <Radio className="h-3.5 w-3.5 text-emerald-600" />
+              <Radio className="h-3.5 w-3.5 text-[#009DE0]" />
               Fleet Broadcast
             </h3>
           </div>
@@ -363,7 +363,7 @@ export const DispatchOperations: React.FC<DispatchOperationsProps> = ({
                 value={broadcastMsg}
                 onChange={(e) => setBroadcastMsg(e.target.value)}
                 disabled={!canBroadcast || isSubmitting}
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
               />
             </div>
 
@@ -374,14 +374,14 @@ export const DispatchOperations: React.FC<DispatchOperationsProps> = ({
                 value={broadcastIncentive}
                 onChange={(e) => setBroadcastIncentive(Number(e.target.value))}
                 disabled={!canBroadcast || isSubmitting}
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
               />
             </div>
 
             <button
               type="submit"
               disabled={!canBroadcast || !broadcastMsg || isSubmitting}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-medium py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full bg-[#009DE0] hover:bg-[#0087c2] disabled:opacity-40 text-white font-medium py-2 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors shadow-[0_2px_8px_rgba(0,157,224,0.25)]"
             >
               <Radio className="h-3.5 w-3.5" />
               <span>Send Broadcast</span>

@@ -395,7 +395,7 @@ export const RefundEditModal: React.FC<RefundEditModalProps> = ({
                       type="button"
                       disabled={isSubmitting}
                       onClick={handleManualSettle}
-                      className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-medium text-xs transition-colors flex items-center justify-center gap-1"
+                      className="w-full py-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white rounded font-medium text-xs transition-colors flex items-center justify-center gap-1 shadow-xs"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Confirm Offline Settlement (₹{amount.toLocaleString('en-IN')})</span>

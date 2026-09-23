@@ -105,7 +105,7 @@ export const SellerSettlements: React.FC<SellerSettlementsProps> = ({
               placeholder="Search store name, UTR, status..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full bg-slate-50/80 border border-slate-200/80 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/10 focus:border-emerald-700 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+              className="w-full bg-slate-50/80 border border-slate-200/80 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#009DE0]/20 focus:border-[#009DE0] transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
             />
           </div>
 
@@ -113,7 +113,7 @@ export const SellerSettlements: React.FC<SellerSettlementsProps> = ({
             onClick={fetchSettlements}
             className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] shrink-0 cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#009DE0]' : 'text-slate-500'}`} />
             <span>Sync Batches</span>
           </button>
         </div>
@@ -151,7 +151,7 @@ export const SellerSettlements: React.FC<SellerSettlementsProps> = ({
                   <button
                     onClick={() => handleProcessSettlement(set.id)}
                     disabled={!canProcessSettlement || isSubmitting}
-                    className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold px-4 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs"
+                    className="bg-[#009DE0] hover:bg-[#0087c2] disabled:opacity-50 text-white font-bold px-4 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs"
                   >
                     <Send className="h-3.5 w-3.5" />
                     <span>Disburse NEFT Batch</span>

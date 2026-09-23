@@ -149,7 +149,7 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs font-semibold text-slate-600 flex items-center gap-1.5 mr-1.5">
-              <CalendarDays className="h-3.5 w-3.5 text-emerald-600" />
+              <CalendarDays className="h-3.5 w-3.5 text-[#009DE0]" />
               <span>Timeframe:</span>
             </span>
 
@@ -157,7 +157,7 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
               onClick={() => setTimeframe('daily')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 timeframe === 'daily'
-                  ? 'bg-emerald-600 text-white font-semibold shadow-xs'
+                  ? 'bg-[#009DE0] text-white font-semibold shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
@@ -168,7 +168,7 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
               onClick={() => setTimeframe('weekly')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 timeframe === 'weekly'
-                  ? 'bg-emerald-600 text-white font-semibold shadow-xs'
+                  ? 'bg-[#009DE0] text-white font-semibold shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
@@ -179,7 +179,7 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
               onClick={() => setTimeframe('monthly')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 timeframe === 'monthly'
-                  ? 'bg-emerald-600 text-white font-semibold shadow-xs'
+                  ? 'bg-[#009DE0] text-white font-semibold shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
@@ -190,7 +190,7 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
               onClick={() => setTimeframe('quarterly')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 timeframe === 'quarterly'
-                  ? 'bg-emerald-600 text-white font-semibold shadow-xs'
+                  ? 'bg-[#009DE0] text-white font-semibold shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
@@ -201,7 +201,7 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
               onClick={() => setTimeframe('annual')}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 timeframe === 'annual'
-                  ? 'bg-emerald-600 text-white font-semibold shadow-xs'
+                  ? 'bg-[#009DE0] text-white font-semibold shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
@@ -212,7 +212,7 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
               onClick={() => setTimeframe('custom')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 timeframe === 'custom'
-                  ? 'bg-emerald-600 text-white font-semibold shadow-xs'
+                  ? 'bg-[#009DE0] text-white font-semibold shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
@@ -387,12 +387,12 @@ export const ReportsAnalytics: React.FC<ReportsAnalyticsProps> = ({ selectedCity
                         <div className="w-full bg-slate-100 rounded-t h-28 flex items-end overflow-hidden">
                           <div
                             style={{ height: `${heightPct}%` }}
-                            className="w-full bg-slate-900 group-hover:bg-emerald-600 transition-all rounded-t flex flex-col justify-end"
+                            className="w-full bg-slate-900 group-hover:bg-[#009DE0] transition-all rounded-t flex flex-col justify-end"
                             title={`${item.period}: GMV ₹${item.gmv?.toLocaleString()} | Commission ₹${item.commission?.toLocaleString()}`}
                           >
                             <div 
                               style={{ height: `${Math.min(100, Math.max(15, (item.commission / (item.gmv || 1)) * 100 * 5))}%` }} 
-                              className="w-full bg-emerald-500 opacity-90 rounded-t"
+                              className="w-full bg-[#009DE0] opacity-90 rounded-t"
                             />
                           </div>
                         </div>

@@ -209,7 +209,7 @@ export const SellerEditModal: React.FC<SellerEditModalProps> = ({
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-xs">
+            <div className="h-10 w-10 rounded-xl bg-[#009DE0] text-white flex items-center justify-center font-bold shadow-xs">
               <Store className="h-5 w-5" />
             </div>
             <div>
@@ -920,7 +920,7 @@ export const SellerEditModal: React.FC<SellerEditModalProps> = ({
               type="button"
               onClick={handleSaveAll}
               disabled={isSubmitting || !canEdit}
-              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs"
+              className="px-5 py-2 bg-[#009DE0] hover:bg-[#0087c2] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs"
             >
               <Save className="h-4 w-4" />
               <span>Save Store Changes</span>

@@ -290,7 +290,7 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
             className="p-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 rounded-md transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
             title="Refresh Fleet Data"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#009DE0]' : 'text-slate-500'}`} />
           </button>
         </div>
       </div>
@@ -417,7 +417,7 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
                 <select
                   value={vehicleTypeFilter}
                   onChange={(e) => setVehicleTypeFilter(e.target.value)}
-                  className="bg-slate-50 border border-slate-200/90 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-700 cursor-pointer"
+                  className="bg-slate-50 border border-slate-200/90 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#009DE0] cursor-pointer"
                 >
                   <option value="ALL">All Vehicles</option>
                   <option value="EV_SCOOTER">⚡ EV 2-Wheeler</option>
@@ -441,7 +441,7 @@ export const RiderFleetManagement: React.FC<RiderFleetManagementProps> = ({
                   placeholder="Search by name, phone, plate, or hub..."
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  className="w-full bg-slate-50/80 border border-slate-200/90 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/10 focus:border-emerald-700 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+                  className="w-full bg-slate-50/80 border border-slate-200/90 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#009DE0]/15 focus:border-[#009DE0] transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
                 />
               </div>
 

@@ -653,7 +653,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
                       onVerify(document.id);
                       onClose();
                     }}
-                    className="px-5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                    className="px-5 py-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-xs"
                   >
                     <CheckCircle2 className="h-4 w-4" />
                     <span>Mark as Verified</span>

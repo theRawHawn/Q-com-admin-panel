@@ -324,7 +324,7 @@ export const CmsContentManager: React.FC = () => {
             onClick={fetchCmsContent}
             className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#009DE0]' : 'text-slate-500'}`} />
             <span>Refresh</span>
           </button>
         </div>
@@ -334,7 +334,7 @@ export const CmsContentManager: React.FC = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <ImageIcon className="h-4 w-4 text-emerald-600" />
+            <ImageIcon className="h-4 w-4 text-[#009DE0]" />
             Active App Banners
           </h2>
         </div>
@@ -359,7 +359,7 @@ export const CmsContentManager: React.FC = () => {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-3.5">
                       <div>
-                        <span className="text-[10px] uppercase font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded">
+                        <span className="text-[10px] uppercase font-bold text-[#38bdf8] bg-slate-950/80 px-2 py-0.5 rounded">
                           Hub Scope: {banner.cityScope}
                         </span>
                         <h3 className="text-white font-bold text-sm mt-1">{banner.title}</h3>
@@ -374,13 +374,13 @@ export const CmsContentManager: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 text-slate-600 font-medium truncate">
                           <span className="text-slate-400">Showing on:</span>
-                          <span className="font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 truncate">
+                          <span className="font-semibold text-[#00608a] bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200/70 truncate">
                             {getPlacementLocationLabel(banner.targetScreen)}
                           </span>
                         </div>
                         <span
                           className={`font-semibold flex items-center gap-1 shrink-0 ${
-                            banner.isActive !== false ? 'text-emerald-600' : 'text-slate-400'
+                            banner.isActive !== false ? 'text-[#009DE0]' : 'text-slate-400'
                           }`}
                         >
                           <CheckCircle2 className="h-3 w-3" />
@@ -391,7 +391,7 @@ export const CmsContentManager: React.FC = () => {
                       <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1">
                         <span className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-bold border border-slate-200 flex items-center gap-1">
                           <span>🔘 CTA:</span>
-                          <span className="text-emerald-700">{banner.ctaText || 'Know More'}</span>
+                          <span className="text-[#009DE0]">{banner.ctaText || 'Know More'}</span>
                         </span>
                         {banner.ctaUrl && (
                           <span className="font-mono text-slate-500 truncate max-w-[130px]" title={banner.ctaUrl}>
@@ -417,7 +417,7 @@ export const CmsContentManager: React.FC = () => {
                     <button
                       onClick={() => openEditBannerModal(banner)}
                       title="Edit Banner Settings"
-                      className="px-2 py-1 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg text-xs font-medium transition-colors flex items-center gap-1"
+                      className="px-2 py-1 text-slate-600 hover:text-[#009DE0] hover:bg-sky-50 rounded-lg text-xs font-medium transition-colors flex items-center gap-1"
                     >
                       <Edit2 className="h-3.5 w-3.5" />
                       <span>Edit</span>
@@ -537,7 +537,7 @@ export const CmsContentManager: React.FC = () => {
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Layout className="h-4 w-4 text-emerald-600" />
+                <Layout className="h-4 w-4 text-[#009DE0]" />
                 {editingBanner ? 'Edit Banner' : 'Add App Banner / Video Ad'}
               </h2>
               <button
@@ -558,7 +558,7 @@ export const CmsContentManager: React.FC = () => {
                     placeholder="e.g. Monsoon Plumbing Essentials"
                     value={bannerForm.title}
                     onChange={(e) => setBannerForm({ ...bannerForm, title: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                   />
                 </div>
 
@@ -569,7 +569,7 @@ export const CmsContentManager: React.FC = () => {
                     placeholder="e.g. Up to 40% Off on Heavy Duty Astral & Supreme Pipes"
                     value={bannerForm.subtitle}
                     onChange={(e) => setBannerForm({ ...bannerForm, subtitle: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                   />
                 </div>
 
@@ -582,7 +582,7 @@ export const CmsContentManager: React.FC = () => {
                       onClick={() => setBannerForm({ ...bannerForm, mediaType: 'IMAGE' })}
                       className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-colors flex items-center justify-center gap-2 ${
                         bannerForm.mediaType === 'IMAGE'
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-800'
+                          ? 'border-[#009DE0] bg-sky-50 text-[#00608a]'
                           : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
                       }`}
                     >
@@ -621,7 +621,7 @@ export const CmsContentManager: React.FC = () => {
                 <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 space-y-3">
                   <div className="flex items-center justify-between pb-1.5 border-b border-slate-200/60">
                     <div className="flex items-center gap-2">
-                      <MousePointerClick className="h-4 w-4 text-emerald-600" />
+                      <MousePointerClick className="h-4 w-4 text-[#009DE0]" />
                       <span className="font-bold text-slate-800 text-xs">
                         Call to Action & Destination Link
                       </span>
@@ -639,7 +639,7 @@ export const CmsContentManager: React.FC = () => {
                         placeholder="e.g. Know More, Apply Now"
                         value={bannerForm.ctaText}
                         onChange={(e) => setBannerForm({ ...bannerForm, ctaText: e.target.value })}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 text-xs font-semibold text-slate-900 shadow-2xs"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0] text-xs font-semibold text-slate-900 shadow-2xs"
                       />
                     </div>
 
@@ -652,7 +652,7 @@ export const CmsContentManager: React.FC = () => {
                         placeholder="e.g. https://card.bank.com/apply or app://deals"
                         value={bannerForm.ctaUrl}
                         onChange={(e) => setBannerForm({ ...bannerForm, ctaUrl: e.target.value })}
-                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-[11px] text-slate-900 shadow-2xs"
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0] font-mono text-[11px] text-slate-900 shadow-2xs"
                       />
                     </div>
                   </div>
@@ -669,7 +669,7 @@ export const CmsContentManager: React.FC = () => {
                           onClick={() => setBannerForm({ ...bannerForm, ctaText: preset })}
                           className={`px-2.5 py-1 text-[11px] rounded-md font-medium transition-all ${
                             bannerForm.ctaText === preset
-                              ? 'bg-emerald-600 text-white shadow-2xs font-semibold'
+                              ? 'bg-[#009DE0] text-white shadow-2xs font-semibold'
                               : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                           }`}
                         >
@@ -689,7 +689,7 @@ export const CmsContentManager: React.FC = () => {
                     required
                     value={bannerForm.imageUrl}
                     onChange={(e) => setBannerForm({ ...bannerForm, imageUrl: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-[11px]"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0] font-mono text-[11px]"
                   />
                 </div>
 
@@ -699,7 +699,7 @@ export const CmsContentManager: React.FC = () => {
                     <select
                       value={bannerForm.cityScope}
                       onChange={(e) => setBannerForm({ ...bannerForm, cityScope: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                     >
                       <option value="all">Pan-India (All Hubs)</option>
                       <option value="bengaluru">Bengaluru</option>
@@ -713,7 +713,7 @@ export const CmsContentManager: React.FC = () => {
                     <select
                       value={bannerForm.targetScreen}
                       onChange={(e) => setBannerForm({ ...bannerForm, targetScreen: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 font-medium text-slate-800"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0] font-medium text-slate-800"
                     >
                       <optgroup label="Storefront Screens">
                         <option value="HOME_EXPLORE">App Homepage Main Carousel</option>
@@ -745,7 +745,7 @@ export const CmsContentManager: React.FC = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold shadow-xs transition-colors"
+                  className="px-4 py-2 bg-[#009DE0] hover:bg-[#0087c2] text-white rounded-lg font-semibold shadow-xs transition-colors"
                 >
                   {saving ? 'Saving...' : editingBanner ? 'Update Banner' : 'Publish Banner'}
                 </button>
@@ -859,7 +859,7 @@ export const CmsContentManager: React.FC = () => {
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-6 space-y-4 text-xs">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
-                <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                <span className="text-[10px] uppercase font-bold text-[#00608a] bg-sky-50 px-2 py-0.5 rounded">
                   Target: {selectedBannerDetail.targetScreen}
                 </span>
                 <h3 className="font-bold text-slate-900 text-base mt-2">{selectedBannerDetail.title}</h3>
@@ -895,7 +895,7 @@ export const CmsContentManager: React.FC = () => {
                   setSelectedBannerDetail(null);
                   openEditBannerModal(b);
                 }}
-                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold flex items-center gap-1.5"
+                className="px-3.5 py-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white rounded-lg font-semibold flex items-center gap-1.5"
               >
                 <Edit2 className="h-3.5 w-3.5" />
                 Edit Banner

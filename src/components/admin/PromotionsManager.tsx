@@ -198,7 +198,7 @@ export const PromotionsManager: React.FC = () => {
             onClick={fetchPromotions}
             className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#009DE0]' : 'text-slate-500'}`} />
             <span>Refresh</span>
           </button>
         </div>
@@ -213,7 +213,7 @@ export const PromotionsManager: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by promo code, campaign title, funding model or category..."
-            className="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
           />
         </div>
 
@@ -264,7 +264,7 @@ export const PromotionsManager: React.FC = () => {
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
-                    <RefreshCw className="h-5 w-5 animate-spin mx-auto text-emerald-600 mb-2" />
+                    <RefreshCw className="h-5 w-5 animate-spin mx-auto text-[#009DE0] mb-2" />
                     Loading promotions...
                   </td>
                 </tr>
@@ -278,7 +278,7 @@ export const PromotionsManager: React.FC = () => {
                 filteredPromotions.map((promo) => (
                   <tr key={promo.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="px-4 py-3.5">
-                      <div className="font-bold text-slate-900 font-mono text-sm text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60 inline-block mb-1">
+                      <div className="font-bold font-mono text-sm text-[#00608a] bg-sky-50 px-2 py-0.5 rounded border border-sky-200/70 inline-block mb-1">
                         {promo.code}
                       </div>
                       <div className="text-slate-700 font-medium">{promo.name}</div>
@@ -311,7 +311,7 @@ export const PromotionsManager: React.FC = () => {
                       <div className="font-semibold text-slate-900">{promo.usageCount || 0} / {promo.maxUsageLimit}</div>
                       <div className="w-20 bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
                         <div
-                          className="bg-emerald-600 h-full rounded-full"
+                          className="bg-[#009DE0] h-full rounded-full"
                           style={{ width: `${Math.min(100, ((promo.usageCount || 0) / promo.maxUsageLimit) * 100)}%` }}
                         />
                       </div>
@@ -343,7 +343,7 @@ export const PromotionsManager: React.FC = () => {
                         <button
                           onClick={() => openEditModal(promo)}
                           title="Edit Promotion"
-                          className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-500 hover:text-[#009DE0] hover:bg-sky-50 rounded-lg transition-colors"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
                         </button>
@@ -382,7 +382,7 @@ export const PromotionsManager: React.FC = () => {
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Tag className="h-4 w-4 text-emerald-600" />
+                <Tag className="h-4 w-4 text-[#009DE0]" />
                 {editingPromo ? `Edit Promo Code: ${editingPromo.code}` : 'Create New Promo Code'}
               </h2>
               <button
@@ -404,7 +404,7 @@ export const PromotionsManager: React.FC = () => {
                       placeholder="e.g. ELEC20"
                       value={formData.code}
                       onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-mono font-bold text-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 uppercase"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-mono font-bold text-[#00608a] focus:outline-none focus:ring-1 focus:ring-[#009DE0] uppercase"
                     />
                   </div>
                   <div>
@@ -415,7 +415,7 @@ export const PromotionsManager: React.FC = () => {
                       placeholder="e.g. Electrician Mega Launch"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                     />
                   </div>
                 </div>
@@ -426,7 +426,7 @@ export const PromotionsManager: React.FC = () => {
                     <select
                       value={formData.isPercentage ? 'PCT' : 'FLAT'}
                       onChange={(e) => setFormData({ ...formData, isPercentage: e.target.value === 'PCT' })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                     >
                       <option value="PCT">Percentage (%)</option>
                       <option value="FLAT">Flat (₹)</option>
@@ -439,7 +439,7 @@ export const PromotionsManager: React.FC = () => {
                       required
                       value={formData.discountValue}
                       onChange={(e) => setFormData({ ...formData, discountValue: Number(e.target.value) })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                     />
                   </div>
                   <div>
@@ -448,7 +448,7 @@ export const PromotionsManager: React.FC = () => {
                       type="number"
                       value={formData.maxDiscountCap}
                       onChange={(e) => setFormData({ ...formData, maxDiscountCap: Number(e.target.value) })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                     />
                   </div>
                 </div>
@@ -460,7 +460,7 @@ export const PromotionsManager: React.FC = () => {
                       type="number"
                       value={formData.minOrderValue}
                       onChange={(e) => setFormData({ ...formData, minOrderValue: Number(e.target.value) })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                     />
                   </div>
                   <div>
@@ -468,7 +468,7 @@ export const PromotionsManager: React.FC = () => {
                     <select
                       value={formData.fundingSource}
                       onChange={(e) => setFormData({ ...formData, fundingSource: e.target.value as any })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                     >
                       <option value="PLATFORM">Platform Funded (100%)</option>
                       <option value="BRAND">Brand Co-Funded</option>
@@ -486,7 +486,7 @@ export const PromotionsManager: React.FC = () => {
                       value={formData.applicableCategory}
                       onChange={(e) => setFormData({ ...formData, applicableCategory: e.target.value })}
                       placeholder="e.g. Electrical, Plumbing or All"
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                     />
                   </div>
 
@@ -496,7 +496,7 @@ export const PromotionsManager: React.FC = () => {
                       type="number"
                       value={formData.maxUsageLimit}
                       onChange={(e) => setFormData({ ...formData, maxUsageLimit: Number(e.target.value) })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0]"
                     />
                   </div>
                 </div>
@@ -507,7 +507,7 @@ export const PromotionsManager: React.FC = () => {
                     type="date"
                     value={formData.validUntil}
                     onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#009DE0] font-mono"
                   />
                 </div>
               </div>
@@ -523,7 +523,7 @@ export const PromotionsManager: React.FC = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold shadow-xs transition-colors"
+                  className="px-4 py-2 bg-[#009DE0] hover:bg-[#0087c2] text-white rounded-lg font-semibold shadow-xs transition-colors"
                 >
                   {saving ? 'Saving...' : editingPromo ? 'Update Promo' : 'Create Promo'}
                 </button>
@@ -539,7 +539,7 @@ export const PromotionsManager: React.FC = () => {
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-6 space-y-4 text-xs">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
-                <span className="font-mono font-bold text-sm text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
+                <span className="font-mono font-bold text-sm text-[#00608a] bg-sky-50 px-2.5 py-1 rounded border border-sky-200">
                   {selectedPromoForDetail.code}
                 </span>
                 <h3 className="font-bold text-slate-900 text-base mt-2">{selectedPromoForDetail.name}</h3>
@@ -573,7 +573,7 @@ export const PromotionsManager: React.FC = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Redemptions Used:</span>
-                <span className="font-bold text-emerald-700">{selectedPromoForDetail.usageCount} / {selectedPromoForDetail.maxUsageLimit}</span>
+                <span className="font-bold text-[#00608a]">{selectedPromoForDetail.usageCount} / {selectedPromoForDetail.maxUsageLimit}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Valid Until:</span>
@@ -594,7 +594,7 @@ export const PromotionsManager: React.FC = () => {
                   setSelectedPromoForDetail(null);
                   openEditModal(p);
                 }}
-                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white rounded-lg font-semibold flex items-center gap-1.5"
               >
                 <Edit2 className="h-3.5 w-3.5" />
                 Edit Configuration

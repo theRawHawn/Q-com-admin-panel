@@ -691,14 +691,14 @@ export const EmployeeRoleManager: React.FC = () => {
             disabled={loading}
             className="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-medium border border-slate-200 transition-colors shadow-2xs"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#009DE0]' : 'text-slate-500'}`} />
             <span>Refresh</span>
           </button>
 
           {activeTab === 'ROLES' ? (
             <button
               onClick={() => openCreateRoleModal()}
-              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors"
+              className="flex items-center gap-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors"
             >
               <Plus className="h-4 w-4" />
               <span>Create Custom Role</span>
@@ -706,7 +706,7 @@ export const EmployeeRoleManager: React.FC = () => {
           ) : activeTab === 'EMPLOYEES' ? (
             <button
               onClick={openCreateEmployeeModal}
-              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors"
+              className="flex items-center gap-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-xs transition-colors"
             >
               <UserPlus className="h-4 w-4" />
               <span>Add Staff Member</span>
@@ -1485,7 +1485,7 @@ export const EmployeeRoleManager: React.FC = () => {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold shadow-xs transition-colors flex items-center gap-1.5"
+                    className="px-5 py-2 bg-[#009DE0] hover:bg-[#0087c2] text-white rounded-xl font-semibold shadow-xs transition-colors flex items-center gap-1.5"
                   >
                     {saving ? (
                       <>
@@ -1648,7 +1648,7 @@ export const EmployeeRoleManager: React.FC = () => {
                   type="button"
                   disabled={saving}
                   onClick={handleSaveRoleEmployees}
-                  className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1"
+                  className="px-4 py-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1"
                 >
                   {saving ? (
                     <>
@@ -1749,7 +1749,7 @@ export const EmployeeRoleManager: React.FC = () => {
                   type="button"
                   disabled={saving}
                   onClick={handleSaveEmployeeRoles}
-                  className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1"
+                  className="px-4 py-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1"
                 >
                   {saving ? (
                     <>
@@ -1909,7 +1909,7 @@ export const EmployeeRoleManager: React.FC = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-xs transition-colors flex items-center gap-1"
+                  className="px-5 py-2 bg-[#009DE0] hover:bg-[#0087c2] text-white rounded-xl font-bold shadow-xs transition-colors flex items-center gap-1"
                 >
                   {saving ? (
                     <>

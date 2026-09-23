@@ -328,7 +328,7 @@ export const RiderLedgerModal: React.FC<RiderLedgerModalProps> = ({
                     onClick={() => setReleaseMode('FULL')}
                     className={`py-2 px-3 rounded-xl text-xs font-medium border text-left transition-all ${
                       releaseMode === 'FULL'
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                        ? 'bg-[#009DE0] text-white border-[#009DE0] shadow-xs'
                         : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                     }`}
                   >
@@ -341,7 +341,7 @@ export const RiderLedgerModal: React.FC<RiderLedgerModalProps> = ({
                     onClick={() => setReleaseMode('CUSTOM')}
                     className={`py-2 px-3 rounded-xl text-xs font-medium border text-left transition-all ${
                       releaseMode === 'CUSTOM'
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                        ? 'bg-[#009DE0] text-white border-[#009DE0] shadow-xs'
                         : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
                     }`}
                   >
@@ -361,7 +361,7 @@ export const RiderLedgerModal: React.FC<RiderLedgerModalProps> = ({
                         placeholder={`Enter amount (max ₹${pendingBalance})`}
                         value={customAmount}
                         onChange={(e) => setCustomAmount(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-7 pr-3 py-1.5 text-xs text-slate-900 font-bold focus:bg-white focus:ring-1 focus:ring-emerald-500"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-7 pr-3 py-1.5 text-xs text-slate-900 font-bold focus:bg-white focus:ring-1 focus:ring-[#009DE0]"
                       />
                     </div>
                   </div>
@@ -381,7 +381,7 @@ export const RiderLedgerModal: React.FC<RiderLedgerModalProps> = ({
                   <select
                     value={paymentMode}
                     onChange={(e: any) => setPaymentMode(e.target.value)}
-                    className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:ring-1 focus:ring-emerald-500"
+                    className="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium text-slate-800 focus:bg-white focus:ring-1 focus:ring-[#009DE0]"
                   >
                     <option value="UPI">⚡ UPI Instant VPA (24x7)</option>
                     <option value="IMPS">🏦 IMPS Real-Time Transfer</option>
@@ -391,7 +391,7 @@ export const RiderLedgerModal: React.FC<RiderLedgerModalProps> = ({
                   <button
                     onClick={handleExecutePayout}
                     disabled={isReleasing || currentRider.payoutStatus === 'ON_HOLD' || amountToRelease <= 0 || pendingBalance <= 0}
-                    className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-bold py-2 px-4 rounded-xl text-xs shadow-xs transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-[#009DE0] hover:bg-[#0087c2] disabled:opacity-40 text-white font-bold py-2 px-4 rounded-xl text-xs shadow-xs transition-colors"
                   >
                     {isReleasing ? (
                       <Clock className="h-4 w-4 animate-spin" />

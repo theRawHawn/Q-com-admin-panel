@@ -135,7 +135,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ metrics, onNavigateTab, 
               <span className="text-xs font-medium text-slate-500 truncate tracking-normal">
                 {card.title}
               </span>
-              <div className="p-1 rounded bg-slate-50 text-slate-400 group-hover:text-emerald-700 group-hover:bg-emerald-50/50 transition-colors shrink-0">
+              <div className="p-1 rounded bg-slate-50 text-slate-400 group-hover:text-[#009DE0] group-hover:bg-sky-50/80 transition-colors shrink-0">
                 <Icon className="h-3.5 w-3.5" />
               </div>
             </div>
@@ -151,7 +151,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ metrics, onNavigateTab, 
                   <svg className="w-14 h-5 overflow-visible" viewBox="0 0 56 20">
                     <polyline
                       fill="none"
-                      stroke={card.id === 'sla' ? '#059669' : '#047857'}
+                      stroke={card.id === 'sla' ? '#059669' : '#009DE0'}
                       strokeWidth="1.75"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -162,7 +162,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ metrics, onNavigateTab, 
                         cx="56"
                         cy={20 - ((card.sparkline[card.sparkline.length - 1] - minVal) / range) * 16}
                         r="2"
-                        className="fill-emerald-600"
+                        className={card.id === 'sla' ? 'fill-emerald-600' : 'fill-[#009DE0]'}
                       />
                     )}
                   </svg>

@@ -314,7 +314,7 @@ export const RiderLedgerDashboard: React.FC<RiderLedgerDashboardProps> = ({
             <button
               onClick={handleBulkReleaseDaily}
               disabled={isBulkReleasing || pendingCount === 0 || !canProcessPayout}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+              className="w-full bg-[#009DE0] hover:bg-[#0087c2] disabled:opacity-50 text-white font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
             >
               {isBulkReleasing ? (
                 <Clock className="h-4 w-4 animate-spin" />
@@ -486,7 +486,7 @@ export const RiderLedgerDashboard: React.FC<RiderLedgerDashboardProps> = ({
                         <button
                           onClick={() => handleReleaseSingleRider(r, 'DAILY')}
                           disabled={isReleasingThis || isHeld || dailyEarn <= 0 || !canProcessPayout}
-                          className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white font-semibold px-2.5 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-2xs transition-colors"
+                          className="bg-[#009DE0] hover:bg-[#0087c2] disabled:opacity-40 text-white font-semibold px-2.5 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-2xs transition-colors"
                           title={`Release today's earnings (₹${dailyEarn})`}
                         >
                           {isReleasingThis ? (

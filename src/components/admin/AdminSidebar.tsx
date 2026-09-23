@@ -112,14 +112,14 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     }}
                     className={`relative w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs transition-all text-left group ${
                       isActive
-                        ? 'bg-slate-100/90 text-slate-950 font-semibold before:absolute before:left-0 before:top-1 before:bottom-1 before:w-[3px] before:bg-emerald-700 before:rounded-r'
+                        ? 'bg-sky-50/80 text-slate-950 font-semibold before:absolute before:left-0 before:top-1 before:bottom-1 before:w-[3px] before:bg-[#009DE0] before:rounded-r'
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Icon
                         className={`h-4 w-4 shrink-0 transition-colors ${
-                          isActive ? 'text-emerald-700' : 'text-slate-400 group-hover:text-slate-600'
+                          isActive ? 'text-[#009DE0]' : 'text-slate-400 group-hover:text-slate-600'
                         }`}
                       />
                       <span className="truncate">{item.label}</span>
@@ -135,7 +135,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Role Pill Footer */}
       <div className="p-3 px-3.5 border-t border-slate-200/80 bg-slate-50/50 flex items-center justify-between text-[11px] text-slate-500 select-none shrink-0">
         <div className="flex items-center gap-2 truncate">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 shrink-0"></span>
+          <span className="h-1.5 w-1.5 rounded-full bg-[#009DE0] shrink-0 shadow-[0_0_6px_rgba(0,157,224,0.6)]"></span>
           <span className="truncate font-medium text-slate-700">{userRole.replace(/_/g, ' ')}</span>
         </div>
         <span className="text-[10px] font-mono text-slate-400 uppercase">RBAC</span>
@@ -163,7 +163,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           <aside className="relative w-64 max-w-[80vw] bg-white flex flex-col h-full shadow-xl z-10 animate-in slide-in-from-left duration-200">
             <div className="p-3.5 border-b border-slate-200/80 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="h-7 w-7 rounded-md bg-emerald-800 flex items-center justify-center font-bold text-white text-xs">
+                <div className="h-7 w-7 rounded-md bg-[#009DE0] flex items-center justify-center font-bold text-white text-xs shadow-[0_2px_8px_rgba(0,157,224,0.35)]">
                   QC
                 </div>
                 <span className="font-bold text-slate-900 text-sm">Navigation</span>

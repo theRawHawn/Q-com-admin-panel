@@ -612,7 +612,7 @@ export const RiderEditModal: React.FC<RiderEditModalProps> = ({
                       }
                     });
                   }}
-                  className="bg-emerald-600 text-white font-bold px-3 py-1 rounded-lg text-xs hover:bg-emerald-700"
+                  className="bg-[#009DE0] text-white font-bold px-3 py-1 rounded-lg text-xs hover:bg-[#0087c2]"
                 >
                   Verify All Documents
                 </button>
@@ -918,7 +918,7 @@ export const RiderEditModal: React.FC<RiderEditModalProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs transition-all disabled:opacity-50"
+                className="flex items-center gap-2 bg-[#009DE0] hover:bg-[#0087c2] text-white px-5 py-2 rounded-xl text-xs font-bold shadow-xs transition-all disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
                 <span>{isSubmitting ? 'Saving Profile...' : isEditing ? 'Update Rider Profile' : 'Complete Onboarding'}</span>

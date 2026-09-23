@@ -400,7 +400,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen h-[100dvh] w-full bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-emerald-600 selection:text-white antialiased overflow-hidden">
+    <div className="h-screen h-[100dvh] w-full bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-[#009DE0] selection:text-white antialiased overflow-hidden">
       {/* Top Fixed Admin Header */}
       <AdminHeader
         currentUser={currentUser}

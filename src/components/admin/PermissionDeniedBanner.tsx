@@ -48,7 +48,7 @@ export const PermissionDeniedBanner: React.FC<PermissionDeniedBannerProps> = ({
       <div className="mt-6 flex items-center justify-center gap-3">
         <button
           onClick={onSwitchToSuperAdmin}
-          className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-xs"
+          className="inline-flex items-center gap-2 bg-[#009DE0] hover:bg-[#0087c2] text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-xs"
         >
           <span>Switch to Super Admin Persona</span>
           <ArrowRight className="h-3.5 w-3.5" />

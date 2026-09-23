@@ -560,7 +560,7 @@ export const SellerLedgerModal: React.FC<SellerLedgerModalProps> = ({
                       type="button"
                       onClick={handleReleaseSettlement}
                       disabled={isReleasing || pendingBalance <= 0 || !canProcessSettlement}
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+                      className="w-full bg-[#009DE0] hover:bg-[#0087c2] disabled:opacity-50 text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors"
                     >
                       {isReleasing ? (
                         <>

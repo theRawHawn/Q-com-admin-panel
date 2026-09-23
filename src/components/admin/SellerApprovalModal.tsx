@@ -548,7 +548,7 @@ export const SellerApprovalModal: React.FC<SellerApprovalModalProps> = ({
                   type="button"
                   onClick={handleApproveClick}
                   disabled={!canApprove || isSubmitting}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50"
+                  className="px-5 py-2 bg-[#009DE0] hover:bg-[#0087c2] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50"
                 >
                   <CheckCircle2 className="h-4 w-4" />
                   <span>Approve & Onboard Store</span>

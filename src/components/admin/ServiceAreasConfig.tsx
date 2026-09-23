@@ -336,7 +336,7 @@ export const ServiceAreasConfig: React.FC<ServiceAreasConfigProps> = ({
             onClick={() => setActiveTab('CITIES')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === 'CITIES'
-                ? 'bg-emerald-600 text-white shadow-xs'
+                ? 'bg-[#009DE0] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
@@ -348,7 +348,7 @@ export const ServiceAreasConfig: React.FC<ServiceAreasConfigProps> = ({
             onClick={() => setActiveTab('ZONES')}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === 'ZONES'
-                ? 'bg-emerald-600 text-white shadow-xs'
+                ? 'bg-[#009DE0] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
             }`}
           >
@@ -731,7 +731,7 @@ export const ServiceAreasConfig: React.FC<ServiceAreasConfigProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-colors shadow-xs"
+                  className="px-4 py-2 rounded-lg bg-[#009DE0] hover:bg-[#0087c2] text-white font-bold transition-colors shadow-xs"
                 >
                   Launch Territory
                 </button>
@@ -958,7 +958,7 @@ export const ServiceAreasConfig: React.FC<ServiceAreasConfigProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-colors shadow-xs"
+                  className="px-4 py-2 rounded-lg bg-[#009DE0] hover:bg-[#0087c2] text-white font-bold transition-colors shadow-xs"
                 >
                   Save City Economics
                 </button>

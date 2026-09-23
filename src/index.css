@@ -3,6 +3,20 @@
 @theme {
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Electric Sky Cyan / Blue (#009DE0) Branding Palette */
+  --color-brand-50: #f0f9ff;
+  --color-brand-100: #e0f2fe;
+  --color-brand-200: #bae6fd;
+  --color-brand-300: #7dd3fc;
+  --color-brand-400: #38bdf8;
+  --color-brand-500: #009de0;
+  --color-brand-600: #008cc7;
+  --color-brand-700: #0077ab;
+  --color-brand-800: #00608a;
+  --color-brand-900: #064f70;
+  --color-brand-950: #03334b;
+  --color-brand: #009de0;
 }
 
 @layer base {

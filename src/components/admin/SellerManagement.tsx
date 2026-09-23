@@ -278,7 +278,7 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
             className="p-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-md border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-colors cursor-pointer"
             title="Refresh Store List"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#009DE0]' : 'text-slate-500'}`} />
           </button>
         </div>
       </div>
@@ -350,7 +350,7 @@ export const SellerManagement: React.FC<SellerManagementProps> = ({
             placeholder="Search store name, GSTIN, owner..."
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full bg-white border border-slate-200/90 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-700/10 focus:border-emerald-700 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all"
+            className="w-full bg-white border border-slate-200/90 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009DE0]/15 focus:border-[#009DE0] shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all"
           />
         </div>
       </div>

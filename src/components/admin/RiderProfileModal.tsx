@@ -541,7 +541,7 @@ export const RiderProfileModal: React.FC<RiderProfileModalProps> = ({
                   <button
                     type="button"
                     onClick={() => setActiveTab('ledger')}
-                    className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-2xs transition-colors"
+                    className="flex items-center gap-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-2xs transition-colors"
                   >
                     <CreditCard className="h-3.5 w-3.5" />
                     <span>Earnings & Ledger</span>
@@ -669,17 +669,17 @@ export const RiderProfileModal: React.FC<RiderProfileModalProps> = ({
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`py-3.5 px-3.5 border-b-2 flex items-center gap-2 whitespace-nowrap transition-all shrink-0 ${
                   isActive
-                    ? 'border-emerald-600 text-emerald-700 font-bold bg-emerald-50/40'
+                    ? 'border-[#009DE0] text-[#009DE0] font-bold bg-sky-50/50'
                     : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                <Icon className={`h-4 w-4 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
+                <Icon className={`h-4 w-4 ${isActive ? 'text-[#009DE0]' : 'text-slate-400'}`} />
                 <span>{tab.label}</span>
                 {tab.badge && (
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                       isActive
-                        ? 'bg-emerald-100 text-emerald-800'
+                        ? 'bg-sky-100 text-[#00608a]'
                         : currentRider.status === 'PENDING_APPROVAL'
                         ? 'bg-indigo-100 text-indigo-700'
                         : 'bg-slate-100 text-slate-700 border border-slate-200'
@@ -1088,7 +1088,7 @@ export const RiderProfileModal: React.FC<RiderProfileModalProps> = ({
                       type="button"
                       onClick={handleApproveClick}
                       disabled={isUpdating}
-                      className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs flex items-center gap-1 shadow-xs"
+                      className="px-4 py-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white font-bold rounded-lg text-xs flex items-center gap-1 shadow-xs"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span>Approve & Activate Fleet Rider</span>
@@ -1104,7 +1104,7 @@ export const RiderProfileModal: React.FC<RiderProfileModalProps> = ({
             <div className="space-y-4">
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
                 <h3 className="text-xs font-bold text-slate-900 flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-emerald-600" />
+                  <CreditCard className="h-4 w-4 text-[#009DE0]" />
                   <span>Direct Bank Payout Settlement Info</span>
                 </h3>
 
@@ -1131,7 +1131,7 @@ export const RiderProfileModal: React.FC<RiderProfileModalProps> = ({
 
                   <div>
                     <span className="text-slate-500 block text-[11px]">UPI ID / VPA:</span>
-                    <span className="text-emerald-700 font-bold">{currentRider.bankDetails?.upiId || `${currentRider.phone.replace(/[^0-9]/g, '')}@upi`}</span>
+                    <span className="text-[#00608a] font-bold">{currentRider.bankDetails?.upiId || `${currentRider.phone.replace(/[^0-9]/g, '')}@upi`}</span>
                   </div>
 
                   <div>
@@ -1147,14 +1147,14 @@ export const RiderProfileModal: React.FC<RiderProfileModalProps> = ({
           {activeTab === 'ledger' && (
             <div className="space-y-5">
               {/* Payment Release Control Card */}
-              <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-3">
+              <div className="p-4 bg-sky-50/70 border border-sky-200 rounded-xl space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h3 className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
-                      <CreditCard className="h-4 w-4 text-emerald-700" />
+                    <h3 className="text-xs font-bold text-[#00608a] flex items-center gap-1.5">
+                      <CreditCard className="h-4 w-4 text-[#009DE0]" />
                       <span>Payment Release & Settlement Gateway</span>
                     </h3>
-                    <p className="text-[11px] text-emerald-800 mt-0.5">
+                    <p className="text-[11px] text-[#00608a] mt-0.5">
                       Payable balance: <strong>₹{(currentRider.pendingPayableBalance ?? currentRider.todayEarnings ?? 0).toLocaleString('en-IN')}</strong> • Target: {currentRider.bankDetails?.upiId || `${currentRider.bankDetails?.bankName} A/C`}
                     </p>
                   </div>
@@ -1165,7 +1165,7 @@ export const RiderProfileModal: React.FC<RiderProfileModalProps> = ({
                       type="button"
                       onClick={handleReleasePayout}
                       disabled={isReleasingPayout || (currentRider.pendingPayableBalance ?? (currentRider.todayEarnings || 0)) <= 0 || !canPayout}
-                      className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-2xs transition-colors flex items-center gap-1.5"
+                      className="bg-[#009DE0] hover:bg-[#0087c2] disabled:opacity-40 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-2xs transition-colors flex items-center gap-1.5"
                     >
                       {isReleasingPayout ? <Clock className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                       <span>Release Pending Due (₹{(currentRider.pendingPayableBalance ?? (currentRider.todayEarnings || 0)).toLocaleString('en-IN')})</span>

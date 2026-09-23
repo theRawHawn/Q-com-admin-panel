@@ -261,7 +261,7 @@ export const SponsoredAdsManager: React.FC = () => {
             onClick={fetchCampaigns}
             className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#009DE0]' : 'text-slate-500'}`} />
             <span>Refresh</span>
           </button>
         </div>
@@ -292,7 +292,7 @@ export const SponsoredAdsManager: React.FC = () => {
         <div className="bg-white border border-slate-200 rounded-xl p-3.5 shadow-2xs">
           <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
             <span>Ad Spend Realized</span>
-            <IndianRupee className="h-4 w-4 text-emerald-600" />
+            <IndianRupee className="h-4 w-4 text-[#009DE0]" />
           </div>
           <div className="text-xl font-bold text-slate-900 mt-1">₹{totalAdRevenue.toLocaleString('en-IN')}</div>
           <div className="text-[11px] text-purple-600 font-medium mt-0.5">100% Platform Margin</div>
@@ -476,7 +476,7 @@ export const SponsoredAdsManager: React.FC = () => {
                   {camp.status === 'PENDING_APPROVAL' ? (
                     <button
                       onClick={() => handleApprove(camp.id)}
-                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-2xs transition-colors flex items-center gap-1"
+                      className="px-3 py-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white rounded-lg text-xs font-semibold shadow-2xs transition-colors flex items-center gap-1"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       Approve & Launch

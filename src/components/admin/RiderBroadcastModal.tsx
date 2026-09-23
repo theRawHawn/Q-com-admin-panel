@@ -194,7 +194,7 @@ export const RiderBroadcastModal: React.FC<RiderBroadcastModalProps> = ({
             <button
               type="submit"
               disabled={isSending || !message.trim()}
-              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-xs disabled:opacity-50 transition-all"
+              className="flex items-center gap-1.5 bg-[#009DE0] hover:bg-[#0087c2] text-white font-bold px-4 py-2 rounded-xl text-xs shadow-xs disabled:opacity-50 transition-all"
             >
               <Send className="h-3.5 w-3.5" />
               <span>{isSending ? 'Transmitting...' : 'Send Broadcast Now'}</span>

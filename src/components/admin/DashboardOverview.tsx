@@ -239,7 +239,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
     return (
       <div className="p-12 flex items-center justify-center min-h-[350px]">
         <div className="flex flex-col items-center gap-2.5 text-slate-400">
-          <RefreshCw className="h-5 w-5 animate-spin text-emerald-600" />
+          <RefreshCw className="h-5 w-5 animate-spin text-[#009DE0]" />
           <span className="text-xs">Loading metrics...</span>
         </div>
       </div>
@@ -265,7 +265,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
               disabled={isRefreshing}
               className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] active:bg-slate-100 cursor-pointer"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin text-[#009DE0]' : 'text-slate-500'}`} />
               <span>Refresh</span>
             </button>
           </div>
@@ -325,7 +325,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-700 font-mono shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+                    className="bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#009DE0] font-mono shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
                   />
                 </div>
 
@@ -335,7 +335,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-700 font-mono shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+                    className="bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#009DE0] font-mono shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
                   />
                 </div>
 
@@ -472,7 +472,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
                   <div className="w-full bg-slate-100/80 rounded-t h-28 flex items-end overflow-hidden">
                     <div
                       style={{ height: `${heightPct}%` }}
-                      className="w-full bg-slate-800 group-hover:bg-emerald-700 transition-colors rounded-t"
+                      className="w-full bg-slate-800 group-hover:bg-[#009DE0] transition-colors rounded-t"
                       title={`${h.hour}: ${h.orders?.toLocaleString()} orders (₹${h.gmv?.toLocaleString()})`}
                     ></div>
                   </div>
@@ -509,7 +509,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
               <h3 className="text-sm font-semibold text-slate-900 tracking-tight">Live Pipeline</h3>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#009DE0] animate-pulse"></span>
               <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-semibold">Live Feed</span>
             </div>
           </div>
@@ -518,12 +518,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
           <div className="bg-slate-50/80 border border-slate-100 p-2 rounded-md">
             <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-1.5">
               <span>SLA FLOW</span>
-              <span className="text-emerald-700 font-semibold">⚡ 9.4m Avg Cycle</span>
+              <span className="text-[#009DE0] font-semibold">⚡ 9.4m Avg Cycle</span>
             </div>
             <div className="grid grid-cols-4 gap-1 h-1.5 rounded-full overflow-hidden bg-slate-200">
               <div className="bg-amber-500 rounded-full" title="Store Packing (<2.5m)"></div>
               <div className="bg-sky-500 rounded-full" title="Rider Handshake (<1m)"></div>
-              <div className="bg-emerald-600 rounded-full" title="Last Mile (<8m)"></div>
+              <div className="bg-[#009DE0] rounded-full" title="Last Mile (<8m)"></div>
               <div className="bg-slate-400 rounded-full" title="Doorstep (<1m)"></div>
             </div>
             <div className="flex justify-between text-[9px] text-slate-400 mt-1 font-mono">

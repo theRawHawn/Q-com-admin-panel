@@ -201,7 +201,7 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({
             onClick={fetchOrders}
             className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md text-xs font-medium border border-slate-200/90 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)] cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-emerald-700' : 'text-slate-500'}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin text-[#009DE0]' : 'text-slate-500'}`} />
             <span>Refresh</span>
           </button>
         </div>
@@ -217,7 +217,7 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({
               placeholder="Search by order ID, customer, phone, store, area..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full bg-slate-50/80 border border-slate-200/80 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/10 focus:border-emerald-700 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+              className="w-full bg-slate-50/80 border border-slate-200/80 rounded-md pl-9 pr-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#009DE0]/15 focus:border-[#009DE0] transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
             />
           </div>
           <button
@@ -251,14 +251,14 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="bg-slate-50 border border-slate-200/90 rounded-md px-2.5 py-1 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-700 font-medium cursor-pointer"
+              className="bg-slate-50 border border-slate-200/90 rounded-md px-2.5 py-1 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#009DE0] font-medium cursor-pointer"
             >
               <option value="ALL">All Urgency</option>
               <option value="NORMAL">Normal</option>
               <option value="HIGH">High Priority</option>
               <option value="CRITICAL_SITE">Critical Site</option>
             </select>
-
+ 
             {/* Hold Toggle */}
             <button
               onClick={() => setHoldOnlyFilter(!holdOnlyFilter)}
@@ -294,7 +294,7 @@ export const OrderControlCenter: React.FC<OrderControlCenterProps> = ({
               {loading ? (
                 <tr>
                   <td colSpan={7} className="p-8 text-center text-slate-400">
-                    <RefreshCw className="h-4 w-4 animate-spin mx-auto text-emerald-600 mb-1.5" />
+                    <RefreshCw className="h-4 w-4 animate-spin mx-auto text-[#009DE0] mb-1.5" />
                     <span>Loading orders...</span>
                   </td>
                 </tr>
