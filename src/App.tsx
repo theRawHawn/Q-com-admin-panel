@@ -290,7 +290,12 @@ export default function App() {
         <PermissionDeniedBanner
           requiredPermission={currentTabRequiredPermission}
           currentRole={currentUser.role}
-          featureName={activeTab.replace(/_/g, ' ').toUpperCase()}
+          roleTitle={currentUser.roleTitle || currentUser.role}
+          onSwitchToSuperAdmin={() => {
+            const superAdmin = AVAILABLE_ADMIN_PERSONAS.find((p) => p.role === 'SUPER_ADMIN') || AVAILABLE_ADMIN_PERSONAS[0];
+            setCurrentUser(superAdmin);
+            adminApi.setPersona(superAdmin);
+          }}
         />
       );
     }

@@ -12,21 +12,32 @@ class AdminApiClient {
     }
   }
 
-  public async ensureSession(): Promise<string | null> {
-    const savedToken = this.sessionToken || (typeof window !== 'undefined' ? localStorage.getItem('qcom_admin_session_token') : null);
-    if (savedToken) {
-      this.sessionToken = savedToken;
-      return savedToken;
+  public async ensureSession(forceFresh = false): Promise<string | null> {
+    if (!forceFresh) {
+      const savedToken = this.sessionToken || (typeof window !== 'undefined' ? localStorage.getItem('qcom_admin_session_token') : null);
+      if (savedToken) {
+        this.sessionToken = savedToken;
+        return savedToken;
+      }
+    } else {
+      this.sessionToken = null;
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('qcom_admin_session_token');
+      }
     }
 
-    if (!this.sessionPromise) {
+    if (!this.sessionPromise || forceFresh) {
       this.sessionPromise = (async () => {
         try {
+          const activeId = this.activeUser?.id || (typeof window !== 'undefined' ? localStorage.getItem('qcom_active_admin_id') : null) || 'emp-001';
+          const activeRole = this.activeRole || (typeof window !== 'undefined' ? (localStorage.getItem('qcom_active_admin_role') as AdminRole) : null) || 'SUPER_ADMIN';
+
           const res = await fetch('/api/admin/auth/session', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              employeeId: this.activeUser?.id || (typeof window !== 'undefined' ? localStorage.getItem('qcom_active_admin_id') : null) || 'emp-001',
+              employeeId: activeId,
+              roleCode: activeRole,
             }),
           });
           if (res.ok) {
@@ -53,6 +64,11 @@ class AdminApiClient {
     if (typeof window !== 'undefined') {
       localStorage.setItem('qcom_active_admin_role', user.role);
       localStorage.setItem('qcom_active_admin_id', user.id);
+    }
+
+    if (user.role === 'SUPER_ADMIN') {
+      await this.ensureSession(true);
+      return;
     }
 
     await this.ensureSession();
@@ -131,147 +147,83 @@ class AdminApiClient {
     }
   }
 
+  private async request<T>(endpoint: string, options: RequestInit, isRetry = false): Promise<T> {
+    await this.ensureSession();
+
+    const headers: Record<string, string> = {
+      ...this.getHeaders(),
+      ...((options.headers as Record<string, string>) || {}),
+    };
+
+    let res = await fetch(endpoint, {
+      ...options,
+      headers,
+    });
+    this.handleResponseHeaders(res);
+
+    // Auto-recover on 401 UNAUTHENTICATED: refresh session once and retry
+    if (res.status === 401 && !isRetry) {
+      const freshToken = await this.ensureSession(true);
+      if (freshToken) {
+        const retryHeaders: Record<string, string> = {
+          ...this.getHeaders(),
+          ...((options.headers as Record<string, string>) || {}),
+        };
+        res = await fetch(endpoint, {
+          ...options,
+          headers: retryHeaders,
+        });
+        this.handleResponseHeaders(res);
+      }
+    }
+
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      if (!res.ok) {
+        throw new Error(`HTTP Error ${res.status}: Server returned non-JSON response`);
+      }
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error(`Endpoint ${endpoint} returned invalid JSON format`);
+      }
+    }
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || data.error || `HTTP Error ${res.status}`);
+    }
+    return data;
+  }
+
   public async get<T>(endpoint: string): Promise<T> {
-    await this.ensureSession();
-    const res = await fetch(endpoint, {
-      method: 'GET',
-      headers: this.getHeaders(),
-    });
-    this.handleResponseHeaders(res);
-    
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      if (!res.ok) {
-        throw new Error(`HTTP Error ${res.status}: Server returned non-JSON response`);
-      }
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch {
-        throw new Error(`Endpoint ${endpoint} returned invalid JSON format`);
-      }
-    }
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || data.error || `HTTP Error ${res.status}`);
-    }
-    return data;
+    return this.request<T>(endpoint, { method: 'GET' });
   }
 
-  public async post<T>(endpoint: string, body: any): Promise<T> {
-    await this.ensureSession();
-    const res = await fetch(endpoint, {
+  public async post<T>(endpoint: string, body?: any): Promise<T> {
+    return this.request<T>(endpoint, {
       method: 'POST',
-      headers: this.getHeaders(),
-      body: JSON.stringify(body),
+      body: body !== undefined ? JSON.stringify(body) : undefined,
     });
-    this.handleResponseHeaders(res);
-
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      if (!res.ok) {
-        throw new Error(`HTTP Error ${res.status}: Server returned non-JSON response`);
-      }
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch {
-        throw new Error(`Endpoint ${endpoint} returned invalid JSON format`);
-      }
-    }
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || data.error || `HTTP Error ${res.status}`);
-    }
-    return data;
   }
 
-  public async put<T>(endpoint: string, body: any): Promise<T> {
-    await this.ensureSession();
-    const res = await fetch(endpoint, {
+  public async put<T>(endpoint: string, body?: any): Promise<T> {
+    return this.request<T>(endpoint, {
       method: 'PUT',
-      headers: this.getHeaders(),
-      body: JSON.stringify(body),
+      body: body !== undefined ? JSON.stringify(body) : undefined,
     });
-    this.handleResponseHeaders(res);
-
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      if (!res.ok) {
-        throw new Error(`HTTP Error ${res.status}: Server returned non-JSON response`);
-      }
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch {
-        throw new Error(`Endpoint ${endpoint} returned invalid JSON format`);
-      }
-    }
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || data.error || `HTTP Error ${res.status}`);
-    }
-    return data;
   }
 
   public async patch<T>(endpoint: string, body?: any): Promise<T> {
-    await this.ensureSession();
-    const res = await fetch(endpoint, {
+    return this.request<T>(endpoint, {
       method: 'PATCH',
-      headers: this.getHeaders(),
-      body: body ? JSON.stringify(body) : undefined,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
     });
-    this.handleResponseHeaders(res);
-
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      if (!res.ok) {
-        throw new Error(`HTTP Error ${res.status}: Server returned non-JSON response`);
-      }
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch {
-        throw new Error(`Endpoint ${endpoint} returned invalid JSON format`);
-      }
-    }
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || data.error || `HTTP Error ${res.status}`);
-    }
-    return data;
   }
 
   public async delete<T>(endpoint: string): Promise<T> {
-    await this.ensureSession();
-    const res = await fetch(endpoint, {
-      method: 'DELETE',
-      headers: this.getHeaders(),
-    });
-    this.handleResponseHeaders(res);
-
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      if (!res.ok) {
-        throw new Error(`HTTP Error ${res.status}: Server returned non-JSON response`);
-      }
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch {
-        throw new Error(`Endpoint ${endpoint} returned invalid JSON format`);
-      }
-    }
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || data.error || `HTTP Error ${res.status}`);
-    }
-    return data;
+    return this.request<T>(endpoint, { method: 'DELETE' });
   }
 }
 
