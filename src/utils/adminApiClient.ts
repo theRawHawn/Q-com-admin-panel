@@ -4,11 +4,47 @@ class AdminApiClient {
   private activeRole: AdminRole = 'SUPER_ADMIN';
   private activeUser: AdminUser | null = null;
   private sessionToken: string | null = null;
+  private sessionPromise: Promise<string | null> | null = null;
 
   constructor() {
     if (typeof window !== 'undefined') {
       this.sessionToken = localStorage.getItem('qcom_admin_session_token');
     }
+  }
+
+  public async ensureSession(): Promise<string | null> {
+    const savedToken = this.sessionToken || (typeof window !== 'undefined' ? localStorage.getItem('qcom_admin_session_token') : null);
+    if (savedToken) {
+      this.sessionToken = savedToken;
+      return savedToken;
+    }
+
+    if (!this.sessionPromise) {
+      this.sessionPromise = (async () => {
+        try {
+          const res = await fetch('/api/admin/auth/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              employeeId: this.activeUser?.id || (typeof window !== 'undefined' ? localStorage.getItem('qcom_active_admin_id') : null) || 'emp-001',
+            }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.sessionToken) {
+              this.setSessionToken(data.sessionToken);
+              return data.sessionToken;
+            }
+          }
+        } catch {
+          // offline fallback
+        } finally {
+          this.sessionPromise = null;
+        }
+        return null;
+      })();
+    }
+    return this.sessionPromise;
   }
 
   public async setPersona(user: AdminUser) {
@@ -19,11 +55,13 @@ class AdminApiClient {
       localStorage.setItem('qcom_active_admin_id', user.id);
     }
 
+    await this.ensureSession();
+
     // Handshake with server to acquire cryptographic session token for this persona
     try {
       const res = await fetch('/api/admin/auth/switch-persona', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getHeaders(),
         body: JSON.stringify({ employeeId: user.id, roleCode: user.role }),
       });
       if (res.ok) {
@@ -94,6 +132,7 @@ class AdminApiClient {
   }
 
   public async get<T>(endpoint: string): Promise<T> {
+    await this.ensureSession();
     const res = await fetch(endpoint, {
       method: 'GET',
       headers: this.getHeaders(),
@@ -121,6 +160,7 @@ class AdminApiClient {
   }
 
   public async post<T>(endpoint: string, body: any): Promise<T> {
+    await this.ensureSession();
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -149,6 +189,7 @@ class AdminApiClient {
   }
 
   public async put<T>(endpoint: string, body: any): Promise<T> {
+    await this.ensureSession();
     const res = await fetch(endpoint, {
       method: 'PUT',
       headers: this.getHeaders(),
@@ -177,6 +218,7 @@ class AdminApiClient {
   }
 
   public async patch<T>(endpoint: string, body?: any): Promise<T> {
+    await this.ensureSession();
     const res = await fetch(endpoint, {
       method: 'PATCH',
       headers: this.getHeaders(),
@@ -205,6 +247,7 @@ class AdminApiClient {
   }
 
   public async delete<T>(endpoint: string): Promise<T> {
+    await this.ensureSession();
     const res = await fetch(endpoint, {
       method: 'DELETE',
       headers: this.getHeaders(),

@@ -32,7 +32,7 @@ export function securityHeadersMiddleware(req: Request, res: Response, next: Nex
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: blob: https://images.unsplash.com https://images.pexels.com https://*.googleusercontent.com https://www.gstatic.com",
-    "connect-src 'self' https://* ws: wss:",
+    "connect-src 'self' https://apis.google.com https://fonts.googleapis.com https://ai.studio https://*.ai.studio https://*.google.com https://*.run.app ws: wss:",
     customFrameAncestors,
     "object-src 'none'",
     "base-uri 'self'",

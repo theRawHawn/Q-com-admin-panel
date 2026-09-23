@@ -77,7 +77,78 @@ adminRouter.post('/auth/session', (req: Request, res: Response) => {
   });
 });
 
-adminRouter.post('/auth/switch-persona', sensitiveOpsLimiter, (req: Request, res: Response) => {
+// ----------------------------------------------------
+// Authenticate Admin Middleware (Token Verification)
+// ----------------------------------------------------
+function authenticateAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  const sessionToken = authHeader?.startsWith('Bearer ')
+    ? authHeader.slice(7).trim()
+    : (req.headers['x-admin-session-token'] as string);
+
+  let emp: AdminEmployeeUser | undefined;
+
+  // 1. Verify cryptographic session token
+  if (sessionToken) {
+    const session = sessionManager.validateSession(sessionToken);
+    if (session) {
+      emp = authoritativeAdminStore.getEmployees().find((e) => e.id === session.employeeId);
+      req.sessionToken = sessionToken;
+    }
+  }
+
+  // If still unauthenticated, deny request (Strict session required - no header spoofing or dev fallback)
+  if (!emp) {
+    authoritativeAdminStore.logAudit({
+      actorName: 'Unknown Caller',
+      actorRole: 'ANONYMOUS',
+      actionType: 'UNAUTHENTICATED_ACCESS_ATTEMPT',
+      targetModule: 'Security Perimeter',
+      summary: `Rejected unauthenticated request to ${req.method} ${req.originalUrl}.`,
+      severity: 'HIGH',
+    });
+
+    return res.status(401).json({
+      success: false,
+      error: 'UNAUTHENTICATED',
+      message: 'Valid admin authentication session required.',
+    });
+  }
+
+  // Check if employee account is suspended or inactive
+  if (emp.status !== 'ACTIVE') {
+    return res.status(403).json({
+      success: false,
+      error: 'ACCOUNT_INACTIVE',
+      status: emp.status,
+      message: `Access Denied: Your account status is '${emp.status}'. Please contact Super Admin.`,
+    });
+  }
+
+  // Set authenticated employee & user
+  req.employee = emp;
+  req.admin = {
+    id: emp.id,
+    name: emp.name,
+    email: emp.email,
+    role: emp.role, // Strictly server-authoritative role; never spoofable
+    roleTitle: emp.roleTitle,
+    avatar: emp.avatar,
+    department: emp.department,
+    lastLogin: emp.lastLogin,
+    status: emp.status,
+  };
+
+  const allRoles = authoritativeAdminStore.getRoles();
+  req.effectivePermissions = calculateEmployeePermissions(emp, allRoles);
+  next();
+}
+
+adminRouter.post('/auth/switch-persona', sensitiveOpsLimiter, authenticateAdmin, (req: AuthenticatedRequest, res: Response) => {
+  if (req.employee?.role !== 'SUPER_ADMIN') {
+    return res.status(403).json({ success: false, error: 'FORBIDDEN', message: 'Only Super Administrators can switch personas.' });
+  }
+
   const { employeeId, roleCode } = req.body || {};
 
   let targetEmp: AdminEmployeeUser | undefined;
@@ -100,8 +171,8 @@ adminRouter.post('/auth/switch-persona', sensitiveOpsLimiter, (req: Request, res
   const perms = calculateEmployeePermissions(targetEmp, roles);
 
   authoritativeAdminStore.logAudit({
-    actorName: targetEmp.name,
-    actorRole: targetEmp.role,
+    actorName: req.employee?.name || targetEmp.name,
+    actorRole: req.employee?.role || targetEmp.role,
     actionType: 'ADMIN_PERSONA_SWITCHED',
     targetModule: 'Session & Auth',
     summary: `Switched active administrative session to "${targetEmp.name}" (${targetEmp.roleTitle}).`,
@@ -128,87 +199,6 @@ adminRouter.post('/auth/logout', (req: Request, res: Response) => {
   }
   res.json({ success: true, message: 'Logged out successfully.' });
 });
-
-// ----------------------------------------------------
-// Authenticate Admin Middleware (Token & ID Verification)
-// ----------------------------------------------------
-function authenticateAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
-  const sessionToken = authHeader?.startsWith('Bearer ')
-    ? authHeader.slice(7).trim()
-    : (req.headers['x-admin-session-token'] as string);
-  const adminIdHeader = req.headers['x-admin-id'] as string;
-
-  let emp: AdminEmployeeUser | undefined;
-
-  // 1. Verify session token first
-  if (sessionToken) {
-    const session = sessionManager.validateSession(sessionToken);
-    if (session) {
-      emp = authoritativeAdminStore.getEmployees().find((e) => e.id === session.employeeId);
-      req.sessionToken = sessionToken;
-    }
-  }
-
-  // 2. Direct lookup by ID / employeeCode (with auto session issuance)
-  if (!emp && adminIdHeader) {
-    emp = authoritativeAdminStore.getEmployees().find(
-      (e) => e.id === adminIdHeader || e.employeeCode === adminIdHeader
-    );
-    if (emp) {
-      const freshSession = sessionManager.createSession(emp);
-      req.sessionToken = freshSession.token;
-      res.setHeader('X-Admin-Session-Token', freshSession.token);
-    }
-  }
-
-  // 3. Fallback for initial development connection (bootstrap Super Admin with a session)
-  if (!emp && !adminIdHeader && !sessionToken) {
-    const superAdmin = authoritativeAdminStore.getEmployees().find((e) => e.role === 'SUPER_ADMIN') || authoritativeAdminStore.getEmployees()[0];
-    if (superAdmin) {
-      emp = superAdmin;
-      const freshSession = sessionManager.createSession(superAdmin);
-      req.sessionToken = freshSession.token;
-      res.setHeader('X-Admin-Session-Token', freshSession.token);
-    }
-  }
-
-  // If still unauthenticated, deny request
-  if (!emp) {
-    authoritativeAdminStore.logAudit({
-      actorName: 'Unknown Caller',
-      actorRole: 'ANONYMOUS',
-      actionType: 'UNAUTHENTICATED_ACCESS_ATTEMPT',
-      targetModule: 'Security Perimeter',
-      summary: `Rejected unauthenticated request to ${req.method} ${req.originalUrl}.`,
-      severity: 'HIGH',
-    });
-
-    return res.status(401).json({
-      success: false,
-      error: 'UNAUTHENTICATED',
-      message: 'Valid admin authentication session required.',
-    });
-  }
-
-  // Set authenticated employee & user
-  req.employee = emp;
-  req.admin = {
-    id: emp.id,
-    name: emp.name,
-    email: emp.email,
-    role: emp.role, // Strictly server-authoritative role; never spoofable
-    roleTitle: emp.roleTitle,
-    avatar: emp.avatar,
-    department: emp.department,
-    lastLogin: emp.lastLogin,
-    status: emp.status,
-  };
-
-  const allRoles = authoritativeAdminStore.getRoles();
-  req.effectivePermissions = calculateEmployeePermissions(emp, allRoles);
-  next();
-}
 
 function requirePermission(permission: AdminPermission) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -333,6 +323,23 @@ adminRouter.post('/roles/create', requirePermission('roles.create'), (req: Authe
     return res.status(400).json({ success: false, error: 'INVALID_PERMISSIONS', message: 'Permissions must be provided as an array of permission keys.' });
   }
 
+  // Prevent privilege escalation via wildcard or permissions outside creator's ceiling
+  if (permissions.includes('*' as any) && req.employee?.role !== 'SUPER_ADMIN') {
+    return res.status(403).json({ success: false, error: 'CANNOT_GRANT_WILDCARD', message: 'Only Super Admin may grant wildcard permissions.' });
+  }
+
+  if (req.employee?.role !== 'SUPER_ADMIN') {
+    const callerPerms = new Set(req.effectivePermissions || []);
+    const unauthorizedPerms = permissions.filter((p) => (p as string) !== '*' && !callerPerms.has(p));
+    if (unauthorizedPerms.length > 0) {
+      return res.status(403).json({
+        success: false,
+        error: 'PRIVILEGE_CEILING_EXCEEDED',
+        message: `Cannot grant permissions you do not possess: ${unauthorizedPerms.slice(0, 3).join(', ')}${unauthorizedPerms.length > 3 ? '...' : ''}`,
+      });
+    }
+  }
+
   const createdRole = authoritativeAdminStore.createRole({
     name: name.trim(),
     code: code || name.trim().toUpperCase().replace(/\s+/g, '_'),
@@ -354,6 +361,19 @@ adminRouter.post('/roles/:id/clone', requirePermission('roles.create'), (req: Au
   const sourceRole = authoritativeAdminStore.getRoleById(req.params.id);
   if (!sourceRole) {
     return res.status(404).json({ success: false, error: 'SOURCE_ROLE_NOT_FOUND', message: 'Source role not found.' });
+  }
+
+  // Enforce privilege ceiling on cloned permissions
+  if (req.employee?.role !== 'SUPER_ADMIN') {
+    const callerPerms = new Set(req.effectivePermissions || []);
+    const unauthorizedPerms = sourceRole.permissions.filter((p) => (p as string) !== '*' && !callerPerms.has(p));
+    if (unauthorizedPerms.length > 0 || sourceRole.permissions.includes('*' as any)) {
+      return res.status(403).json({
+        success: false,
+        error: 'PRIVILEGE_CEILING_EXCEEDED',
+        message: 'Cannot clone a role that possesses permissions exceeding your own authorization ceiling.',
+      });
+    }
   }
 
   const { name } = req.body;
@@ -388,6 +408,24 @@ adminRouter.put('/roles/:id', requirePermission('roles.edit'), (req: Authenticat
 
   if (existing.isSystemRole && existing.code === 'SUPER_ADMIN' && permissions && permissions.length < ALL_SYSTEM_PERMISSIONS.length) {
     return res.status(400).json({ success: false, error: 'PROTECTED_SYSTEM_ROLE', message: 'Super Admin system role permissions cannot be restricted.' });
+  }
+
+  if (Array.isArray(permissions)) {
+    if (permissions.includes('*' as any) && req.employee?.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({ success: false, error: 'CANNOT_GRANT_WILDCARD', message: 'Only Super Admin may grant wildcard permissions.' });
+    }
+
+    if (req.employee?.role !== 'SUPER_ADMIN') {
+      const callerPerms = new Set(req.effectivePermissions || []);
+      const unauthorizedPerms = permissions.filter((p) => (p as string) !== '*' && !callerPerms.has(p));
+      if (unauthorizedPerms.length > 0) {
+        return res.status(403).json({
+          success: false,
+          error: 'PRIVILEGE_CEILING_EXCEEDED',
+          message: `Cannot assign permissions you do not possess: ${unauthorizedPerms.slice(0, 3).join(', ')}${unauthorizedPerms.length > 3 ? '...' : ''}`,
+        });
+      }
+    }
   }
 
   const updated = authoritativeAdminStore.updateRole(roleId, {
